@@ -1,0 +1,11 @@
+{
+  "name": "antigravity-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-model agent orchestration system",
+  "dependencies": {
+    "openai": "^4.77.0",
+    "dotenv": "^16.4.7"
+  }
+}

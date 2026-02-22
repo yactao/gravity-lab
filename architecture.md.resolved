@@ -1,0 +1,221 @@
+# 🏗️ Antigravity Lab — Architecture
+
+## Vue d'ensemble
+
+```mermaid
+graph TB
+    subgraph IDE["💻 IDE — Antigravity"]
+        GEM["🧠 Gemini<br/>Orchestrateur natif<br/>Planification · Coordination · Édition"]
+    end
+
+    subgraph CLI["⚡ agents-cli.js"]
+        ORC["Orchestrator"]
+        ORC --> AGT1["Agent coder"]
+        ORC --> AGT2["Agent reviewer"]
+        ORC --> AGT3["Agent tester"]
+        ORC --> AGT4["Agent architect"]
+        ORC --> AGT5["Agent debugger"]
+        ORC --> AGT6["Agent researcher"]
+    end
+
+    subgraph APIs["☁️ APIs Externes"]
+        DS["DeepSeek<br/>api.deepseek.com"]
+        KM["Kimi/Moonshot<br/>api.moonshot.ai"]
+    end
+
+    GEM -->|"run_command"| ORC
+    AGT1 & AGT2 & AGT3 & AGT4 & AGT5 --> DS
+    AGT6 --> KM
+```
+
+### Répartition des responsabilités
+
+| Couche | Agent | Rôle |
+|---|---|---|
+| 🧠 **Gemini** (natif) | Antigravity | Chef d'orchestre, planification, brainstorming, édition fichiers |
+| ☁️ **DeepSeek** (CLI) | coder, reviewer, tester, architect, debugger | Code, revue, tests, design, debug |
+| ☁️ **Kimi** (CLI) | researcher | Analyse longue, documentation, résumés |
+
+---
+
+## Arborescence
+
+```
+antigravity lab/
+├── .agents/
+│   ├── agents/
+│   │   └── code-reviewer.md
+│   ├── skills/                       # 15 skills
+│   │   ├── brainstorming/
+│   │   ├── dispatching-parallel-agents/
+│   │   ├── executing-plans/
+│   │   ├── finishing-a-development-branch/
+│   │   ├── multi-model-orchestration/  ★
+│   │   ├── receiving-code-review/
+│   │   ├── requesting-code-review/
+│   │   ├── subagent-driven-development/
+│   │   ├── systematic-debugging/
+│   │   ├── test-driven-development/
+│   │   ├── using-git-worktrees/
+│   │   ├── using-superpowers/
+│   │   ├── verification-before-completion/
+│   │   ├── writing-plans/
+│   │   └── writing-skills/
+│   └── workflows/
+│       ├── brainstorm.md
+│       ├── execute-plan.md
+│       ├── orchestrate.md            ★
+│       └── write-plan.md
+│
+├── lib/orchestrator/                 # Moteur multi-modèles
+│   ├── config.js         (4.2 KB)   # Providers, rôles, prompts
+│   ├── llm-client.js     (3.4 KB)   # Client OpenAI-compatible
+│   ├── agent.js           (3.1 KB)   # Classe Agent
+│   ├── orchestrator.js   (9.4 KB)   # 3 modes d'exécution
+│   ├── task-manager.js   (4.0 KB)   # Gestion tâches
+│   └── output-formatter.js (4.1 KB) # Formatage résultats
+│
+├── agents-cli.js         (9.1 KB)   # CLI d'orchestration
+├── .env                              # Clés API (DEEPSEEK, KIMI)
+├── package.json                      # openai, dotenv
+└── superpowers/                      # Repo source Superpowers
+```
+
+---
+
+## Moteur d'orchestration
+
+### Classes
+
+```mermaid
+classDiagram
+    class Orchestrator {
+        +addAgent(config) Agent
+        +runParallel(assignments) Result
+        +runSequential(steps) Result
+        +runPipeline(task, opts) Result
+        +ask(agentName, task) Result
+        +getSummary() Summary
+    }
+
+    class Agent {
+        -name, role, provider, model
+        -history[], results[]
+        +execute(task) Result
+        +resetHistory()
+        +getInfo() Object
+    }
+
+    class LLMClient {
+        -clients: Map
+        +chat(provider, model, msgs) Response
+        +testConnection(provider) TestResult
+    }
+
+    class TaskManager {
+        -tasks: Map
+        +addTask() / assignTask()
+        +completeTask() / failTask()
+        +getNextAvailable() Task
+        +toMarkdown() string
+    }
+
+    Orchestrator --> Agent
+    Orchestrator --> TaskManager
+    Agent --> LLMClient
+    LLMClient --> Config
+```
+
+### 3 modes d'exécution
+
+```mermaid
+graph LR
+    subgraph P["⚡ Parallel"]
+        P1["Agent 1"] 
+        P2["Agent 2"]
+        P3["Agent 3"]
+    end
+
+    subgraph S["🔗 Sequential"]
+        S1["Agent 1"] -->|ctx| S2["Agent 2"] -->|ctx| S3["Agent 3"]
+    end
+
+    subgraph PL["🔄 Pipeline"]
+        R["🔍 Researcher<br/>Kimi"] -->|analyse| C["💻 Coder<br/>DeepSeek"]
+        C -->|code| T["🧪 Tester<br/>DeepSeek"]
+        T -->|tests| V["📋 Reviewer<br/>DeepSeek"]
+    end
+```
+
+| Mode | Usage |
+|---|---|
+| **Parallel** | Tâches indépendantes simultanées |
+| **Sequential** | Chaîne avec résultat précédent en contexte |
+| **Pipeline** | Research → Code → Test → Review |
+
+---
+
+## Providers & Rôles
+
+| Provider | Base URL | Modèles |
+|---|---|---|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-chat`, `deepseek-reasoner` |
+| **Kimi** | `api.moonshot.ai/v1` | `moonshot-v1-auto`, `v1-8k/32k/128k` |
+
+| Rôle | Provider | Spécialité |
+|---|---|---|
+| 💻 `coder` | DeepSeek | Code, algorithmes, refactoring |
+| 📋 `reviewer` | DeepSeek | Revue de code, bugs, qualité |
+| 🧪 `tester` | DeepSeek | Tests, edge cases, couverture |
+| 🏗️ `architect` | DeepSeek | Design système, patterns |
+| 🐛 `debugger` | DeepSeek | Analyse d'erreurs, hypothèses |
+| 🔍 `researcher` | Kimi | Analyse longue, docs, résumés |
+
+---
+
+## CLI — Commandes
+
+```bash
+node agents-cli.js test [--provider <name>]
+node agents-cli.js ask --role <role> "<question>"
+node agents-cli.js pipeline --task "<tâche>" [--stages <s1,s2>]
+node agents-cli.js parallel --tasks '<json>'
+node agents-cli.js roles
+node agents-cli.js providers
+```
+
+---
+
+## Flux de données
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Utilisateur
+    participant G as 🧠 Gemini (Antigravity)
+    participant CLI as ⚡ agents-cli.js
+    participant DS as ☁️ DeepSeek
+    participant KM as ☁️ Kimi
+
+    U->>G: "Implémente un cache LRU"
+    G->>CLI: pipeline --task "cache LRU"
+    CLI->>KM: 🔍 RESEARCHER
+    KM-->>CLI: Analyse
+    CLI->>DS: 💻 CODER
+    DS-->>CLI: Code
+    CLI->>DS: 🧪 TESTER
+    DS-->>CLI: Tests
+    CLI->>DS: 📋 REVIEWER
+    DS-->>CLI: Review
+    CLI-->>G: Rapport complet
+    G-->>U: Code + Tests + Review intégrés
+```
+
+---
+
+## Dépendances
+
+| Package | Usage |
+|---|---|
+| `openai` ^4.77.0 | SDK pour APIs OpenAI-compatibles |
+| `dotenv` ^16.4.7 | Chargement [.env](file:///c:/Users/taouf/Documents/antigravity%20lab/.env) |
+| **Node.js** v24.12.0 | Runtime |

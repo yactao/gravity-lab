@@ -1,0 +1,253 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AppController = void 0;
+const common_1 = require("@nestjs/common");
+const app_service_1 = require("./app.service");
+const rules_engine_service_1 = require("./rules-engine.service");
+const jwt_auth_guard_1 = require("./auth/jwt-auth.guard");
+let AppController = class AppController {
+    appService;
+    rulesEngineService;
+    constructor(appService, rulesEngineService) {
+        this.appService = appService;
+        this.rulesEngineService = rulesEngineService;
+    }
+    getHello() {
+        return this.appService.getHello();
+    }
+    getSites(orgId) {
+        return this.appService.getSites(orgId);
+    }
+    getOrganizations() {
+        return this.appService.getOrganizations();
+    }
+    createOrganization(orgData) {
+        return this.appService.createOrganization(orgData);
+    }
+    updateOrganization(id, orgData) {
+        return this.appService.updateOrganization(id, orgData);
+    }
+    deleteOrganization(id) {
+        return this.appService.deleteOrganization(id);
+    }
+    createSite(orgId, siteData) {
+        const finalOrgId = siteData.organizationId || orgId;
+        return this.appService.createSite(siteData, finalOrgId);
+    }
+    createZone(zoneData) {
+        if (!zoneData.siteId) {
+            throw new Error("siteId is required to create a zone");
+        }
+        return this.appService.createZone(zoneData, zoneData.siteId);
+    }
+    getSensors(orgId) {
+        return this.appService.getSensors(orgId);
+    }
+    getGateways(orgId) {
+        return this.appService.getGateways(orgId);
+    }
+    createGateway(gatewayData) {
+        return this.appService.createGateway(gatewayData);
+    }
+    getReadings(limit, orgId) {
+        const parsedLimit = limit ? parseInt(limit, 10) : 100;
+        return this.appService.getReadings(parsedLimit, orgId);
+    }
+    getGlobalEnergy(orgId, siteId) {
+        return this.appService.getGlobalEnergy(orgId, siteId);
+    }
+    getAverageTemperature(orgId, siteId) {
+        return this.appService.getAverageTemperature(orgId, siteId);
+    }
+    getAlerts(orgId, siteId) {
+        return this.appService.getAlerts(orgId, siteId);
+    }
+    getHvacPerformance(orgId, siteId) {
+        return this.appService.getHvacPerformance(orgId, siteId);
+    }
+    getRules(orgId) {
+        return this.rulesEngineService.getRules(orgId);
+    }
+    createRule(orgId, ruleData) {
+        return this.rulesEngineService.createRule({ ...ruleData, organizationId: orgId });
+    }
+    processIotWebhook(webhookData) {
+        return this.appService.processIotWebhook(webhookData);
+    }
+};
+exports.AppController = AppController;
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", String)
+], AppController.prototype, "getHello", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('sites'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getSites", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('organizations'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getOrganizations", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('organizations'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "createOrganization", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Put)('organizations/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "updateOrganization", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Delete)('organizations/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "deleteOrganization", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('sites'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "createSite", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('zones'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "createZone", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('sensors'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getSensors", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('gateways'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getGateways", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('gateways'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "createGateway", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('readings'),
+    __param(0, (0, common_1.Query)('limit')),
+    __param(1, (0, common_1.Headers)('x-organization-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getReadings", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('energy/global'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Query)('siteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getGlobalEnergy", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('temperature/average'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Query)('siteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getAverageTemperature", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('alerts'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Query)('siteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getAlerts", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('energy/hvac-performance'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Query)('siteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getHvacPerformance", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('rules'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getRules", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('rules'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "createRule", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('iot/webhook'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "processIotWebhook", null);
+exports.AppController = AppController = __decorate([
+    (0, common_1.Controller)('api'),
+    __metadata("design:paramtypes", [app_service_1.AppService,
+        rules_engine_service_1.RulesEngineService])
+], AppController);
+//# sourceMappingURL=app.controller.js.map
