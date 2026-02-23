@@ -95,7 +95,17 @@ export function TenantProvider({ children }: { children: ReactNode }) {
             headers["x-user-role"] = currentTenant.role;
         }
 
-        const res = await fetch(url, { ...options, headers });
+        // Handle dynamic base URL for API requests
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+        // If the URL is already absolute (contains http), we leave it as is 
+        // ONLY IF it's not the old localhost string. 
+        // We'll replace the hardcoded localhost string to make migrations easier.
+        const finalUrl = url.replace("http://localhost:3001", API_URL).startsWith("http")
+            ? url.replace("http://localhost:3001", API_URL)
+            : `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+
+        const res = await fetch(finalUrl, { ...options, headers });
         if (res.status === 401 && pathname !== '/login') {
             logout(); // Auto logout on token expiration
         }
