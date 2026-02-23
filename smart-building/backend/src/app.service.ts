@@ -61,8 +61,10 @@ export class AppService implements OnModuleInit {
 
       // 2. Create Default Users
       const adminUser = this.userRepo.create({ name: 'Super Admin', email: 'admin@ubbee.fr', password: 'admin', role: UserRole.SUPER_ADMIN, organization: orgUbbee });
+      const managerUser = this.userRepo.create({ name: 'Energy Manager', email: 'manager@ubbee.fr', password: 'password', role: UserRole.ENERGY_MANAGER, organization: orgUbbee });
+      const ubbeeClient = this.userRepo.create({ name: 'Client Ubbee', email: 'client@ubbee.fr', password: 'password', role: UserRole.CLIENT, organization: orgUbbee });
       const casaClient = this.userRepo.create({ name: 'Responsable Casa', email: 'client@casa.fr', password: 'password', role: UserRole.CLIENT, organization: orgCasa });
-      await this.userRepo.save([adminUser, casaClient]);
+      await this.userRepo.save([adminUser, managerUser, ubbeeClient, casaClient]);
 
       // 3. Create Sites and assign to Organizations
       // UBBEE
