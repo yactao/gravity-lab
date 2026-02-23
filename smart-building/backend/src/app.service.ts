@@ -139,7 +139,7 @@ export class AppService implements OnModuleInit {
   }
 
   async getSites(orgId?: string) {
-    const where = orgId ? { organization: { id: orgId } } : {};
+    const where = orgId ? { organizationId: orgId } : {};
     return this.siteRepo.find({ where, relations: ['zones'] });
   }
 
@@ -209,7 +209,7 @@ export class AppService implements OnModuleInit {
   }
 
   async getGateways(orgId?: string) {
-    const where = orgId ? { site: { organization: { id: orgId } } } : {};
+    const where = orgId ? { site: { organizationId: orgId } } : {};
     return this.gatewayRepo.find({ where, relations: ['site', 'sensors'] });
   }
 
@@ -227,12 +227,12 @@ export class AppService implements OnModuleInit {
 
 
   async getSensors(orgId?: string) {
-    const where = orgId ? { zone: { site: { organization: { id: orgId } } } } : {};
+    const where = orgId ? { zone: { site: { organizationId: orgId } } } : {};
     return this.sensorRepo.find({ where, relations: ['zone', 'zone.site'] });
   }
 
   async getReadings(limit: number = 100, orgId?: string) {
-    const where = orgId ? { sensor: { zone: { site: { organization: { id: orgId } } } } } : {};
+    const where = orgId ? { sensor: { zone: { site: { organizationId: orgId } } } } : {};
     return this.readingRepo.find({
       where,
       order: { timestamp: 'DESC' },
@@ -248,7 +248,7 @@ export class AppService implements OnModuleInit {
     if (siteId) {
       where.sensor.zone = { site: { id: siteId } };
     } else if (orgId) {
-      where.sensor.zone = { site: { organization: { id: orgId } } };
+      where.sensor.zone = { site: { organizationId: orgId } };
     }
     const readings = await this.readingRepo.find({
       where,
@@ -289,7 +289,7 @@ export class AppService implements OnModuleInit {
     if (siteId) {
       where.sensor.zone = { site: { id: siteId } };
     } else if (orgId) {
-      where.sensor.zone = { site: { organization: { id: orgId } } };
+      where.sensor.zone = { site: { organizationId: orgId } };
     }
 
     // Fetch recent readings
@@ -327,7 +327,7 @@ export class AppService implements OnModuleInit {
     if (siteId) {
       where.sensor = { zone: { site: { id: siteId } } };
     } else if (orgId) {
-      where.sensor = { zone: { site: { organization: { id: orgId } } } };
+      where.sensor = { zone: { site: { organizationId: orgId } } };
     }
     return this.alertRepo.find({
       where,
