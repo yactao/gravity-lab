@@ -45,6 +45,6 @@ npm prune --production
 # ==== 5️⃣ (Re)Démarrer les services avec pm2 ==== #
 log "Redémarrage des processus pm2"
 cd "$APP_ROOT"
-pm2 startOrRestart ecosystem.config.js --env production
+pm2 startOrRestart ecosystem.config.cjs --env production
 
 log "Déploiement terminé 🎉"
