@@ -18,7 +18,7 @@ module.exports = {
         {
             name: "gtb-backend",
             script: "node",
-            args: "dist/main.js",
+            args: "dist/src/main.js",
             cwd: "./backend",
             env: {
                 NODE_ENV: "production",
