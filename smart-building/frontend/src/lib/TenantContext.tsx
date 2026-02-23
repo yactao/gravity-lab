@@ -95,15 +95,14 @@ export function TenantProvider({ children }: { children: ReactNode }) {
             headers["x-user-role"] = currentTenant.role;
         }
 
-        // Handle dynamic base URL for API requests
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        // Handle dynamic base URL for API requests. 
+        // If not defined, fallback to empty string so requests are relative to current domain (works instantly with Nginx proxy!)
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
-        // If the URL is already absolute (contains http), we leave it as is 
-        // ONLY IF it's not the old localhost string. 
-        // We'll replace the hardcoded localhost string to make migrations easier.
-        const finalUrl = url.replace("http://localhost:3001", API_URL).startsWith("http")
-            ? url.replace("http://localhost:3001", API_URL)
-            : `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+        let finalUrl = url.replace("http://localhost:3001", API_URL);
+        if (!finalUrl.startsWith("http") && !finalUrl.startsWith("/")) {
+            finalUrl = `/${finalUrl}`;
+        }
 
         const res = await fetch(finalUrl, { ...options, headers });
         if (res.status === 401 && pathname !== '/login') {

@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "Plateforme de gestion technique du bâtiment next-gen",
 };
 
+import { ClientLayoutWrapper } from "@/components/layout/ClientLayoutWrapper";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,15 +35,9 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TenantProvider>
-            <div className="flex min-h-screen">
-              <Sidebar />
-              <main className="flex-1 ml-64 relative">
-                <Header />
-                <div className="pt-24 px-8 pb-8">
-                  {children}
-                </div>
-              </main>
-            </div>
+            <ClientLayoutWrapper>
+              {children}
+            </ClientLayoutWrapper>
           </TenantProvider>
         </ThemeProvider>
       </body>
