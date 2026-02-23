@@ -4,6 +4,7 @@ import { Bell, ChevronDown, User, Search, LogOut, Briefcase, Sun, Moon, Building
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
+import { GlobalSearch } from "./GlobalSearch";
 import { useTheme } from "next-themes";
 
 export function Header() {
@@ -35,17 +36,8 @@ export function Header() {
     }, []);
     return (
         <header className="fixed top-0 right-0 left-64 h-16 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-40 px-6 flex items-center justify-between transition-colors">
-            {/* Search Bar - Restored from V1 */}
-            <div className="flex items-center w-96">
-                <div className="relative w-full group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-muted-foreground group-focus-within:text-primary transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher un bâtiment, un capteur..."
-                        className="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 rounded-full pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all placeholder:text-slate-400 dark:placeholder:text-muted-foreground/50"
-                    />
-                </div>
-            </div>
+            {/* Search Bar - Global OmniSearch Component */}
+            <GlobalSearch />
 
             {/* Right Actions / Profile (UBBEE mode) */}
             <div className="flex items-center space-x-6">
