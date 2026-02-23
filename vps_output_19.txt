@@ -1,0 +1,54 @@
+==== UFW STATUS ====
+Status: active
+
+To                         Action      From
+--                         ------      ----
+OpenSSH                    ALLOW       Anywhere                  
+80/tcp                     ALLOW       Anywhere                  
+443/tcp                    ALLOW       Anywhere                  
+OpenSSH (v6)               ALLOW       Anywhere (v6)             
+80/tcp (v6)                ALLOW       Anywhere (v6)             
+443/tcp (v6)               ALLOW       Anywhere (v6)             
+
+\n==== NGINX CONFIG ====
+cat: /etc/nginx/sites-available/gtb: No such file or directory
+cat: /etc/nginx/sites-enabled/default: No such file or directory
+\n==== PM2 ENV FRONTEND ====
+module.exports = {
+    apps: [
+        {
+            name: "gtb-frontend",
+            script: "npm",
+            args: "run start",
+            cwd: "./frontend",
+            env: {
+                NODE_ENV: "production",
+                PORT: "3000",
+                // Remplacez par le nom de domaine de production
+                NEXT_PUBLIC_API_URL: "http://127.0.0.1:3001"
+            },
+            watch: false,
+            autorestart: true,
+            max_memory_restart: "300M"
+        },
+        {
+            name: "gtb-backend",
+            script: "node",
+            args: "dist/src/main.js",
+            cwd: "./backend",
+            env: {
+                NODE_ENV: "production",
+                PORT: "3001",
+                // Pensez à configurer vos credentials Hostinger DB en Prod
+                DB_HOST: "localhost",
+                DB_PORT: "5432",
+                DB_USER: "votre_utilisateur",
+                DB_PASS: "votre_mot_de_passe",
+                DB_NAME: "votre_base_de_donnees"
+            },
+            watch: false,
+            autorestart: true,
+            max_memory_restart: "300M"
+        }
+    ]
+};

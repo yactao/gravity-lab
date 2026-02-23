@@ -1,0 +1,73 @@
+From https://github.com/yactao/gravity-lab
+   ad1a96e..0a73778  main       -> origin/main
+HEAD is now at 0a73778 fix(pm2): point to correct nestjs main file in dist/src/main.js
+==== STARTING PM2 ====
+[PM2][WARN] Environment [production] is not defined in process file
+[PM2][WARN] Environment [production] is not defined in process file
+[PM2] Applying action restartProcessId on app [gtb-frontend](ids: [ 0 ])
+[PM2] Applying action restartProcessId on app [gtb-backend](ids: [ 1 ])
+[PM2] [gtb-backend](1) ✓
+[PM2] [gtb-frontend](0) ✓
+┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 37449    │ 0s     │ 15   │ online    │ 0%       │ 56.8mb   │ root     │ disabled │
+│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 37458    │ 0s     │ 1    │ online    │ 0%       │ 19.1mb   │ root     │ disabled │
+└────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+==== STATUS ==================
+┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 37449    │ 0s     │ 15   │ online    │ 0%       │ 62.6mb   │ root     │ disabled │
+│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 37458    │ 0s     │ 1    │ online    │ 0%       │ 60.9mb   │ root     │ disabled │
+└────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+==== LOGS BACKEND ============
+[TAILING] Tailing last 20 lines for [gtb-backend] process (change the value with --lines option)
+/root/.pm2/logs/gtb-backend-out.log last 20 lines:
+/root/.pm2/logs/gtb-backend-error.log last 20 lines:
+1|gtb-back |     at node:internal/main/run_main_module:28:49 {
+1|gtb-back |   code: 'MODULE_NOT_FOUND',
+1|gtb-back |   requireStack: []
+1|gtb-back | }
+1|gtb-back | 
+1|gtb-back | Node.js v20.20.0
+1|gtb-back | node:internal/modules/cjs/loader:1210
+1|gtb-back |   throw err;
+1|gtb-back |   ^
+1|gtb-back | 
+1|gtb-back | Error: Cannot find module '/opt/gravity-lab/smart-building/backend/dist/main.js'
+1|gtb-back |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+1|gtb-back |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+1|gtb-back |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+1|gtb-back |     at node:internal/main/run_main_module:28:49 {
+1|gtb-back |   code: 'MODULE_NOT_FOUND',
+1|gtb-back |   requireStack: []
+1|gtb-back | }
+1|gtb-back | 
+1|gtb-back | Node.js v20.20.0
+
+==== REQUEST LOCAL API =======
+*   Trying 127.0.0.1:3001...
+* Connected to 127.0.0.1 (127.0.0.1) port 3001
+> POST /api/auth/login HTTP/1.1
+> Host: 127.0.0.1:3001
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 50
+> 
+} [50 bytes data]
+< {"message":"Identifiants incorrects","error":"Unauthorized","statusCode":401}HTTP/1.1 401 Unauthorized
+< X-Powered-By: Express
+< Access-Control-Allow-Origin: *
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 77
+< ETag: W/"4d-bq36DAoBx8Hx0sfpeeQILBTIqQU"
+< Date: Mon, 23 Feb 2026 11:47:23 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< 
+{ [77 bytes data]
+* Connection #0 to host 127.0.0.1 left intact

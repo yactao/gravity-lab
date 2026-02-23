@@ -1,0 +1,91 @@
+==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
+HEAD is now at b982f3e fix(seed): add manager and ubbee client to default seeds
+From https://github.com/yactao/gravity-lab
+   b982f3e..442dc2a  main       -> origin/main
+Updating b982f3e..442dc2a
+Fast-forward
+ smart-building/fix_urls.js                         | 45 ++++++++++++++++++++++
+ smart-building/frontend/src/app/energy/page.tsx    |  2 +-
+ smart-building/frontend/src/app/layout.tsx         | 14 +++----
+ smart-building/frontend/src/app/map/page.tsx       |  2 +-
+ smart-building/frontend/src/app/page.tsx           |  2 +-
+ .../frontend/src/app/sites/[id]/page.tsx           |  2 +-
+ .../src/components/layout/ClientLayoutWrapper.tsx  | 26 +++++++++++++
+ smart-building/frontend/src/lib/TenantContext.tsx  | 17 ++++----
+ 8 files changed, 88 insertions(+), 22 deletions(-)
+ create mode 100644 smart-building/fix_urls.js
+ create mode 100644 smart-building/frontend/src/components/layout/ClientLayoutWrapper.tsx
+\n==== RECOMPILATION FRONTEND ====
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'camera-controls@3.1.2',
+npm warn EBADENGINE   required: { node: '>=22.0.0', npm: '>=10.5.1' },
+npm warn EBADENGINE   current: { node: 'v20.20.0', npm: '10.8.2' }
+npm warn EBADENGINE }
+
+added 479 packages, and audited 480 packages in 20s
+
+154 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (1 moderate, 14 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> frontend@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /opt/gravity-lab/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /opt/gravity-lab/smart-building/frontend/package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.production
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 17.8s
+  Running TypeScript ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/18) ...
+  Generating static pages using 1 worker (4/18) 
+  Generating static pages using 1 worker (8/18) 
+  Generating static pages using 1 worker (13/18) 
+✓ Generating static pages using 1 worker (18/18) in 503.4ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /alerts
+├ ○ /billing
+├ ○ /clients
+├ ƒ /clients/[id]
+├ ○ /energy
+├ ○ /license
+├ ○ /login
+├ ○ /maintenance
+├ ○ /map
+├ ○ /network
+├ ○ /onboarding
+├ ○ /rules
+├ ○ /settings
+├ ○ /sites
+├ ƒ /sites/[id]
+└ ○ /updates
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+\n==== REDEMARRAGE DE PM2 FRONTEND ====
+Use --update-env to update environment variables
+[PM2] Applying action reloadProcessId on app [gtb-frontend](ids: [ 0 ])
+[PM2] [gtb-frontend](0) ✓

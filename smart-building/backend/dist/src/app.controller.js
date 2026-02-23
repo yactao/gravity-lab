@@ -86,6 +86,9 @@ let AppController = class AppController {
     processIotWebhook(webhookData) {
         return this.appService.processIotWebhook(webhookData);
     }
+    globalSearch(q, orgId, role) {
+        return this.appService.globalSearch(q, orgId, role);
+    }
 };
 exports.AppController = AppController;
 __decorate([
@@ -245,6 +248,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "processIotWebhook", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('search'),
+    __param(0, (0, common_1.Query)('q')),
+    __param(1, (0, common_1.Headers)('x-organization-id')),
+    __param(2, (0, common_1.Headers)('x-user-role')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "globalSearch", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)('api'),
     __metadata("design:paramtypes", [app_service_1.AppService,

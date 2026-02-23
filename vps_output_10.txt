@@ -1,0 +1,4 @@
+==== CHERCHER BDD SQLITE ====
+/opt/gravity-lab/smart-building/backend/smartbuild_v3.sqlite
+\n==== CONTENU SQLITE DANS /opt/gravity-lab/smart-building ====
+bash: line 6: node: command not found

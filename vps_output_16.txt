@@ -1,0 +1,8 @@
+==== CONFIG NGINX ====
+cat: /etc/nginx/sites-available/gtb: No such file or directory
+\n==== LOGS ERREURS NGINX (5 DERNIERES LIGNES) ====
+2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/02/23 11:07:22 [emerg] 34067#34067: still could not bind()

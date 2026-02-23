@@ -410,5 +410,99 @@ export class AppService implements OnModuleInit {
 
     return { success: true, readingId: reading.id, decoded };
   }
+
+  async globalSearch(query: string, orgId: string, role: string) {
+    if (!query || query.length < 2) return [];
+
+    const searchStr = `%${query}%`;
+    const results: any[] = [];
+
+    // 1. Search Sites
+    const sites = await this.siteRepo.createQueryBuilder('site')
+      .where('site.organizationId = :orgId', { orgId })
+      .andWhere('(site.name LIKE :search OR site.city LIKE :search)')
+      .setParameters({ search: searchStr })
+      .take(5)
+      .getMany();
+
+    sites.forEach(s => results.push({
+      id: s.id,
+      type: 'site',
+      title: s.name,
+      subtitle: `Bâtiment • ${s.city}`,
+      url: `/sites/${s.id}`
+    }));
+
+    // 2. Search Zones
+    const zones = await this.zoneRepo.createQueryBuilder('zone')
+      .leftJoinAndSelect('zone.site', 'site')
+      .where('site.organizationId = :orgId', { orgId })
+      .andWhere('zone.name LIKE :search')
+      .setParameter('search', searchStr)
+      .take(5)
+      .getMany();
+
+    zones.forEach(z => results.push({
+      id: z.id,
+      type: 'zone',
+      title: z.name,
+      subtitle: `Zone • ${z.site.name}`,
+      url: `/sites/${z.site.id}` // Navigue vers le site parent
+    }));
+
+    // 3. Search Sensors
+    const sensors = await this.sensorRepo.createQueryBuilder('sensor')
+      .leftJoinAndSelect('sensor.zone', 'zone')
+      .leftJoinAndSelect('zone.site', 'site')
+      .where('site.organizationId = :orgId', { orgId })
+      .andWhere('(sensor.name LIKE :search OR sensor.externalId LIKE :search)')
+      .setParameter('search', searchStr)
+      .take(5)
+      .getMany();
+
+    sensors.forEach(s => results.push({
+      id: s.id,
+      type: 'sensor',
+      title: s.name,
+      subtitle: `Capteur ${s.type} • ${s.zone.site.name}`,
+      url: `/sites/${s.zone.site.id}`
+    }));
+
+    // 4. Search Gateways
+    const gateways = await this.gatewayRepo.createQueryBuilder('gateway')
+      .leftJoinAndSelect('gateway.site', 'site')
+      .where('site.organizationId = :orgId', { orgId })
+      .andWhere('(gateway.name LIKE :search OR gateway.serialNumber LIKE :search)')
+      .setParameter('search', searchStr)
+      .take(3)
+      .getMany();
+
+    gateways.forEach(g => results.push({
+      id: g.id,
+      type: 'gateway',
+      title: g.name,
+      subtitle: `Passerelle • ${g.serialNumber}`,
+      url: `/network`
+    }));
+
+    // 5. Search Organizations (Admins only)
+    if (role === 'SUPER_ADMIN' || role === 'ENERGY_MANAGER') {
+      const orgs = await this.orgRepo.createQueryBuilder('org')
+        .where('org.name LIKE :search')
+        .setParameter('search', searchStr)
+        .take(3)
+        .getMany();
+
+      orgs.forEach(o => results.push({
+        id: o.id,
+        type: 'organization',
+        title: o.name,
+        subtitle: `Client B2B`,
+        url: `/clients` // Or `/clients/${o.id}` if that route existed directly
+      }));
+    }
+
+    return results;
+  }
 }
 

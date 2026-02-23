@@ -69,8 +69,10 @@ let AppService = class AppService {
             const orgLeroy = (await this.orgRepo.findOne({ where: { id: org3Id } }));
             const orgMaison = (await this.orgRepo.findOne({ where: { id: org4Id } }));
             const adminUser = this.userRepo.create({ name: 'Super Admin', email: 'admin@ubbee.fr', password: 'admin', role: user_entity_1.UserRole.SUPER_ADMIN, organization: orgUbbee });
+            const managerUser = this.userRepo.create({ name: 'Energy Manager', email: 'manager@ubbee.fr', password: 'password', role: user_entity_1.UserRole.ENERGY_MANAGER, organization: orgUbbee });
+            const ubbeeClient = this.userRepo.create({ name: 'Client Ubbee', email: 'client@ubbee.fr', password: 'password', role: user_entity_1.UserRole.CLIENT, organization: orgUbbee });
             const casaClient = this.userRepo.create({ name: 'Responsable Casa', email: 'client@casa.fr', password: 'password', role: user_entity_1.UserRole.CLIENT, organization: orgCasa });
-            await this.userRepo.save([adminUser, casaClient]);
+            await this.userRepo.save([adminUser, managerUser, ubbeeClient, casaClient]);
             const sU1 = this.siteRepo.create({ name: 'Siège Social UBBEE', address: '15 Avenue des Champs-Élysées', city: 'Paris', type: 'Bureaux', organization: orgUbbee, latitude: 48.8708, longitude: 2.3051 });
             const sC1 = this.siteRepo.create({ name: 'Casa Rivoli', address: '12 Rue de Rivoli', city: 'Paris', type: 'Magasin', organization: orgCasa, latitude: 48.8550, longitude: 2.3600 });
             const sC2 = this.siteRepo.create({ name: 'Casa Bordeaux', address: 'Promenade Sainte-Catherine', city: 'Bordeaux', type: 'Magasin', organization: orgCasa, latitude: 44.8385, longitude: -0.5750 });
@@ -117,7 +119,7 @@ let AppService = class AppService {
         return 'SmartBuild API Operational';
     }
     async getSites(orgId) {
-        const where = orgId ? { organization: { id: orgId } } : {};
+        const where = orgId ? { organizationId: orgId } : {};
         return this.siteRepo.find({ where, relations: ['zones'] });
     }
     async getOrganizations() {
@@ -178,7 +180,7 @@ let AppService = class AppService {
         return this.zoneRepo.save(newZone);
     }
     async getGateways(orgId) {
-        const where = orgId ? { site: { organization: { id: orgId } } } : {};
+        const where = orgId ? { site: { organizationId: orgId } } : {};
         return this.gatewayRepo.find({ where, relations: ['site', 'sensors'] });
     }
     async createGateway(gatewayData) {
@@ -194,11 +196,11 @@ let AppService = class AppService {
         return this.gatewayRepo.save(newGateway);
     }
     async getSensors(orgId) {
-        const where = orgId ? { zone: { site: { organization: { id: orgId } } } } : {};
+        const where = orgId ? { zone: { site: { organizationId: orgId } } } : {};
         return this.sensorRepo.find({ where, relations: ['zone', 'zone.site'] });
     }
     async getReadings(limit = 100, orgId) {
-        const where = orgId ? { sensor: { zone: { site: { organization: { id: orgId } } } } } : {};
+        const where = orgId ? { sensor: { zone: { site: { organizationId: orgId } } } } : {};
         return this.readingRepo.find({
             where,
             order: { timestamp: 'DESC' },
@@ -213,7 +215,7 @@ let AppService = class AppService {
             where.sensor.zone = { site: { id: siteId } };
         }
         else if (orgId) {
-            where.sensor.zone = { site: { organization: { id: orgId } } };
+            where.sensor.zone = { site: { organizationId: orgId } };
         }
         const readings = await this.readingRepo.find({
             where,
@@ -248,7 +250,7 @@ let AppService = class AppService {
             where.sensor.zone = { site: { id: siteId } };
         }
         else if (orgId) {
-            where.sensor.zone = { site: { organization: { id: orgId } } };
+            where.sensor.zone = { site: { organizationId: orgId } };
         }
         const readings = await this.readingRepo.find({
             where,
@@ -278,7 +280,7 @@ let AppService = class AppService {
             where.sensor = { zone: { site: { id: siteId } } };
         }
         else if (orgId) {
-            where.sensor = { zone: { site: { organization: { id: orgId } } } };
+            where.sensor = { zone: { site: { organizationId: orgId } } };
         }
         return this.alertRepo.find({
             where,
@@ -339,6 +341,83 @@ let AppService = class AppService {
         await this.rulesEngine.evaluate(reading, sensor);
         this.eventsGateway.broadcastDataRefresh(sensor.zone?.site?.id);
         return { success: true, readingId: reading.id, decoded };
+    }
+    async globalSearch(query, orgId, role) {
+        if (!query || query.length < 2)
+            return [];
+        const searchStr = `%${query}%`;
+        const results = [];
+        const sites = await this.siteRepo.createQueryBuilder('site')
+            .where('site.organizationId = :orgId', { orgId })
+            .andWhere('(site.name LIKE :search OR site.city LIKE :search)')
+            .setParameters({ search: searchStr })
+            .take(5)
+            .getMany();
+        sites.forEach(s => results.push({
+            id: s.id,
+            type: 'site',
+            title: s.name,
+            subtitle: `Bâtiment • ${s.city}`,
+            url: `/sites/${s.id}`
+        }));
+        const zones = await this.zoneRepo.createQueryBuilder('zone')
+            .leftJoinAndSelect('zone.site', 'site')
+            .where('site.organizationId = :orgId', { orgId })
+            .andWhere('zone.name LIKE :search')
+            .setParameter('search', searchStr)
+            .take(5)
+            .getMany();
+        zones.forEach(z => results.push({
+            id: z.id,
+            type: 'zone',
+            title: z.name,
+            subtitle: `Zone • ${z.site.name}`,
+            url: `/sites/${z.site.id}`
+        }));
+        const sensors = await this.sensorRepo.createQueryBuilder('sensor')
+            .leftJoinAndSelect('sensor.zone', 'zone')
+            .leftJoinAndSelect('zone.site', 'site')
+            .where('site.organizationId = :orgId', { orgId })
+            .andWhere('(sensor.name LIKE :search OR sensor.externalId LIKE :search)')
+            .setParameter('search', searchStr)
+            .take(5)
+            .getMany();
+        sensors.forEach(s => results.push({
+            id: s.id,
+            type: 'sensor',
+            title: s.name,
+            subtitle: `Capteur ${s.type} • ${s.zone.site.name}`,
+            url: `/sites/${s.zone.site.id}`
+        }));
+        const gateways = await this.gatewayRepo.createQueryBuilder('gateway')
+            .leftJoinAndSelect('gateway.site', 'site')
+            .where('site.organizationId = :orgId', { orgId })
+            .andWhere('(gateway.name LIKE :search OR gateway.serialNumber LIKE :search)')
+            .setParameter('search', searchStr)
+            .take(3)
+            .getMany();
+        gateways.forEach(g => results.push({
+            id: g.id,
+            type: 'gateway',
+            title: g.name,
+            subtitle: `Passerelle • ${g.serialNumber}`,
+            url: `/network`
+        }));
+        if (role === 'SUPER_ADMIN' || role === 'ENERGY_MANAGER') {
+            const orgs = await this.orgRepo.createQueryBuilder('org')
+                .where('org.name LIKE :search')
+                .setParameter('search', searchStr)
+                .take(3)
+                .getMany();
+            orgs.forEach(o => results.push({
+                id: o.id,
+                type: 'organization',
+                title: o.name,
+                subtitle: `Client B2B`,
+                url: `/clients`
+            }));
+        }
+        return results;
     }
 };
 exports.AppService = AppService;

@@ -1,0 +1,7 @@
+==== TEST TYPEORM FIND ====
+-> TEST 1: organization: { id }
+Test 1 count: 1
+-> TEST 2: organizationId direct
+Test 2 count: 1
+-> TEST 3: all sites without where
+Total sites: 10

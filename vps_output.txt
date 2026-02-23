@@ -1,0 +1,112 @@
+==== PM2 BACKEND LOGS ====
+[TAILING] Tailing last 50 lines for [gtb-backend] process (change the value with --lines option)
+/root/.pm2/logs/gtb-backend-out.log last 50 lines:
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | 🚀 Starting Internal Simulation Service...
+1|gtb-back | ⚡ Adding missing Energy Sensor for V4 Dashboard...
+1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +13ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +25ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mNotificationsModule dependencies initialized[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAiModule dependencies initialized[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m[38;5;3m +24ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +2ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/api}:[39m[38;5;3m +9ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api, GET} route[39m[38;5;3m +3ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sites, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations, GET} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations/:id, PUT} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations/:id, DELETE} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sites, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/zones, POST} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sensors, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, POST} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/readings, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/global, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/temperature/average, GET} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/alerts, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/hvac-performance, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | 🚀 Starting Internal Simulation Service...
+1|gtb-back | ⚡ Adding missing Energy Sensor for V4 Dashboard...
+1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +13ms[39m
+
+/root/.pm2/logs/gtb-backend-error.log last 50 lines:
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back | ⚠️ No sensors found to simulate data for.
+
+\n==== DB USERS ====
+┌─────────┬──────────────────┬──────────┬───────────────┐
+│ (index) │ email            │ password │ role          │
+├─────────┼──────────────────┼──────────┼───────────────┤
+│ 0       │ 'admin@ubbee.fr' │ 'admin'  │ 'SUPER_ADMIN' │
+└─────────┴──────────────────┴──────────┴───────────────┘

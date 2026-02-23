@@ -1,0 +1,29 @@
+==== ARRET DES CONTENEURS DOCKER SUR PORT 80 ====
+d81d6385a519
+22f0722ea3a6
+a9fd1318df97
+b59c1384c8de
+780d2fc29e7f
+d81d6385a519
+22f0722ea3a6
+a9fd1318df97
+b59c1384c8de
+780d2fc29e7f
+\n==== DEMARRAGE NGINX ====
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-02-23 12:05:04 UTC; 14ms ago
+       Docs: man:nginx(8)
+    Process: 40804 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 40806 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+   Main PID: 40807 (nginx)
+      Tasks: 3 (limit: 9483)
+     Memory: 2.4M (peak: 2.5M)
+        CPU: 28ms
+     CGroup: /system.slice/nginx.service
+             ├─40807 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─40808 "nginx: worker process"
+             └─40809 "nginx: worker process"
+
+Feb 23 12:05:04 srv1411776 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Feb 23 12:05:04 srv1411776 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.

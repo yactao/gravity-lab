@@ -1,0 +1,63 @@
+==== CONFIGURATION DE NGINX ====
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+\n==== MISE A JOUR DU FRONTEND ====
+
+> frontend@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /opt/gravity-lab/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /opt/gravity-lab/smart-building/frontend/package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.production
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 24.4s
+  Running TypeScript ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/18) ...
+  Generating static pages using 1 worker (4/18) 
+  Generating static pages using 1 worker (8/18) 
+  Generating static pages using 1 worker (13/18) 
+✓ Generating static pages using 1 worker (18/18) in 417.3ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /alerts
+├ ○ /billing
+├ ○ /clients
+├ ƒ /clients/[id]
+├ ○ /energy
+├ ○ /license
+├ ○ /login
+├ ○ /maintenance
+├ ○ /map
+├ ○ /network
+├ ○ /onboarding
+├ ○ /rules
+├ ○ /settings
+├ ○ /sites
+├ ƒ /sites/[id]
+└ ○ /updates
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+\n==== REDEMARRAGE DE PM2 ====
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [gtb-frontend](ids: [ 0 ])
+[PM2] [gtb-frontend](0) ✓
+┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 39503    │ 22m    │ 115  │ online    │ 0%       │ 81.7mb   │ root     │ disabled │
+│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 41366    │ 0s     │ 2    │ online    │ 0%       │ 17.5mb   │ root     │ disabled │
+└────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘

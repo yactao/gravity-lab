@@ -1,0 +1,22 @@
+┌─────────┐
+│ (index) │
+├─────────┤
+└─────────┘
+Forcing insert of manager and admin...
+Users inserted. Verifying...
+┌─────────┬────────────────────┬────────────┬──────────────────┐
+│ (index) │ email              │ password   │ role             │
+├─────────┼────────────────────┼────────────┼──────────────────┤
+│ 0       │ 'admin@ubbee.fr'   │ 'admin'    │ 'SUPER_ADMIN'    │
+│ 1       │ 'manager@ubbee.fr' │ 'password' │ 'ENERGY_MANAGER' │
+│ 2       │ 'client@ubbee.fr'  │ 'password' │ 'CLIENT'         │
+└─────────┴────────────────────┴────────────┴──────────────────┘
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [gtb-backend](ids: [ 1 ])
+[PM2] [gtb-backend](1) ✓
+┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 39503    │ 0s     │ 115  │ online    │ 0%       │ 20.0mb   │ root     │ disabled │
+│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 37458    │ 11m    │ 1    │ online    │ 0%       │ 57.2mb   │ root     │ disabled │
+└────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘

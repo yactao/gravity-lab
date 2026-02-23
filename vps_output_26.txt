@@ -1,0 +1,16 @@
+==== PULL DES NOUVEAUX FICHIERS BACKEND ====
+From https://github.com/yactao/gravity-lab
+   442dc2a..84737df  main       -> origin/main
+Updating 442dc2a..84737df
+Fast-forward
+ smart-building/backend/src/app.service.ts | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+\n==== RECOMPILATION BACKEND ====
+
+> backend@0.0.1 build
+> nest build
+
+\n==== REDEMARRAGE DE PM2 BACKEND ====
+Use --update-env to update environment variables
+[PM2] Applying action reloadProcessId on app [gtb-backend](ids: [ 1 ])
+[PM2] [gtb-backend](1) ✓

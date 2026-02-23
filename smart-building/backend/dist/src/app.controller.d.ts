@@ -62,4 +62,5 @@ export declare class AppController {
         readingId: string;
         decoded: import("./iot/payload-formatter.service").DecodedPayload;
     }>;
+    globalSearch(q: string, orgId: string, role: string): Promise<any[]>;
 }

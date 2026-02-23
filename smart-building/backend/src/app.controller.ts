@@ -128,5 +128,14 @@ export class AppController {
   processIotWebhook(@Body() webhookData: any) {
     return this.appService.processIotWebhook(webhookData);
   }
+  @UseGuards(JwtAuthGuard)
+  @Get('search')
+  globalSearch(
+    @Query('q') q: string,
+    @Headers('x-organization-id') orgId: string,
+    @Headers('x-user-role') role: string
+  ) {
+    return this.appService.globalSearch(q, orgId, role);
+  }
 }
 

@@ -1,0 +1,2 @@
+==== PM2 ERROR LOG ====
+\n==== PM2 OUT LOG ====

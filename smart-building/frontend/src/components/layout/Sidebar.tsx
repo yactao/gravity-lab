@@ -36,9 +36,17 @@ export function Sidebar() {
 
     if (!currentTenant) return null;
 
-    const filteredNavItems = navItems.filter((item) => {
+    const filteredNavItems = navItems.map(item => {
+        // Dynamic href for "Gestion de Parc" based on role
+        if (item.name === "Gestion de Parc") {
+            return {
+                ...item,
+                href: currentTenant.role === "CLIENT" ? "/sites" : "/clients"
+            };
+        }
+        return item;
+    }).filter((item) => {
         if (currentTenant.role === "CLIENT") {
-            if (item.name === "Mes Clients") return false; // Entire Mes Clients section restricted for end clients
             if (item.href && ["/rules", "/network", "/settings", "/license", "/onboarding"].includes(item.href)) {
                 return false;
             }

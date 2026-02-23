@@ -81,4 +81,5 @@ export declare class AppService implements OnModuleInit {
         readingId: string;
         decoded: import("./iot/payload-formatter.service").DecodedPayload;
     }>;
+    globalSearch(query: string, orgId: string, role: string): Promise<any[]>;
 }

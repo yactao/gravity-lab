@@ -1,0 +1,43 @@
+==== VERIFICATION DB SQLITE ====
+--- ORGANIZATIONS ---
+┌─────────┬────────────────────────────────────────┬───────────────────┐
+│ (index) │ id                                     │ name              │
+├─────────┼────────────────────────────────────────┼───────────────────┤
+│ 0       │ '11111111-1111-1111-1111-111111111111' │ 'UBBEE'           │
+│ 1       │ '22222222-2222-2222-2222-222222222222' │ 'CASA'            │
+│ 2       │ '33333333-3333-3333-3333-333333333333' │ 'Leroy Merlin'    │
+│ 3       │ '44444444-4444-4444-4444-444444444444' │ 'Maison du Monde' │
+└─────────┴────────────────────────────────────────┴───────────────────┘
+--- SITES ---
+┌─────────┬────────────────────────────────────────┬──────────────────────┬────────────────────────────────────────┐
+│ (index) │ id                                     │ name                 │ organizationId                         │
+├─────────┼────────────────────────────────────────┼──────────────────────┼────────────────────────────────────────┤
+│ 0       │ '33ee182a-f082-4d64-a757-f2662bb709ee' │ 'Siège Social UBBEE' │ '11111111-1111-1111-1111-111111111111' │
+│ 1       │ '972f9dad-1ab0-4269-afea-a6d2375d7438' │ 'Casa Rivoli'        │ '22222222-2222-2222-2222-222222222222' │
+│ 2       │ 'fe2f1dbc-490e-474c-b60b-5a8b8552e695' │ 'Casa Bordeaux'      │ '22222222-2222-2222-2222-222222222222' │
+│ 3       │ '32951ca4-4958-4f51-b56c-57b5671d860e' │ 'Casa Lyon'          │ '22222222-2222-2222-2222-222222222222' │
+│ 4       │ '54459f49-ddcc-4503-a5f5-e348ade9b93c' │ 'LM Massy'           │ '33333333-3333-3333-3333-333333333333' │
+│ 5       │ 'e81680e8-ba84-4485-9531-3d9aa5425273' │ 'LM Daumesnil'       │ '33333333-3333-3333-3333-333333333333' │
+│ 6       │ '6a00267c-a9b8-4195-be52-83abdeac81c8' │ 'LM Logistique'      │ '33333333-3333-3333-3333-333333333333' │
+│ 7       │ 'f458fc83-da2f-46d0-aa2d-44aff2fd731b' │ 'MDM Nantes'         │ '44444444-4444-4444-4444-444444444444' │
+│ 8       │ '20bcc208-9848-499d-90b6-1006d69205d9' │ 'MDM Champs'         │ '44444444-4444-4444-4444-444444444444' │
+│ 9       │ '7b09876b-0fae-4df3-a4c1-0ba168f514fc' │ 'MDM Entrepôt'       │ '44444444-4444-4444-4444-444444444444' │
+└─────────┴────────────────────────────────────────┴──────────────────────┴────────────────────────────────────────┘
+--- USERS ---
+/opt/gravity-lab/smart-building/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5
+	return this[cppdb].prepare(sql, this, false);
+	                   ^
+
+SqliteError: no such table: user
+    at Database.prepare (/opt/gravity-lab/smart-building/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)
+    at [eval]:12:18
+    at runScriptInThisContext (node:internal/vm:209:10)
+    at node:internal/process/execution:118:14
+    at [eval]-wrapper:6:24
+    at runScript (node:internal/process/execution:101:62)
+    at evalScript (node:internal/process/execution:133:3)
+    at node:internal/main/eval_string:51:3 {
+  code: 'SQLITE_ERROR'
+}
+
+Node.js v20.20.0

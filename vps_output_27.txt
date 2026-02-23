@@ -1,0 +1,27 @@
+Login OK, OrgID: 11111111-1111-1111-1111-111111111111
+SITES FETCHED: [
+  {
+    "id": "53b26874-512f-4db6-b24e-854f0d381822",
+    "name": "Siège Social UBBEE",
+    "type": "Bureaux",
+    "address": "15 Avenue des Champs-Élysées",
+    "city": "Paris",
+    "latitude": 48.8708,
+    "longitude": 2.3051,
+    "zones": [
+      {
+        "id": "178209ab-64bd-4cf7-974e-426786610c15",
+        "name": "Accueil",
+        "type": "Hall",
+        "floor": "RDC"
+      },
+      {
+        "id": "fd66615e-4580-4399-866d-30def5da1613",
+        "name": "Open Space",
+        "type": "Office",
+        "floor": "R+1"
+      }
+    ],
+    "organizationId": "11111111-1111-1111-1111-111111111111"
+  }
+]
