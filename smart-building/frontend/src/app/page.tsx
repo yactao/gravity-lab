@@ -39,7 +39,7 @@ export default function Home() {
     fetchData();
 
     // Setup WebSocket for realtime refresh
-    const socket: Socket = io("http://localhost:3001");
+    const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL || "");
 
     socket.on("connect", () => {
       console.log("WebSocket connected for Realtime IoT Data (Global)");
