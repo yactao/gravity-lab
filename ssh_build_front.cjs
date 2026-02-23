@@ -8,12 +8,10 @@ export NVM_DIR="$HOME/.nvm"
 
 echo "==== PULL DES NOUVEAUX FICHIERS FRONTEND ===="
 cd /opt/gravity-lab/smart-building
-git reset --hard origin/main
 git pull
 
 echo "\\n==== RECOMPILATION FRONTEND ===="
 cd frontend
-npm ci
 npm run build
 
 echo "\\n==== REDEMARRAGE DE PM2 FRONTEND ===="
@@ -26,8 +24,8 @@ conn.on('ready', () => {
         if (err) throw err;
         let output = '';
         stream.on('close', (code, signal) => {
-            fs.writeFileSync('vps_output_21.txt', output);
-            console.log('Output saved to vps_output_21.txt');
+            fs.writeFileSync('vps_output_30.txt', output);
+            console.log('Output saved to vps_output_30.txt');
             conn.end();
         }).on('data', (data) => {
             output += data;
