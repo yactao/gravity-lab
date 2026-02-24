@@ -43,25 +43,7 @@ export default function ClientDetailsPage() {
     const handleCreateSite = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Geocoding de l'adresse pour positionnement exact sur la Map
-            let latitude = 48.8566; // GPS par défaut (Paris)
-            let longitude = 2.3522;
-
-            if (newSite.address && newSite.city) {
-                try {
-                    const query = encodeURIComponent(`${newSite.address}, ${newSite.city}`);
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
-                    const geoData = await geoRes.json();
-                    if (geoData && geoData.length > 0) {
-                        latitude = parseFloat(geoData[0].lat);
-                        longitude = parseFloat(geoData[0].lon);
-                    }
-                } catch (err) {
-                    console.error("Geocoding failed, using default coordinates", err);
-                }
-            }
-
-            const payload = { ...newSite, latitude, longitude };
+            const payload = { ...newSite };
 
             const res = await authFetch("http://localhost:3001/api/sites", {
                 method: "POST",

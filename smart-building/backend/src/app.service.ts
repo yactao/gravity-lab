@@ -190,6 +190,24 @@ export class AppService implements OnModuleInit {
     const org = await this.orgRepo.findOne({ where: { id: orgId } });
     if (!org) throw new Error("Organization not found");
 
+    if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
+      try {
+        const query = encodeURIComponent(`${siteData.address}${siteData.city ? ', ' + siteData.city : ''}`);
+        // Add User-Agent header as required by Nominatim usage policy
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
+          headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
+        });
+        const data = await response.json();
+        if (data && data.length > 0) {
+          siteData.latitude = parseFloat(data[0].lat);
+          siteData.longitude = parseFloat(data[0].lon);
+          console.log(`Geocoded ${siteData.address} to ${siteData.latitude}, ${siteData.longitude}`);
+        }
+      } catch (err) {
+        console.error('Geocoding failed:', err);
+      }
+    }
+
     const newSite = this.siteRepo.create({
       ...siteData,
       organization: org

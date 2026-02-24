@@ -17,8 +17,9 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Get('sites')
-  getSites(@Headers('x-organization-id') orgId: string) {
-    return this.appService.getSites(orgId);
+  getSites(@Headers('x-organization-id') orgId: string, @Headers('x-user-role') role?: string) {
+    const filterOrgId = role === 'SUPER_ADMIN' ? undefined : orgId;
+    return this.appService.getSites(filterOrgId);
   }
 
   @UseGuards(JwtAuthGuard)
