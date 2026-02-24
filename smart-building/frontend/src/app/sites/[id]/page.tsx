@@ -68,8 +68,8 @@ export default function SiteDashboardPage() {
     const [newZone, setNewZone] = useState({ name: "", type: "Office", floor: "RDC" });
     const isAdmin = currentTenant?.role === "ENERGY_MANAGER" || currentTenant?.role === "SUPER_ADMIN";
 
-    const fetchSiteDetails = async () => {
-        setLoading(true);
+    const fetchSiteDetails = async (isSilentRefresh = false) => {
+        if (!isSilentRefresh) setLoading(true);
         try {
             // Fetch all sites for now and find. Ideally GET /api/sites/:id
             const res = await authFetch("http://localhost:3001/api/sites");
@@ -77,10 +77,10 @@ export default function SiteDashboardPage() {
                 const data = await res.json();
                 const found = data.find((s: any) => s.id === siteId);
                 setSite(found || null);
-                // Auto-expand first floor if exists
-                if (found && found.zones && found.zones.length > 0) {
+                // Auto-expand first floor if exists and it's the initial load
+                if (found && found.zones && found.zones.length > 0 && !isSilentRefresh) {
                     const firstFloor = found.zones[0].floor || "RDC";
-                    setExpandedFloors({ [firstFloor]: true });
+                    setExpandedFloors(prev => Object.keys(prev).length === 0 ? { [firstFloor]: true } : prev);
                 }
             }
         } catch (err) {
@@ -104,7 +104,7 @@ export default function SiteDashboardPage() {
             // If it's a global refresh or specifically for our site
             if (data.all || data.siteId === siteId) {
                 console.log("Realtime update received! Refreshing site data...");
-                fetchSiteDetails();
+                fetchSiteDetails(true); // Silent refresh, no loading spinner
             }
         });
 
