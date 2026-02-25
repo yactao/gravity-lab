@@ -522,5 +522,21 @@ export class AppService implements OnModuleInit {
 
     return results;
   }
+
+  async getUsers(organizationId?: string) {
+    if (organizationId) {
+      return this.userRepo.find({ where: { organization: { id: organizationId } } });
+    }
+    return this.userRepo.find({ relations: ['organization'] });
+  }
+
+  async createUser(userData: any) {
+    let org = null;
+    if (userData.organizationId) {
+      org = await this.orgRepo.findOne({ where: { id: userData.organizationId } });
+    }
+    const user = this.userRepo.create({ ...userData, organization: org });
+    return this.userRepo.save(user);
+  }
 }
 

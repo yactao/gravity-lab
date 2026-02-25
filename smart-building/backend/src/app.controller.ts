@@ -139,5 +139,17 @@ export class AppController {
   ) {
     return this.appService.globalSearch(q, orgId, role);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('users')
+  getUsers(@Query('organizationId') orgId?: string) {
+    return this.appService.getUsers(orgId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('users')
+  createUser(@Body() userData: any) {
+    return this.appService.createUser(userData);
+  }
 }
 

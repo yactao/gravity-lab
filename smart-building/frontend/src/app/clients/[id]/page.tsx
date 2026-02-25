@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTenant } from "@/lib/TenantContext";
-import { Briefcase, Activity, Users, Settings, ArrowLeft, Building2, Plus, MapPin, Building, X } from "lucide-react";
+import { Briefcase, Activity, Users, Settings, ArrowLeft, Building2, Plus, MapPin, Building, X, Mail, Shield } from "lucide-react";
 import { BuildingModel } from "@/components/dashboard/BuildingModel";
 
 export default function ClientDetailsPage() {
@@ -19,6 +19,12 @@ export default function ClientDetailsPage() {
     // Add Site states
     const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
     const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", city: "" });
+
+    // Add User states
+    const [usersList, setUsersList] = useState<any[]>([]);
+    const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+    const [newUser, setNewUser] = useState({ name: "", email: "", role: "CLIENT", password: "password123" });
+
     const isAdmin = currentTenant?.role === "ENERGY_MANAGER" || currentTenant?.role === "SUPER_ADMIN";
 
     const fetchClientDetails = async () => {
@@ -29,6 +35,15 @@ export default function ClientDetailsPage() {
                 const found = data.find((org: any) => org.id === clientId);
                 setClient(found);
             }
+
+            // Fetch associated users
+            if (isAdmin) {
+                const userRes = await authFetch(`http://localhost:3001/api/users?organizationId=${clientId}`);
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    setUsersList(userData);
+                }
+            }
         } catch (err) {
             console.error("Failed to fetch client details", err);
         } finally {
@@ -38,7 +53,7 @@ export default function ClientDetailsPage() {
 
     useEffect(() => {
         fetchClientDetails();
-    }, [clientId, authFetch]);
+    }, [clientId, authFetch, isAdmin]);
 
     const handleCreateSite = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,6 +69,25 @@ export default function ClientDetailsPage() {
                 setIsAddSiteOpen(false);
                 setNewSite({ name: "", type: "Bureaux", address: "", city: "" });
                 await fetchClientDetails(); // Reload to get the new site
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const payload = { ...newUser, organizationId: clientId };
+
+            const res = await authFetch("http://localhost:3001/api/users", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                setIsAddUserOpen(false);
+                setNewUser({ name: "", email: "", role: "CLIENT", password: "password123" });
+                await fetchClientDetails(); // Reload to get the new user
             }
         } catch (e) {
             console.error(e);
@@ -131,6 +165,18 @@ export default function ClientDetailsPage() {
                                 <p className="text-sm font-medium text-slate-900 dark:text-slate-300">Forme juridique: {client.legalForm || "N/A"}</p>
                                 <p className="text-sm font-medium text-slate-900 dark:text-slate-300">Date création: {client.establishmentDate || "N/A"}</p>
                             </div>
+
+                            {/* Image du Bâtiment / Logo */}
+                            <div className="mt-8 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 relative h-48 group">
+                                <img
+                                    src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800"
+                                    alt="Siège"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-4">
+                                    <span className="text-white text-xs font-bold uppercase tracking-wider">Aperçu du Siège</span>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Sites & Synoptique */}
@@ -196,12 +242,68 @@ export default function ClientDetailsPage() {
 
                 {/* 3. GESTION UTILISATEURS */}
                 {activeTab === "users" && (
-                    <div className="glass-card p-12 text-center rounded-2xl border-slate-200 dark:border-white/5">
-                        <Users className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Comptes Utilisateurs ({client.usersCount})</h3>
-                        <p className="text-sm text-slate-500 max-w-lg mx-auto">
-                            Gérez les accès, les rôles (CLIENT, ENERGY_MANAGER) et les mots de passe des collaborateurs de {client.name}.
-                        </p>
+                    <div className="glass-card p-6 rounded-2xl border-slate-200 dark:border-white/5 min-h-[400px]">
+                        <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-200 dark:border-white/5">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                                    <Users className="w-5 h-5 mr-2 text-primary" />
+                                    Gestion des Utilisateurs
+                                </h3>
+                                <p className="text-xs text-slate-500 mt-1">Supervisez les accès ({client.name})</p>
+                            </div>
+                            {isAdmin && (
+                                <button onClick={() => setIsAddUserOpen(true)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 font-bold rounded-xl transition-all shadow-sm flex items-center text-sm">
+                                    <Plus className="h-4 w-4 mr-2 text-emerald-500" /> Nouvel Utilisateur
+                                </button>
+                            )}
+                        </div>
+
+                        {usersList.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-slate-200 dark:border-white/10 text-xs text-slate-500 uppercase tracking-wider">
+                                            <th className="pb-3 font-bold">Nom</th>
+                                            <th className="pb-3 font-bold">Email</th>
+                                            <th className="pb-3 font-bold">Rôle</th>
+                                            <th className="pb-3 font-bold">Créé le</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-sm">
+                                        {usersList.map((user: any) => (
+                                            <tr key={user.id} className="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
+                                                <td className="py-4 font-bold text-slate-900 dark:text-white flex items-center">
+                                                    <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center mr-3 text-xs text-primary">
+                                                        {user.name.substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                    {user.name}
+                                                </td>
+                                                <td className="py-4 text-slate-600 dark:text-slate-300">
+                                                    <a href={`mailto:${user.email}`} className="flex items-center hover:text-primary">
+                                                        <Mail className="w-3 h-3 mr-1.5 opacity-50" />
+                                                        {user.email}
+                                                    </a>
+                                                </td>
+                                                <td className="py-4">
+                                                    <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest rounded flex items-center inline-flex ${user.role === 'SUPER_ADMIN' ? 'bg-purple-500/10 text-purple-600' : user.role === 'ENERGY_MANAGER' ? 'bg-orange-500/10 text-orange-600' : 'bg-emerald-500/10 text-emerald-600'}`}>
+                                                        <Shield className="w-3 h-3 mr-1 opacity-70" />
+                                                        {user.role}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 text-slate-500 italic text-xs">
+                                                    {new Date(user.createdAt).toLocaleDateString()}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-12 text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl">
+                                <Users className="h-10 w-10 mb-3 opacity-20" />
+                                <p className="text-sm">Aucun utilisateur rattaché à ce client.</p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -230,6 +332,37 @@ export default function ClientDetailsPage() {
                             </div>
 
                             <button type="submit" className="w-full py-3 mt-4 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">Créer le Bâtiment</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Add User */}
+            {isAddUserOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl relative">
+                        <button onClick={() => setIsAddUserOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="h-5 w-5" /></button>
+                        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-white flex items-center"><Users className="w-5 h-5 mr-2 text-primary" /> Nouvel Utilisateur</h2>
+                        <form onSubmit={handleCreateUser} className="space-y-4">
+                            <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nom Complet</label>
+                                <input type="text" required value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" /></div>
+
+                            <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Email</label>
+                                <input type="email" required value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" /></div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rôle</label>
+                                    <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all">
+                                        <option value="CLIENT">Client</option>
+                                        <option value="ENERGY_MANAGER">Energy Manager</option>
+                                    </select></div>
+                                <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Mot de passe</label>
+                                    <input type="text" required value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-xs text-slate-500" /></div>
+                            </div>
+
+                            <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] flex justify-center items-center">
+                                Ajouter à {client.name}
+                            </button>
                         </form>
                     </div>
                 </div>
