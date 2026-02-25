@@ -19,6 +19,7 @@ export default function ClientsPage() {
         region: "",
         city: "",
         address: "",
+        postalCode: "",
         phone: "",
         email: "",
         establishmentDate: "",
@@ -65,7 +66,7 @@ export default function ClientsPage() {
             });
             if (res.ok) {
                 setIsAddClientOpen(false);
-                setNewClient({ name: "", type: "Corporate", country: "France", region: "", city: "", address: "", phone: "", email: "", establishmentDate: "", legalForm: "SAS" });
+                setNewClient({ name: "", type: "Corporate", country: "France", region: "", city: "", postalCode: "", address: "", phone: "", email: "", establishmentDate: "", legalForm: "SAS" });
                 await fetchOrganizations();
             }
         } catch (e) {
@@ -77,10 +78,10 @@ export default function ClientsPage() {
         e.preventDefault();
         if (!editClient) return;
         try {
-            const { name, type, country, region, city, address, phone, email, establishmentDate, legalForm } = editClient;
+            const { name, type, country, region, city, address, postalCode, phone, email, establishmentDate, legalForm } = editClient;
             const res = await authFetch(`http://localhost:3001/api/organizations/${editClient.id}`, {
                 method: "PUT",
-                body: JSON.stringify({ name, type, country, region, city, address, phone, email, establishmentDate, legalForm })
+                body: JSON.stringify({ name, type, country, region, city, address, postalCode, phone, email, establishmentDate, legalForm })
             });
             if (res.ok) {
                 setIsEditClientOpen(false);
@@ -388,6 +389,19 @@ export default function ClientsPage() {
                                             placeholder="ex: Paris"
                                         />
                                     </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Code postal *</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={newClient.postalCode}
+                                            onChange={e => setNewClient({ ...newClient, postalCode: e.target.value })}
+                                            className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="ex: 75000"
+                                        />
+                                    </div>
                                     <div>
                                         <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Région</label>
                                         <input
@@ -528,6 +542,17 @@ export default function ClientsPage() {
                                             type="text"
                                             value={editClient.city || ""}
                                             onChange={e => setEditClient({ ...editClient, city: e.target.value })}
+                                            className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Code postal</label>
+                                        <input
+                                            type="text"
+                                            value={editClient.postalCode || ""}
+                                            onChange={e => setEditClient({ ...editClient, postalCode: e.target.value })}
                                             className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
                                         />
                                     </div>

@@ -48,6 +48,12 @@ let AppController = class AppController {
         const finalOrgId = siteData.organizationId || orgId;
         return this.appService.createSite(siteData, finalOrgId);
     }
+    updateSite(id, siteData) {
+        return this.appService.updateSite(id, siteData);
+    }
+    deleteSite(id) {
+        return this.appService.deleteSite(id);
+    }
     createZone(zoneData) {
         if (!zoneData.siteId) {
             throw new Error("siteId is required to create a zone");
@@ -164,6 +170,23 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "createSite", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Put)('sites/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "updateSite", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Delete)('sites/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "deleteSite", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)('zones'),

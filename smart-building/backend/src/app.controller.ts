@@ -55,6 +55,18 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Put('sites/:id')
+  updateSite(@Param('id') id: string, @Body() siteData: any) {
+    return this.appService.updateSite(id, siteData);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('sites/:id')
+  deleteSite(@Param('id') id: string) {
+    return this.appService.deleteSite(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('zones')
   createZone(@Body() zoneData: any) {
     if (!zoneData.siteId) {

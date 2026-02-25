@@ -192,7 +192,7 @@ export class AppService implements OnModuleInit {
 
     if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
       try {
-        const query = encodeURIComponent(`${siteData.address}${siteData.city ? ', ' + siteData.city : ''}`);
+        const query = encodeURIComponent(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
         // Add User-Agent header as required by Nominatim usage policy
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
           headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
@@ -213,6 +213,32 @@ export class AppService implements OnModuleInit {
       organization: org
     });
     return this.siteRepo.save(newSite);
+  }
+
+  async updateSite(id: string, siteData: any) {
+    if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
+      try {
+        const query = encodeURIComponent(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
+          headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
+        });
+        const data = await response.json();
+        if (data && data.length > 0) {
+          siteData.latitude = parseFloat(data[0].lat);
+          siteData.longitude = parseFloat(data[0].lon);
+          console.log(`Geocoded ${siteData.address} to ${siteData.latitude}, ${siteData.longitude}`);
+        }
+      } catch (err) {
+        console.error('Geocoding failed:', err);
+      }
+    }
+
+    await this.siteRepo.update(id, siteData);
+    return this.siteRepo.findOne({ where: { id } });
+  }
+
+  async deleteSite(id: string) {
+    return this.siteRepo.delete(id);
   }
 
   async createZone(zoneData: any, siteId: string) {
@@ -552,7 +578,7 @@ export class AppService implements OnModuleInit {
     // In a real scenario, this would lookup the equipment by ID and publish an MQTT payload
     // to the actual physical device. For this demo, we'll just log and mock success.
     console.log(`[ACTION Triggered] Eq: ${payload.equipmentId} | Action: ${payload.action} | Val: ${payload.value}`);
-    this.events.emit('sensor_data', {
+    this.eventsGateway.server.emit('sensor_data', {
       type: 'action_audit',
       equipmentId: payload.equipmentId,
       action: payload.action,

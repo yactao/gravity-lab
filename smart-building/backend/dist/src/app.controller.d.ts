@@ -17,6 +17,7 @@ export declare class AppController {
         region: string;
         city: string;
         address: string;
+        postalCode: string;
         phone: string;
         email: string;
         establishmentDate: string;
@@ -33,6 +34,8 @@ export declare class AppController {
     updateOrganization(id: string, orgData: any): Promise<import("./entities/organization.entity").Organization | null>;
     deleteOrganization(id: string): Promise<import("typeorm").DeleteResult>;
     createSite(orgId: string, siteData: any): Promise<import("./entities/site.entity").Site[]>;
+    updateSite(id: string, siteData: any): Promise<import("./entities/site.entity").Site | null>;
+    deleteSite(id: string): Promise<import("typeorm").DeleteResult>;
     createZone(zoneData: any): Promise<import("./entities/zone.entity").Zone[]>;
     getSensors(orgId: string): Promise<import("./entities/sensor.entity").Sensor[]>;
     getGateways(orgId: string): Promise<import("./entities/gateway.entity").Gateway[]>;

@@ -18,7 +18,9 @@ export default function ClientDetailsPage() {
 
     // Add Site states
     const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
-    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", city: "" });
+    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+    const [isEditSiteOpen, setIsEditSiteOpen] = useState(false);
+    const [editingSite, setEditingSite] = useState<any>({ id: "", name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
 
     // Add User states
     const [usersList, setUsersList] = useState<any[]>([]);
@@ -70,8 +72,38 @@ export default function ClientDetailsPage() {
             });
             if (res.ok) {
                 setIsAddSiteOpen(false);
-                setNewSite({ name: "", type: "Bureaux", address: "", city: "" });
+                setNewSite({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
                 await fetchClientDetails(); // Reload to get the new site
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleUpdateSite = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await authFetch(`http://localhost:3001/api/sites/${editingSite.id}`, {
+                method: "PUT",
+                body: JSON.stringify(editingSite)
+            });
+            if (res.ok) {
+                setIsEditSiteOpen(false);
+                await fetchClientDetails();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleDeleteSite = async (siteId: string, siteName: string) => {
+        if (!confirm(`Voulez-vous vraiment supprimer le site "${siteName}" ?`)) return;
+        try {
+            const res = await authFetch(`http://localhost:3001/api/sites/${siteId}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                await fetchClientDetails();
             }
         } catch (e) {
             console.error(e);
@@ -238,9 +270,21 @@ export default function ClientDetailsPage() {
                                                         <Building className="h-3 w-3 mr-1.5" />
                                                         {site.name}
                                                     </h4>
-                                                    <span className="text-[9px] uppercase tracking-widest bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded">Actif</span>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-[9px] uppercase tracking-widest bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded">Actif</span>
+                                                        {isAdmin && (
+                                                            <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
+                                                                <button onClick={() => { setEditingSite(site); setIsEditSiteOpen(true); }} className="text-slate-400 hover:text-slate-900 dark:hover:text-white p-1 rounded hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+                                                                    <Edit2 className="h-3 w-3" />
+                                                                </button>
+                                                                <button onClick={() => handleDeleteSite(site.id, site.name)} className="text-rose-400 hover:text-rose-600 p-1 rounded hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">
+                                                                    <Trash2 className="h-3 w-3" />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <p className="text-xs text-slate-500 flex items-center"><MapPin className="h-3 w-3 mr-1" /> {site.city}</p>
+                                                <p className="text-xs text-slate-500 flex items-center"><MapPin className="h-3 w-3 mr-1" /> {site.postalCode ? `${site.postalCode} ` : ''}{site.city}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -395,11 +439,43 @@ export default function ClientDetailsPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div><label className="text-sm text-slate-500 dark:text-slate-400">Adresse</label>
                                     <input type="text" required value={newSite.address} onChange={e => setNewSite({ ...newSite, address: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
-                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
-                                    <input type="text" required value={newSite.city} onChange={e => setNewSite({ ...newSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Code postal</label>
+                                    <input type="text" required value={newSite.postalCode} onChange={e => setNewSite({ ...newSite, postalCode: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" placeholder="ex: 75000" /></div>
                             </div>
+                            <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
+                                <input type="text" required value={newSite.city} onChange={e => setNewSite({ ...newSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
 
                             <button type="submit" className="w-full py-3 mt-4 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">Créer le Bâtiment</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Edit Site */}
+            {isEditSiteOpen && editingSite && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl relative">
+                        <button onClick={() => setIsEditSiteOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="h-5 w-5" /></button>
+                        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-white flex items-center"><Edit2 className="w-5 h-5 mr-2 text-primary" /> Modifier le Bâtiment</h2>
+                        <form onSubmit={handleUpdateSite} className="space-y-4">
+                            <div><label className="text-sm text-slate-500 dark:text-slate-400">Nom du bâtiment</label>
+                                <input type="text" required value={editingSite.name} onChange={e => setEditingSite({ ...editingSite, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+
+                            <div><label className="text-sm text-slate-500 dark:text-slate-400">Type</label>
+                                <select value={editingSite.type || "Bureaux"} onChange={e => setEditingSite({ ...editingSite, type: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white">
+                                    <option value="Bureaux">Bureaux</option><option value="Magasin">Magasin</option><option value="Usine">Usine</option><option value="Logistique">Logistique</option>
+                                </select></div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Adresse</label>
+                                    <input type="text" value={editingSite.address || ""} onChange={e => setEditingSite({ ...editingSite, address: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Code postal</label>
+                                    <input type="text" value={editingSite.postalCode || ""} onChange={e => setEditingSite({ ...editingSite, postalCode: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                            </div>
+                            <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
+                                <input type="text" value={editingSite.city || ""} onChange={e => setEditingSite({ ...editingSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+
+                            <button type="submit" className="w-full py-3 mt-4 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">Enregistrer</button>
                         </form>
                     </div>
                 </div>

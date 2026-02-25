@@ -38,6 +38,7 @@ export declare class AppService implements OnModuleInit {
         region: string;
         city: string;
         address: string;
+        postalCode: string;
         phone: string;
         email: string;
         establishmentDate: string;
@@ -54,6 +55,8 @@ export declare class AppService implements OnModuleInit {
     updateOrganization(id: string, orgData: any): Promise<Organization | null>;
     deleteOrganization(id: string): Promise<import("typeorm").DeleteResult>;
     createSite(siteData: any, orgId: string): Promise<Site[]>;
+    updateSite(id: string, siteData: any): Promise<Site | null>;
+    deleteSite(id: string): Promise<import("typeorm").DeleteResult>;
     createZone(zoneData: any, siteId: string): Promise<Zone[]>;
     getGateways(orgId?: string): Promise<Gateway[]>;
     createGateway(gatewayData: any): Promise<Gateway[]>;

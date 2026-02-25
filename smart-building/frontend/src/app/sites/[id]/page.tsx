@@ -28,7 +28,9 @@ interface Site {
     id: string;
     name: string;
     type?: string;
+    description?: string;
     address: string;
+    postalCode?: string;
     city: string;
     status: string;
     zones: Zone[];
@@ -196,7 +198,7 @@ export default function SiteDashboardPage() {
                     </div>
                     <p className="text-slate-500 dark:text-muted-foreground font-medium flex items-center">
                         <MapPin className="h-4 w-4 mr-1.5 text-slate-400" />
-                        {site.address}, {site.city}
+                        {site.address}, {site.postalCode ? `${site.postalCode} ` : ''}{site.city}
                     </p>
                 </div>
 

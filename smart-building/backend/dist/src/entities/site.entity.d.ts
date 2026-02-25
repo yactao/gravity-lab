@@ -7,6 +7,7 @@ export declare class Site {
     type: string;
     address: string;
     city: string;
+    postalCode: string;
     latitude: number;
     longitude: number;
     zones: Zone[];

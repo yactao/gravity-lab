@@ -26,6 +26,9 @@ export class Organization {
     address: string;
 
     @Column({ nullable: true })
+    postalCode: string;
+
+    @Column({ nullable: true })
     phone: string;
 
     @Column({ nullable: true })

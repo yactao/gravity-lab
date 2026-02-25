@@ -12,6 +12,7 @@ interface Site {
     name: string;
     type?: string;
     address: string;
+    postalCode?: string;
     city: string;
     status: string;
     zonesCount?: number;
@@ -143,7 +144,7 @@ export default function SitesListPage() {
                                         </td>
                                         <td className="px-6 py-4 text-center flex justify-center items-center">
                                             <MapPin className="h-4 w-4 text-slate-400 mr-2" />
-                                            <span className="font-bold text-slate-900 dark:text-white">{site.city}</span>
+                                            <span className="font-bold text-slate-900 dark:text-white">{site.postalCode ? `${site.postalCode} ` : ''}{site.city}</span>
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <div className="flex items-center justify-center">

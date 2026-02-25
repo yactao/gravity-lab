@@ -165,7 +165,7 @@ let AppService = class AppService {
             throw new Error("Organization not found");
         if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
             try {
-                const query = encodeURIComponent(`${siteData.address}${siteData.city ? ', ' + siteData.city : ''}`);
+                const query = encodeURIComponent(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
                     headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
                 });
@@ -185,6 +185,30 @@ let AppService = class AppService {
             organization: org
         });
         return this.siteRepo.save(newSite);
+    }
+    async updateSite(id, siteData) {
+        if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
+            try {
+                const query = encodeURIComponent(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
+                    headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
+                });
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    siteData.latitude = parseFloat(data[0].lat);
+                    siteData.longitude = parseFloat(data[0].lon);
+                    console.log(`Geocoded ${siteData.address} to ${siteData.latitude}, ${siteData.longitude}`);
+                }
+            }
+            catch (err) {
+                console.error('Geocoding failed:', err);
+            }
+        }
+        await this.siteRepo.update(id, siteData);
+        return this.siteRepo.findOne({ where: { id } });
+    }
+    async deleteSite(id) {
+        return this.siteRepo.delete(id);
     }
     async createZone(zoneData, siteId) {
         const site = await this.siteRepo.findOne({ where: { id: siteId } });
@@ -460,7 +484,7 @@ let AppService = class AppService {
     }
     async executeEquipmentAction(payload) {
         console.log(`[ACTION Triggered] Eq: ${payload.equipmentId} | Action: ${payload.action} | Val: ${payload.value}`);
-        this.events.emit('sensor_data', {
+        this.eventsGateway.server.emit('sensor_data', {
             type: 'action_audit',
             equipmentId: payload.equipmentId,
             action: payload.action,

@@ -8,6 +8,7 @@ export declare class Organization {
     region: string;
     city: string;
     address: string;
+    postalCode: string;
     phone: string;
     email: string;
     establishmentDate: string;
