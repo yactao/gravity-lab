@@ -388,12 +388,12 @@ let AppService = class AppService {
             return [];
         const searchStr = `%${query}%`;
         const results = [];
-        const sites = await this.siteRepo.createQueryBuilder('site')
-            .where('site.organizationId = :orgId', { orgId })
-            .andWhere('(site.name LIKE :search OR site.city LIKE :search)')
-            .setParameters({ search: searchStr })
-            .take(5)
-            .getMany();
+        const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111' && (role === 'SUPER_ADMIN' || role === 'ENERGY_MANAGER');
+        const sitesQuery = this.siteRepo.createQueryBuilder('site')
+            .where('(site.name LIKE :search OR site.city LIKE :search)', { search: searchStr });
+        if (!isGlobalContext)
+            sitesQuery.andWhere('site.organizationId = :orgId', { orgId });
+        const sites = await sitesQuery.take(5).getMany();
         sites.forEach(s => results.push({
             id: s.id,
             type: 'site',
@@ -401,13 +401,12 @@ let AppService = class AppService {
             subtitle: `Bâtiment • ${s.city}`,
             url: `/sites/${s.id}`
         }));
-        const zones = await this.zoneRepo.createQueryBuilder('zone')
+        const zonesQuery = this.zoneRepo.createQueryBuilder('zone')
             .leftJoinAndSelect('zone.site', 'site')
-            .where('site.organizationId = :orgId', { orgId })
-            .andWhere('zone.name LIKE :search')
-            .setParameter('search', searchStr)
-            .take(5)
-            .getMany();
+            .where('zone.name LIKE :search', { search: searchStr });
+        if (!isGlobalContext)
+            zonesQuery.andWhere('site.organizationId = :orgId', { orgId });
+        const zones = await zonesQuery.take(5).getMany();
         zones.forEach(z => results.push({
             id: z.id,
             type: 'zone',
@@ -415,28 +414,26 @@ let AppService = class AppService {
             subtitle: `Zone • ${z.site.name}`,
             url: `/sites/${z.site.id}`
         }));
-        const sensors = await this.sensorRepo.createQueryBuilder('sensor')
+        const sensorsQuery = this.sensorRepo.createQueryBuilder('sensor')
             .leftJoinAndSelect('sensor.zone', 'zone')
             .leftJoinAndSelect('zone.site', 'site')
-            .where('site.organizationId = :orgId', { orgId })
-            .andWhere('(sensor.name LIKE :search OR sensor.externalId LIKE :search)')
-            .setParameter('search', searchStr)
-            .take(5)
-            .getMany();
+            .where('(sensor.name LIKE :search OR sensor.externalId LIKE :search)', { search: searchStr });
+        if (!isGlobalContext)
+            sensorsQuery.andWhere('site.organizationId = :orgId', { orgId });
+        const sensors = await sensorsQuery.take(5).getMany();
         sensors.forEach(s => results.push({
             id: s.id,
             type: 'sensor',
             title: s.name,
-            subtitle: `Capteur ${s.type} • ${s.zone.site.name}`,
-            url: `/sites/${s.zone.site.id}`
+            subtitle: `Capteur ${s.type} • ${s.zone?.site?.name || 'N/A'}`,
+            url: s.zone?.site ? `/sites/${s.zone.site.id}` : '#'
         }));
-        const gateways = await this.gatewayRepo.createQueryBuilder('gateway')
+        const gatewaysQuery = this.gatewayRepo.createQueryBuilder('gateway')
             .leftJoinAndSelect('gateway.site', 'site')
-            .where('site.organizationId = :orgId', { orgId })
-            .andWhere('(gateway.name LIKE :search OR gateway.serialNumber LIKE :search)')
-            .setParameter('search', searchStr)
-            .take(3)
-            .getMany();
+            .where('(gateway.name LIKE :search OR gateway.serialNumber LIKE :search)', { search: searchStr });
+        if (!isGlobalContext)
+            gatewaysQuery.andWhere('site.organizationId = :orgId', { orgId });
+        const gateways = await gatewaysQuery.take(3).getMany();
         gateways.forEach(g => results.push({
             id: g.id,
             type: 'gateway',
@@ -446,8 +443,7 @@ let AppService = class AppService {
         }));
         if (role === 'SUPER_ADMIN' || role === 'ENERGY_MANAGER') {
             const orgs = await this.orgRepo.createQueryBuilder('org')
-                .where('org.name LIKE :search')
-                .setParameter('search', searchStr)
+                .where('org.name LIKE :search', { search: searchStr })
                 .take(3)
                 .getMany();
             orgs.forEach(o => results.push({
@@ -455,9 +451,22 @@ let AppService = class AppService {
                 type: 'organization',
                 title: o.name,
                 subtitle: `Client B2B`,
-                url: `/clients`
+                url: `/clients/${o.id}`
             }));
         }
+        const usersQuery = this.userRepo.createQueryBuilder('user')
+            .leftJoinAndSelect('user.organization', 'org')
+            .where('(user.name LIKE :search OR user.email LIKE :search)', { search: searchStr });
+        if (!isGlobalContext)
+            usersQuery.andWhere('user.organizationId = :orgId', { orgId });
+        const users = await usersQuery.take(4).getMany();
+        users.forEach(u => results.push({
+            id: u.id,
+            type: 'user',
+            title: u.name,
+            subtitle: `Utilisateur • ${u.email}`,
+            url: u.organization ? `/clients/${u.organization.id}` : `/clients`
+        }));
         return results;
     }
     async getUsers(organizationId) {

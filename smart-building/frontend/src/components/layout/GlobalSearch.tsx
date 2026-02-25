@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Loader2, Building, LayoutGrid, Cpu, Wifi, Building2 } from "lucide-react";
+import { Search, Loader2, Building, LayoutGrid, Cpu, Wifi, Building2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/lib/TenantContext";
 import { cn } from "@/lib/utils";
 
 type SearchResult = {
     id: string;
-    type: 'site' | 'zone' | 'sensor' | 'gateway' | 'organization';
+    type: 'site' | 'zone' | 'sensor' | 'gateway' | 'organization' | 'user';
     title: string;
     subtitle: string;
     url: string;
@@ -20,6 +20,7 @@ const iconMap = {
     sensor: Cpu,
     gateway: Wifi,
     organization: Building2,
+    user: Users,
 };
 
 export function GlobalSearch() {
