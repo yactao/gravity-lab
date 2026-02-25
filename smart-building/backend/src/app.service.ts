@@ -538,5 +538,15 @@ export class AppService implements OnModuleInit {
     const user = this.userRepo.create({ ...userData, organization: org });
     return this.userRepo.save(user);
   }
+
+  async updateUser(id: string, userData: any) {
+    await this.userRepo.update(id, userData);
+    return this.userRepo.findOne({ where: { id } });
+  }
+
+  async deleteUser(id: string) {
+    await this.userRepo.delete(id);
+    return { success: true };
+  }
 }
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTenant } from "@/lib/TenantContext";
-import { Briefcase, Activity, Users, Settings, ArrowLeft, Building2, Plus, MapPin, Building, X, Mail, Shield } from "lucide-react";
+import { Briefcase, Activity, Users, Settings, ArrowLeft, Building2, Plus, MapPin, Building, X, Mail, Shield, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { BuildingModel } from "@/components/dashboard/BuildingModel";
 
 export default function ClientDetailsPage() {
@@ -24,6 +24,9 @@ export default function ClientDetailsPage() {
     const [usersList, setUsersList] = useState<any[]>([]);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [newUser, setNewUser] = useState({ name: "", email: "", role: "CLIENT", password: "password123" });
+    const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+    const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState({ id: "", name: "", email: "", role: "" });
 
     const isAdmin = currentTenant?.role === "ENERGY_MANAGER" || currentTenant?.role === "SUPER_ADMIN";
 
@@ -88,6 +91,37 @@ export default function ClientDetailsPage() {
                 setIsAddUserOpen(false);
                 setNewUser({ name: "", email: "", role: "CLIENT", password: "password123" });
                 await fetchClientDetails(); // Reload to get the new user
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleUpdateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await authFetch(`http://localhost:3001/api/users/${editingUser.id}`, {
+                method: "PUT",
+                body: JSON.stringify({ name: editingUser.name, email: editingUser.email, role: editingUser.role })
+            });
+            if (res.ok) {
+                setIsEditUserOpen(false);
+                await fetchClientDetails();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
+        try {
+            const res = await authFetch(`http://localhost:3001/api/users/${userId}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                setMenuOpenId(null);
+                await fetchClientDetails();
             }
         } catch (e) {
             console.error(e);
@@ -267,6 +301,7 @@ export default function ClientDetailsPage() {
                                             <th className="pb-3 font-bold">Email</th>
                                             <th className="pb-3 font-bold">Rôle</th>
                                             <th className="pb-3 font-bold">Créé le</th>
+                                            <th className="pb-3 font-bold text-right pr-6">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-sm">
@@ -292,6 +327,39 @@ export default function ClientDetailsPage() {
                                                 </td>
                                                 <td className="py-4 text-slate-500 italic text-xs">
                                                     {new Date(user.createdAt).toLocaleDateString()}
+                                                </td>
+                                                <td className="py-4 text-right pr-6 relative">
+                                                    {isAdmin && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => setMenuOpenId(menuOpenId === user.id ? null : user.id)}
+                                                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                                                            >
+                                                                <MoreVertical className="w-4 h-4" />
+                                                            </button>
+
+                                                            {menuOpenId === user.id && (
+                                                                <div className="absolute right-12 top-10 bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-white/10 shadow-lg rounded-xl overflow-hidden w-40 z-20">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setEditingUser({ id: user.id, name: user.name, email: user.email, role: user.role });
+                                                                            setMenuOpenId(null);
+                                                                            setIsEditUserOpen(true);
+                                                                        }}
+                                                                        className="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 flex items-center transition-colors"
+                                                                    >
+                                                                        <Edit2 className="w-4 h-4 mr-2 opacity-70" /> Modifier
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteUser(user.id)}
+                                                                        className="w-full text-left px-4 py-3 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center transition-colors"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -362,6 +430,35 @@ export default function ClientDetailsPage() {
 
                             <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] flex justify-center items-center">
                                 Ajouter à {client.name}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Edit User */}
+            {isEditUserOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl relative">
+                        <button onClick={() => setIsEditUserOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="h-5 w-5" /></button>
+                        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-white flex items-center"><Edit2 className="w-5 h-5 mr-2 text-primary" /> Modifier l'Utilisateur</h2>
+                        <form onSubmit={handleUpdateUser} className="space-y-4">
+                            <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nom Complet</label>
+                                <input type="text" required value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" /></div>
+
+                            <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Email</label>
+                                <input type="email" required value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" /></div>
+
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rôle</label>
+                                <select value={editingUser.role} onChange={e => setEditingUser({ ...editingUser, role: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all">
+                                    <option value="CLIENT">Client</option>
+                                    <option value="ENERGY_MANAGER">Energy Manager</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] flex justify-center items-center">
+                                Enregistrer les modifications
                             </button>
                         </form>
                     </div>

@@ -151,5 +151,17 @@ export class AppController {
   createUser(@Body() userData: any) {
     return this.appService.createUser(userData);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('users/:id')
+  updateUser(@Param('id') id: string, @Body() userData: any) {
+    return this.appService.updateUser(id, userData);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('users/:id')
+  deleteUser(@Param('id') id: string) {
+    return this.appService.deleteUser(id);
+  }
 }
 
