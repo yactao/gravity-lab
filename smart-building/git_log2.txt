@@ -1,0 +1,29 @@
+commit bd63d4377036f861572306d07693d318bee346ed
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Feb 23 18:10:45 2026 +0100
+
+    feat(frontend): allow clients to view parc list in sidebar
+
+commit 7bc667c9f70f6e810e2a3a0bc93c58a7a101c6ec
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Feb 23 18:07:12 2026 +0100
+
+    feat(frontend): GlobalSearch component and Header integration
+
+commit 3559658b00c79694069c504b8efa03b1a9d6a349
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Feb 23 18:01:10 2026 +0100
+
+    feat(backend): global OmniSearch API endpoint across all entities
+
+commit 84737df662aa55adafb5fb63da1c66bf26755bbf
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Feb 23 15:30:59 2026 +0100
+
+    fix(backend): typeorm where clauses for organizations using organizationId
+
+commit 442dc2a11aa934d6094df1df363bc49f6f9384e0
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Feb 23 15:04:24 2026 +0100
+
+    fix(frontend): robust API url fallback and layout wrapper for login

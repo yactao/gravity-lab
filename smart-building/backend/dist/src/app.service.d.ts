@@ -82,4 +82,23 @@ export declare class AppService implements OnModuleInit {
         decoded: import("./iot/payload-formatter.service").DecodedPayload;
     }>;
     globalSearch(query: string, orgId: string, role: string): Promise<any[]>;
+    getUsers(organizationId?: string): Promise<User[]>;
+    createUser(userData: any): Promise<User[]>;
+    updateUser(id: string, userData: any): Promise<User | null>;
+    deleteUser(id: string): Promise<{
+        success: boolean;
+    }>;
+    executeEquipmentAction(payload: {
+        equipmentId: string;
+        action: string;
+        value?: any;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        details: {
+            equipmentId: string;
+            action: string;
+            value?: any;
+        };
+    }>;
 }

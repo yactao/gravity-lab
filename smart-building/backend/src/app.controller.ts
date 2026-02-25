@@ -163,5 +163,14 @@ export class AppController {
   deleteUser(@Param('id') id: string) {
     return this.appService.deleteUser(id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('equipment/action')
+  executeEquipmentAction(
+    @Headers('x-organization-id') orgId: string,
+    @Body() payload: { equipmentId: string; action: string; value?: any }
+  ) {
+    return this.appService.executeEquipmentAction(payload);
+  }
 }
 

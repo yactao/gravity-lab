@@ -163,6 +163,23 @@ let AppService = class AppService {
         const org = await this.orgRepo.findOne({ where: { id: orgId } });
         if (!org)
             throw new Error("Organization not found");
+        if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
+            try {
+                const query = encodeURIComponent(`${siteData.address}${siteData.city ? ', ' + siteData.city : ''}`);
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
+                    headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
+                });
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    siteData.latitude = parseFloat(data[0].lat);
+                    siteData.longitude = parseFloat(data[0].lon);
+                    console.log(`Geocoded ${siteData.address} to ${siteData.latitude}, ${siteData.longitude}`);
+                }
+            }
+            catch (err) {
+                console.error('Geocoding failed:', err);
+            }
+        }
         const newSite = this.siteRepo.create({
             ...siteData,
             organization: org
@@ -418,6 +435,39 @@ let AppService = class AppService {
             }));
         }
         return results;
+    }
+    async getUsers(organizationId) {
+        if (organizationId) {
+            return this.userRepo.find({ where: { organization: { id: organizationId } } });
+        }
+        return this.userRepo.find({ relations: ['organization'] });
+    }
+    async createUser(userData) {
+        let org = null;
+        if (userData.organizationId) {
+            org = await this.orgRepo.findOne({ where: { id: userData.organizationId } });
+        }
+        const user = this.userRepo.create({ ...userData, organization: org });
+        return this.userRepo.save(user);
+    }
+    async updateUser(id, userData) {
+        await this.userRepo.update(id, userData);
+        return this.userRepo.findOne({ where: { id } });
+    }
+    async deleteUser(id) {
+        await this.userRepo.delete(id);
+        return { success: true };
+    }
+    async executeEquipmentAction(payload) {
+        console.log(`[ACTION Triggered] Eq: ${payload.equipmentId} | Action: ${payload.action} | Val: ${payload.value}`);
+        this.events.emit('sensor_data', {
+            type: 'action_audit',
+            equipmentId: payload.equipmentId,
+            action: payload.action,
+            value: payload.value,
+            timestamp: new Date().toISOString()
+        });
+        return { success: true, message: `Action ${payload.action} command sent successfully.`, details: payload };
     }
 };
 exports.AppService = AppService;

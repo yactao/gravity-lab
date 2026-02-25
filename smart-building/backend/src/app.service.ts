@@ -548,5 +548,19 @@ export class AppService implements OnModuleInit {
     await this.userRepo.delete(id);
     return { success: true };
   }
+  async executeEquipmentAction(payload: { equipmentId: string; action: string; value?: any }) {
+    // In a real scenario, this would lookup the equipment by ID and publish an MQTT payload
+    // to the actual physical device. For this demo, we'll just log and mock success.
+    console.log(`[ACTION Triggered] Eq: ${payload.equipmentId} | Action: ${payload.action} | Val: ${payload.value}`);
+    this.events.emit('sensor_data', {
+      type: 'action_audit',
+      equipmentId: payload.equipmentId,
+      action: payload.action,
+      value: payload.value,
+      timestamp: new Date().toISOString()
+    });
+    return { success: true, message: `Action ${payload.action} command sent successfully.`, details: payload };
+  }
 }
+
 

@@ -1,0 +1,259 @@
+﻿
+> frontend@0.1.0 lint
+> eslint
+
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\alerts\page.tsx
+    5:10   warning  'BarChart' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+    5:20   warning  'Bar' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+    5:25   warning  'XAxis' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+    5:32   warning  'YAxis' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+    5:39   warning  'CartesianGrid' is defined but never used                                                                     @typescript-eslint/no-unused-vars
+    5:65   warning  'RechartsTooltip' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+    5:82   warning  'ResponsiveContainer' is defined but never used                                                               @typescript-eslint/no-unused-vars
+    5:103  warning  'Cell' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+    5:109  warning  'ReferenceLine' is defined but never used                                                                     @typescript-eslint/no-unused-vars
+    6:10   warning  'cn' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+   23:42   error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+   45:8    warning  React Hook useEffect has a missing dependency: 'authFetch'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  275:138  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                               react/no-unescaped-entities
+  275:155  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                               react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\billing\page.tsx
+   4:56   warning  'FileText' is defined but never used                             @typescript-eslint/no-unused-vars
+  77:115  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\clients\[id]\page.tsx
+    6:38   warning  'Settings' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   15:42   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   24:48   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   38:47   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   59:8    warning  React Hook useEffect has a missing dependency: 'fetchClientDetails'. Either include it or remove the dependency array                                                                                                                                                                    react-hooks/exhaustive-deps
+  205:33   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  232:66   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  249:53   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  308:63   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  444:171  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\clients\page.tsx
+    4:102  warning  'Signal' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+    5:10   warning  'cn' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   10:56   error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+   30:50   error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+   34:58   error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+   43:56   error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+   57:8    warning  React Hook useEffect has a missing dependency: 'fetchOrganizations'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  202:81   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                        react/no-unescaped-entities
+  310:116  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                        react/no-unescaped-entities
+  351:120  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                        react/no-unescaped-entities
+  461:116  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                        react/no-unescaped-entities
+  499:120  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                        react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\energy\page.tsx
+    9:25   warning  'Calendar' is defined but never used                             @typescript-eslint/no-unused-vars
+    9:35   warning  'Filter' is defined but never used                               @typescript-eslint/no-unused-vars
+   20:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   23:48   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   24:62   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   25:46   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   26:50   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   74:56   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   83:52   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  147:42   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  429:56   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  471:101  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  572:61   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\layout.tsx
+  4:10  warning  'Sidebar' is defined but never used  @typescript-eslint/no-unused-vars
+  5:10  warning  'Header' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\license\page.tsx
+    6:10   warning  'cn' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+   10:44   error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+   23:43   error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+   41:8    warning  React Hook useEffect has a missing dependency: 'fetchQuota'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   59:85   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                react/no-unescaped-entities
+  105:78   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                react/no-unescaped-entities
+  200:106  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                react/no-unescaped-entities
+  215:39   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                react/no-unescaped-entities
+  220:117  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\login\page.tsx
+   7:10  warning  'cn' is defined but never used   @typescript-eslint/no-unused-vars
+  38:18  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\maintenance\page.tsx
+  34:100  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\map\page.tsx
+   6:18   warning  'Maximize2' is defined but never used                            @typescript-eslint/no-unused-vars
+   6:29   warning  'Minimize2' is defined but never used                            @typescript-eslint/no-unused-vars
+   6:40   warning  'ActivitySquare' is defined but never used                       @typescript-eslint/no-unused-vars
+   7:10   warning  'cn' is defined but never used                                   @typescript-eslint/no-unused-vars
+  12:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  62:62   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  85:112  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\network\page.tsx
+  11:46   error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  30:8    warning  React Hook useEffect has a missing dependency: 'fetchGateways'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  44:107  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                   react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\onboarding\page.tsx
+    4:92   warning  'Server' is defined but never used                               @typescript-eslint/no-unused-vars
+   20:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   25:12   warning  'isPairing' is assigned a value but never used                   @typescript-eslint/no-unused-vars
+  154:93   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  161:112  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  223:85   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  245:93   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  246:75   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  297:108  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\page.tsx
+    8:75   warning  'CloudRain' is defined but never used                            @typescript-eslint/no-unused-vars
+    8:91   warning  'Maximize2' is defined but never used                            @typescript-eslint/no-unused-vars
+    8:102  warning  'Minimize2' is defined but never used                            @typescript-eslint/no-unused-vars
+    8:113  warning  'MapPin' is defined but never used                               @typescript-eslint/no-unused-vars
+   14:44   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   15:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   16:52   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   84:85   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  169:91   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  169:105  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\rules\page.tsx
+    4:30   warning  'Box' is defined but never used                                  @typescript-eslint/no-unused-vars
+    4:73   warning  'Plus' is defined but never used                                 @typescript-eslint/no-unused-vars
+   22:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   33:12   warning  'isComplex' is assigned a value but never used                   @typescript-eslint/no-unused-vars
+   51:56   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   85:18   warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  132:18   warning  'e' is defined but never used                                    @typescript-eslint/no-unused-vars
+  176:125  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  329:153  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  335:144  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  341:150  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  366:120  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\settings\page.tsx
+   32:92   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+   32:124  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+   97:152  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  143:109  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  154:46   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  157:89   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  164:118  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  177:154  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\sites\[id]\page.tsx
+    6:68   warning  'ChevronsUpDown' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+    6:89   warning  'Search' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    6:97   warning  'CheckCircle2' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+    6:138  warning  'Building' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    6:211  warning  'CloudRain' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    6:250  warning  'Filter' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    7:10   warning  'cn' is defined but never used                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   57:39   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   87:45   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  112:42   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  123:8    warning  React Hook useEffect has a missing dependency: 'fetchSiteDetails'. Either include it or remove the dependency array                                                                                                                                                                      react-hooks/exhaustive-deps
+  167:74   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  401:114  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  528:45   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\sites\page.tsx
+   5:43  warning  'MoreVertical' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+   5:85  warning  'Shield' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   6:10  warning  'cn' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  35:53  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  50:8   warning  React Hook useEffect has a missing dependency: 'fetchSites'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\app\updates\page.tsx
+  25:119  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\dashboard\BuildingModel.tsx
+   3:10  warning  'useRef' is defined but never used        @typescript-eslint/no-unused-vars
+  15:85  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\dashboard\EnergyChart.tsx
+   6:10  warning  'fr' is defined but never used            @typescript-eslint/no-unused-vars
+  77:40  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\dashboard\MonthlyComparisonChart.tsx
+   8:12  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  23:33  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\dashboard\MonthlyComparisonChart.tsx:23:33
+  21 |             const isSummer = index >= 5 && index <= 7;
+  22 |
+> 23 |             let baseN1 = 3000 + Math.random() * 1000;
+     |                                 ^^^^^^^^^^^^^ Cannot call impure function
+  24 |             if (isWinter) baseN1 += 2000;
+  25 |             if (isSummer) baseN1 += 1500;
+  26 |  react-hooks/purity
+  28:17  error  'baseN' is never reassigned. Use 'const' instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          prefer-const
+  28:42  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\dashboard\MonthlyComparisonChart.tsx:28:42
+  26 |
+  27 |             // Current year shows 15-20% savings
+> 28 |             let baseN = baseN1 * (0.80 + Math.random() * 0.05);
+     |                                          ^^^^^^^^^^^^^ Cannot call impure function
+  29 |
+  30 |             return {
+  31 |                 month,                             react-hooks/purity
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\dashboard\SitesMap.tsx
+  13:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:32  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+  31:26  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+  32:28  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\layout\GlobalSearch.tsx
+  130:56  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  130:64  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\layout\Header.tsx
+   3:35  warning  'Search' is defined but never used        @typescript-eslint/no-unused-vars
+   3:51  warning  'Briefcase' is defined but never used     @typescript-eslint/no-unused-vars
+  16:56  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\components\layout\Sidebar.tsx
+    3:144  warning  'Map' is defined but never used           @typescript-eslint/no-unused-vars
+   13:11   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   77:72   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:70   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\lib\TenantContext.tsx
+  19:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  41:17  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\taouf\Documents\antigravity lab\smart-building\frontend\src\lib\TenantContext.tsx:41:17
+  39 |         if (savedToken && savedTenant) {
+  40 |             try {
+> 41 |                 setToken(savedToken);
+     |                 ^^^^^^^^ Avoid calling setState() directly within an effect
+  42 |                 setCurrentTenantState(JSON.parse(savedTenant));
+  43 |             } catch (e) { }
+  44 |         } else if (pathname !== '/login') {  react-hooks/set-state-in-effect
+  43:22  warning  'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  50:44  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  85:24  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+Ô£û 162 problems (101 errors, 61 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

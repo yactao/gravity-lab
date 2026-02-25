@@ -5,7 +5,7 @@ export declare class AppController {
     private readonly rulesEngineService;
     constructor(appService: AppService, rulesEngineService: RulesEngineService);
     getHello(): string;
-    getSites(orgId: string): Promise<import("./entities/site.entity").Site[]>;
+    getSites(orgId: string, role?: string): Promise<import("./entities/site.entity").Site[]>;
     getOrganizations(): Promise<{
         sitesCount: number;
         usersCount: number;
@@ -63,4 +63,23 @@ export declare class AppController {
         decoded: import("./iot/payload-formatter.service").DecodedPayload;
     }>;
     globalSearch(q: string, orgId: string, role: string): Promise<any[]>;
+    getUsers(orgId?: string): Promise<import("./entities/user.entity").User[]>;
+    createUser(userData: any): Promise<import("./entities/user.entity").User[]>;
+    updateUser(id: string, userData: any): Promise<import("./entities/user.entity").User | null>;
+    deleteUser(id: string): Promise<{
+        success: boolean;
+    }>;
+    executeEquipmentAction(orgId: string, payload: {
+        equipmentId: string;
+        action: string;
+        value?: any;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        details: {
+            equipmentId: string;
+            action: string;
+            value?: any;
+        };
+    }>;
 }

@@ -27,8 +27,10 @@ let AppController = class AppController {
     getHello() {
         return this.appService.getHello();
     }
-    getSites(orgId) {
-        return this.appService.getSites(orgId);
+    getSites(orgId, role) {
+        const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
+        const filterOrgId = (role === 'SUPER_ADMIN' && isGlobalContext) ? undefined : orgId;
+        return this.appService.getSites(filterOrgId);
     }
     getOrganizations() {
         return this.appService.getOrganizations();
@@ -89,6 +91,21 @@ let AppController = class AppController {
     globalSearch(q, orgId, role) {
         return this.appService.globalSearch(q, orgId, role);
     }
+    getUsers(orgId) {
+        return this.appService.getUsers(orgId);
+    }
+    createUser(userData) {
+        return this.appService.createUser(userData);
+    }
+    updateUser(id, userData) {
+        return this.appService.updateUser(id, userData);
+    }
+    deleteUser(id) {
+        return this.appService.deleteUser(id);
+    }
+    executeEquipmentAction(orgId, payload) {
+        return this.appService.executeEquipmentAction(payload);
+    }
 };
 exports.AppController = AppController;
 __decorate([
@@ -101,8 +118,9 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('sites'),
     __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Headers)('x-user-role')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "getSites", null);
 __decorate([
@@ -258,6 +276,48 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "globalSearch", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('users'),
+    __param(0, (0, common_1.Query)('organizationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getUsers", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('users'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "createUser", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Put)('users/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "updateUser", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Delete)('users/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "deleteUser", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('equipment/action'),
+    __param(0, (0, common_1.Headers)('x-organization-id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "executeEquipmentAction", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)('api'),
     __metadata("design:paramtypes", [app_service_1.AppService,
