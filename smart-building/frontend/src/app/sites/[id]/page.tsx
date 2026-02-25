@@ -558,7 +558,7 @@ export default function SiteDashboardPage() {
                                                     {expandedRows[selectedZone.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                                                 </td>
                                                 <td className="p-4 font-bold text-slate-900 dark:text-white">
-                                                    {`Passerelle CEOS-${selectedZone.name.toUpperCase().replace(/\s/g, '-')}`}
+                                                    {`Passerelle Ubot-${selectedZone.name.toUpperCase().replace(/\s/g, '-')}`}
                                                 </td>
                                                 <td className="p-4">
                                                     <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">Online</span>
@@ -629,7 +629,7 @@ export default function SiteDashboardPage() {
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex items-center">
                                                 <Router className="w-4 h-4 mr-2 text-slate-400" />
-                                                <h4 className="font-bold text-sm text-slate-900 dark:text-white">Passerelle CEOS</h4>
+                                                <h4 className="font-bold text-sm text-slate-900 dark:text-white">Passerelle Ubot</h4>
                                             </div>
                                             <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">Online</span>
                                         </div>
