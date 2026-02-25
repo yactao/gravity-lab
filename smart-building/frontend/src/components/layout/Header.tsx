@@ -6,9 +6,11 @@ import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 import { GlobalSearch } from "./GlobalSearch";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 
 export function Header() {
     const { currentTenant, logout, switchTenant, authFetch } = useTenant();
+    const pathname = usePathname();
     const { theme, setTheme } = useTheme();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -45,33 +47,37 @@ export function Header() {
                 {/* Global Client Switcher */}
                 {isAdmin && organizations.length > 0 && (
                     <div className="relative group/tenant mr-2 hidden md:block">
-                        <div className="flex flex-col items-end pr-4 border-r border-slate-200 dark:border-white/10">
+                        <div className={`flex flex-col items-end pr-4 border-r border-slate-200 dark:border-white/10 ${pathname.match(/\/(sites|clients)\/[^/]+/) ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             <span className="text-[9px] text-slate-500 uppercase font-bold tracking-widest leading-tight">Contexte Client</span>
-                            <div className="flex items-center cursor-pointer hover:text-primary transition-colors text-slate-900 dark:text-white font-bold text-xs">
-                                {currentTenant?.name} <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+                            <div className={`flex items-center text-xs font-bold ${pathname.match(/\/(sites|clients)\/[^/]+/) ? 'text-slate-500' : 'cursor-pointer hover:text-primary transition-colors text-slate-900 dark:text-white'}`}>
+                                {currentTenant?.name} {!pathname.match(/\/(sites|clients)\/[^/]+/) && <ChevronDown className="h-3 w-3 ml-1 opacity-50" />}
                             </div>
                         </div>
                         {/* Dropdown for Tenants */}
-                        <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover/tenant:opacity-100 group-hover/tenant:visible transition-all overflow-hidden z-50">
-                            <div className="p-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5">
-                                <p className="text-[10px] font-bold text-slate-500 uppercase px-2">Basculer le contexte vers :</p>
+                        {!pathname.match(/\/(sites|clients)\/[^/]+/) && (
+                            <div className="absolute top-full right-0 mt-1 pt-1 w-64 bg-transparent opacity-0 invisible group-hover/tenant:opacity-100 group-hover/tenant:visible transition-all z-50">
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden mt-1">
+                                    <div className="p-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase px-2">Basculer le contexte vers :</p>
+                                    </div>
+                                    <div className="max-h-64 overflow-y-auto custom-scrollbar p-1">
+                                        {organizations.map(org => (
+                                            <button
+                                                key={org.id}
+                                                onClick={() => switchTenant(org.id, org.name)}
+                                                className={cn(
+                                                    "w-full text-left px-3 py-2 text-xs font-bold rounded-lg flex items-center transition-colors border border-transparent",
+                                                    currentTenant?.id === org.id ? "bg-primary/10 text-primary border-primary/20" : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+                                                )}
+                                            >
+                                                <Building2 className="w-3.5 h-3.5 mr-2 opacity-70" />
+                                                {org.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="max-h-64 overflow-y-auto custom-scrollbar p-1">
-                                {organizations.map(org => (
-                                    <button
-                                        key={org.id}
-                                        onClick={() => switchTenant(org.id, org.name)}
-                                        className={cn(
-                                            "w-full text-left px-3 py-2 text-xs font-bold rounded-lg flex items-center transition-colors border border-transparent",
-                                            currentTenant?.id === org.id ? "bg-primary/10 text-primary border-primary/20" : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
-                                        )}
-                                    >
-                                        <Building2 className="w-3.5 h-3.5 mr-2 opacity-70" />
-                                        {org.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 

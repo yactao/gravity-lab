@@ -54,6 +54,7 @@ export default function SiteDashboardPage() {
 
     // Remote Control Mock States
     const [hvacState, setHvacState] = useState(true);
+    const [hvacTemp, setHvacTemp] = useState(22.0);
     const [lightsState, setLightsState] = useState(false);
 
     // Mock Data for site dashboard
@@ -428,9 +429,27 @@ export default function SiteDashboardPage() {
                                     <div className="pt-4 border-t border-slate-200 dark:border-white/5">
                                         <label className="text-xs font-bold text-slate-500 mb-2 block">Consigne Actuelle (Globale)</label>
                                         <div className="flex justify-between items-center bg-white dark:bg-white/5 p-2 rounded-lg border border-slate-200 dark:border-white/5">
-                                            <button className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">-</button>
-                                            <span className="text-lg font-bold text-slate-900 dark:text-white">22.0°C</span>
-                                            <button className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">+</button>
+                                            <button
+                                                onClick={() => {
+                                                    const newT = Math.max(16, hvacTemp - 0.5);
+                                                    setHvacTemp(newT);
+                                                    handleEquipmentAction("cvc-global", "set_temp", newT);
+                                                }}
+                                                className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                                            >
+                                                -
+                                            </button>
+                                            <span className="text-lg font-bold text-slate-900 dark:text-white">{hvacTemp.toFixed(1)}°C</span>
+                                            <button
+                                                onClick={() => {
+                                                    const newT = Math.min(30, hvacTemp + 0.5);
+                                                    setHvacTemp(newT);
+                                                    handleEquipmentAction("cvc-global", "set_temp", newT);
+                                                }}
+                                                className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                                            >
+                                                +
+                                            </button>
                                         </div>
                                     </div>
                                 )}
