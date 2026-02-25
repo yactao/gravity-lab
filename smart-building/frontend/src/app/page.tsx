@@ -9,6 +9,33 @@ import { Zap, Thermometer, Wind, AlertTriangle, Activity, ActivitySquare, CloudR
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const SortableWidget = ({ id, children, className }: { id: string, children: React.ReactNode, className?: string }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={cn("relative group h-full", className)}>
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-4 right-4 p-1.5 bg-slate-200/80 dark:bg-slate-800/80 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-md cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-slate-300 dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm"
+      >
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 4.625C6.12132 4.625 6.625 4.12132 6.625 3.5C6.625 2.87868 6.12132 2.375 5.5 2.375C4.87868 2.375 4.375 2.87868 4.375 3.5C4.375 4.12132 4.87868 4.625 5.5 4.625ZM9.5 4.625C10.1213 4.625 10.625 4.12132 10.625 3.5C10.625 2.87868 10.1213 2.375 9.5 2.375C8.87868 2.375 8.375 2.87868 8.375 3.5C8.375 4.12132 8.87868 4.625 9.5 4.625ZM10.625 7.5C10.625 8.12132 10.1213 8.625 9.5 8.625C8.87868 8.625 8.375 8.12132 8.375 7.5C8.375 6.87868 8.87868 6.375 9.5 6.375C10.1213 6.375 10.625 6.87868 10.625 7.5ZM5.5 8.625C6.12132 8.625 6.625 8.12132 6.625 7.5C6.625 6.87868 6.12132 6.375 5.5 6.375C4.87868 6.375 4.375 6.87868 4.375 7.5C4.375 8.12132 4.87868 8.625 5.5 8.625ZM10.625 11.5C10.625 12.1213 10.1213 12.625 9.5 12.625C8.87868 12.625 8.375 12.1213 8.375 11.5C8.375 10.87868 8.87868 10.375 9.5 10.375C10.1213 10.375 10.625 10.87868 10.625 11.5ZM5.5 12.625C6.12132 12.625 6.625 12.1213 6.625 11.5C6.625 10.87868 6.12132 10.375 5.5 10.375C4.87868 10.375 4.375 10.87868 4.375 11.5C4.375 12.1213 4.87868 12.625 5.5 12.625Z" fill="currentColor"></path></svg>
+      </div>
+      {children}
+    </div>
+  );
+};
+
 export default function Home() {
   const { authFetch } = useTenant();
   const [readings, setReadings] = useState<any[]>([]);
@@ -28,11 +55,38 @@ export default function Home() {
       weather: true,
     };
   });
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('smartbuild_dashboard_order');
+      if (saved) return JSON.parse(saved);
+    }
+    return ['stats', 'comparativeChart', 'alertsFeed', 'iotFeed'];
+  });
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('smartbuild_dashboard_widgets', JSON.stringify(widgets));
   }, [widgets]);
+
+  useEffect(() => {
+    localStorage.setItem('smartbuild_dashboard_order', JSON.stringify(widgetOrder));
+  }, [widgetOrder]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setWidgetOrder((items: any) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
 
 
@@ -133,172 +187,182 @@ export default function Home() {
         </div>
       </div>
 
-      {/* KPI Grid Row 1 */}
-      {widgets.stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-1 glass-card p-6 rounded-2xl flex flex-col justify-center items-center border-primary/20 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
-            <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-2 relative z-10">Health Score Parc</p>
-            <div className="relative z-10 flex items-baseline">
-              <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{healthScore}</span>
-              <span className="text-xl font-bold text-primary ml-1">/100</span>
-            </div>
-            <p className="text-xs text-primary mt-2 flex items-center relative z-10 font-medium">
-              Excellent état
-            </p>
-            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
-          </div>
-
-          <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatsCard
-              title="Consommation du Parc"
-              value={energy ? `${energy.toFixed(0)} W` : "-- W"}
-              trend={energy ? "+1.2%" : "..."}
-              trendUp={false}
-              icon={Zap}
-              color="cyan"
-            />
-            <StatsCard
-              title="Température Moyenne"
-              value={temp ? `${temp.toFixed(1)}°C` : "--°C"}
-              trend={temp ? "-0.1%" : "..."}
-              trendUp={true}
-              icon={Thermometer}
-              color="orange"
-            />
-            <StatsCard
-              title="Qualité d'Air (CO2)"
-              value={co2 ? `${co2.toFixed(0)} ppm` : "-- ppm"}
-              trend="Stable"
-              trendUp={true}
-              icon={Wind}
-              color="green"
-            />
-            <StatsCard
-              title="Alertes Actives"
-              value={alerts.length.toString()}
-              trend={alerts.length > 0 ? "+X" : "Stable"}
-              trendUp={alerts.length === 0}
-              icon={AlertTriangle}
-              color={alerts.length > 0 ? "red" : "purple"}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Main Content Grid: 3 Columns Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        {/* Left Column: Comparative Power Chart (Span 8) */}
-        {widgets.comparativeChart && (
-          <div className={cn("glass-card p-6 h-[460px] rounded-2xl flex flex-col border-slate-200 dark:border-white/5", (widgets.alertsFeed || widgets.iotFeed) ? "lg:col-span-8" : "lg:col-span-12")}>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Comparatif Consommation (N-1 vs N)</h3>
-                <p className="text-xs text-slate-500 dark:text-muted-foreground">Économies d'énergie sur l'année</p>
-              </div>
-              <div className="flex space-x-1 bg-slate-100 dark:bg-white/5 p-1 rounded-lg">
-                <button className="px-3 py-1 rounded text-xs font-medium text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white transition-colors">Jour</button>
-                <button className="px-3 py-1 rounded text-xs font-bold bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm">Mois</button>
-              </div>
-            </div>
-            <div className="flex-1 w-full">
-              <MonthlyComparisonChart />
-            </div>
-          </div>
-        )}
-
-        {/* Right Column: Feeds (Span 4) */}
-        {(widgets.alertsFeed || widgets.iotFeed) && (
-          <div className={cn("flex flex-col gap-4", widgets.comparativeChart ? "lg:col-span-4" : "lg:col-span-12 lg:flex-row")}>
-
-            {/* Real-time Alerts Feed */}
-            {widgets.alertsFeed && (
-              <div className={cn("glass-card p-4 rounded-2xl flex-1 flex flex-col min-h-[190px] border-slate-200 dark:border-white/5", !widgets.comparativeChart && widgets.iotFeed ? "lg:w-1/2" : "")}>
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center">
-                    <AlertTriangle className="h-4 w-4 mr-1.5 text-orange-400" />
-                    Défauts du Parc
-                  </h3>
-                  {alerts.length > 0 && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 rounded">{alerts.length}</span>}
-                </div>
-
-                <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
-                  {/* Simulated grouped errors based on alerts array length/content */}
-                  <div className="p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex justify-between items-center">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_5px_rgba(249,115,22,0.8)]"></div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Règles non déclenchées</p>
-                    </div>
-                    <span className="text-xs font-bold text-orange-500">
-                      {alerts.filter(a => a.message.toLowerCase().includes('règle') || a.message.toLowerCase().includes('rule')).length || 0}
-                    </span>
-                  </div>
-
-                  <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex justify-between items-center">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Capteurs HS / Hors-ligne</p>
-                    </div>
-                    <span className="text-xs font-bold text-red-500">
-                      {alerts.filter(a => a.message.toLowerCase().includes('offline') || a.message.toLowerCase().includes('timeout') || a.message.toLowerCase().includes('hs')).length || (alerts.length > 0 ? 1 : 0)}
-                    </span>
-                  </div>
-
-                  <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 shadow-[0_0_5px_rgba(244,63,94,0.8)]"></div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Codes erreur CVC (Climatisation)</p>
-                    </div>
-                    <span className="text-xs font-bold text-rose-500">
-                      {alerts.filter(a => a.message.toLowerCase().includes('hvac') || a.message.toLowerCase().includes('cvc') || a.message.toLowerCase().includes('clim')).length || 0}
-                    </span>
-                  </div>
-
-                  {alerts.length === 0 && !loading && (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-500 dark:text-muted-foreground py-4">
-                      <span className="text-emerald-500 text-2xl mb-1 opacity-50">✓</span>
-                      <p className="text-[11px] font-semibold">Aucun incident technique</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Recent IoT Activity */}
-            {widgets.iotFeed && (
-              <div className={cn("glass-card p-4 rounded-2xl flex flex-col border-slate-200 dark:border-white/5 bg-gradient-to-b from-white/5 to-transparent", widgets.comparativeChart ? "flex-1 min-h-[210px]" : !widgets.alertsFeed ? "w-full" : "lg:w-1/2 min-h-[190px]")}>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center mb-3">
-                  <Activity className="h-4 w-4 mr-1.5 text-primary" />
-                  Flux de données IoT
-                </h3>
-                <div className="flex-1 space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
-                  {readings.slice(0, 4).map((r, i) => (
-                    <div key={i} className="flex justify-between items-center group">
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded",
-                          r.sensor?.type === "temperature" ? "bg-orange-500/10 text-orange-400" :
-                            r.sensor?.type === "co2" ? "bg-emerald-500/10 text-emerald-400" :
-                              "bg-cyan-500/10 text-cyan-400"
-                        )}>{r.sensor?.type?.substring(0, 4)}</span>
-                        <span className="text-xs text-slate-500 dark:text-muted-foreground">{new Date(r.timestamp).toLocaleTimeString([], { second: '2-digit', minute: '2-digit', hour: '2-digit' })}</span>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={widgetOrder} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 grid-flow-row-dense">
+            {widgetOrder.map(id => {
+              if (id === 'stats' && widgets.stats) {
+                return (
+                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 h-full">
+                      <div className="lg:col-span-1 glass-card p-6 rounded-2xl flex flex-col justify-center items-center border-primary/20 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+                        <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-2 relative z-10">Health Score Parc</p>
+                        <div className="relative z-10 flex items-baseline">
+                          <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{healthScore}</span>
+                          <span className="text-xl font-bold text-primary ml-1">/100</span>
+                        </div>
+                        <p className="text-xs text-primary mt-2 flex items-center relative z-10 font-medium">
+                          Excellent état
+                        </p>
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
                       </div>
-                      <span className="text-sm font-mono text-slate-900 dark:text-white group-hover:text-primary transition-colors">
-                        {r.value.toFixed(1)} <span className="text-[10px] text-slate-500 dark:text-muted-foreground ml-0.5">{r.sensor?.unit}</span>
-                      </span>
-                    </div>
-                  ))}
-                  {readings.length === 0 && !loading && (
-                    <p className="text-[11px] text-slate-500 dark:text-muted-foreground text-center mt-6">En attente des capteurs...</p>
-                  )}
-                </div>
-              </div>
-            )}
 
+                      <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <StatsCard
+                          title="Consommation du Parc"
+                          value={energy ? `${energy.toFixed(0)} W` : "-- W"}
+                          trend={energy ? "+1.2%" : "..."}
+                          trendUp={false}
+                          icon={Zap}
+                          color="cyan"
+                        />
+                        <StatsCard
+                          title="Température Moyenne"
+                          value={temp ? `${temp.toFixed(1)}°C` : "--°C"}
+                          trend={temp ? "-0.1%" : "..."}
+                          trendUp={true}
+                          icon={Thermometer}
+                          color="orange"
+                        />
+                        <StatsCard
+                          title="Qualité d'Air (CO2)"
+                          value={co2 ? `${co2.toFixed(0)} ppm` : "-- ppm"}
+                          trend="Stable"
+                          trendUp={true}
+                          icon={Wind}
+                          color="green"
+                        />
+                        <StatsCard
+                          title="Alertes Actives"
+                          value={alerts.length.toString()}
+                          trend={alerts.length > 0 ? "+X" : "Stable"}
+                          trendUp={alerts.length === 0}
+                          icon={AlertTriangle}
+                          color={alerts.length > 0 ? "red" : "purple"}
+                        />
+                      </div>
+                    </div>
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'comparativeChart' && widgets.comparativeChart) {
+                return (
+                  <SortableWidget key={id} id={id} className={cn("flex", (widgets.alertsFeed || widgets.iotFeed) ? "col-span-1 lg:col-span-8 lg:row-span-2" : "col-span-1 lg:col-span-12")}>
+                    <div className="glass-card w-full p-6 h-[460px] rounded-2xl flex flex-col border-slate-200 dark:border-white/5">
+                      <div className="flex justify-between items-center mb-6">
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white">Comparatif Consommation (N-1 vs N)</h3>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Économies d'énergie sur l'année</p>
+                        </div>
+                        <div className="flex space-x-1 bg-slate-100 dark:bg-white/5 p-1 rounded-lg">
+                          <button className="px-3 py-1 rounded text-xs font-medium text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white transition-colors">Jour</button>
+                          <button className="px-3 py-1 rounded text-xs font-bold bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm">Mois</button>
+                        </div>
+                      </div>
+                      <div className="flex-1 w-full relative -z-10 group-hover:z-0 transition-all">
+                        <MonthlyComparisonChart />
+                      </div>
+                    </div>
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'alertsFeed' && widgets.alertsFeed) {
+                return (
+                  <SortableWidget key={id} id={id} className={cn("flex", widgets.comparativeChart ? "col-span-1 lg:col-span-4 lg:row-span-1" : "col-span-1 lg:col-span-6")}>
+                    <div className="glass-card w-full p-4 rounded-2xl flex flex-col h-[220px] border-slate-200 dark:border-white/5">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center">
+                          <AlertTriangle className="h-4 w-4 mr-1.5 text-orange-400" />
+                          Défauts du Parc
+                        </h3>
+                        {alerts.length > 0 && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 rounded">{alerts.length}</span>}
+                      </div>
+
+                      <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex justify-between items-center">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_5px_rgba(249,115,22,0.8)]"></div>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Règles non déclenchées</p>
+                          </div>
+                          <span className="text-xs font-bold text-orange-500">
+                            {alerts.filter(a => a.message.toLowerCase().includes('règle') || a.message.toLowerCase().includes('rule')).length || 0}
+                          </span>
+                        </div>
+
+                        <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex justify-between items-center">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Capteurs HS / Hors-ligne</p>
+                          </div>
+                          <span className="text-xs font-bold text-red-500">
+                            {alerts.filter(a => a.message.toLowerCase().includes('offline') || a.message.toLowerCase().includes('timeout') || a.message.toLowerCase().includes('hs')).length || (alerts.length > 0 ? 1 : 0)}
+                          </span>
+                        </div>
+
+                        <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 shadow-[0_0_5px_rgba(244,63,94,0.8)]"></div>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Codes erreur CVC</p>
+                          </div>
+                          <span className="text-xs font-bold text-rose-500">
+                            {alerts.filter(a => a.message.toLowerCase().includes('hvac') || a.message.toLowerCase().includes('cvc') || a.message.toLowerCase().includes('clim')).length || 0}
+                          </span>
+                        </div>
+
+                        {alerts.length === 0 && !loading && (
+                          <div className="flex flex-col items-center justify-center h-full text-slate-500 dark:text-muted-foreground py-4">
+                            <span className="text-emerald-500 text-2xl mb-1 opacity-50">✓</span>
+                            <p className="text-[11px] font-semibold">Aucun incident technique</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'iotFeed' && widgets.iotFeed) {
+                return (
+                  <SortableWidget key={id} id={id} className={cn("flex", widgets.comparativeChart ? "col-span-1 lg:col-span-4 lg:row-span-1" : "col-span-1 lg:col-span-6")}>
+                    <div className="glass-card w-full p-4 rounded-2xl flex flex-col border-slate-200 dark:border-white/5 bg-gradient-to-b from-white/5 to-transparent h-[216px]">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center mb-3">
+                        <Activity className="h-4 w-4 mr-1.5 text-primary" />
+                        Flux de données IoT
+                      </h3>
+                      <div className="flex-1 space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+                        {readings.slice(0, 4).map((r, i) => (
+                          <div key={i} className="flex justify-between items-center group/item">
+                            <div className="flex items-center gap-2">
+                              <span className={cn(
+                                "text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded",
+                                r.sensor?.type === "temperature" ? "bg-orange-500/10 text-orange-400" :
+                                  r.sensor?.type === "co2" ? "bg-emerald-500/10 text-emerald-400" :
+                                    "bg-cyan-500/10 text-cyan-400"
+                              )}>{r.sensor?.type?.substring(0, 4)}</span>
+                              <span className="text-xs text-slate-500 dark:text-muted-foreground">{new Date(r.timestamp).toLocaleTimeString([], { second: '2-digit', minute: '2-digit', hour: '2-digit' })}</span>
+                            </div>
+                            <span className="text-sm font-mono text-slate-900 dark:text-white group-hover/item:text-primary transition-colors">
+                              {r.value.toFixed(1)} <span className="text-[10px] text-slate-500 dark:text-muted-foreground ml-0.5">{r.sensor?.unit}</span>
+                            </span>
+                          </div>
+                        ))}
+                        {readings.length === 0 && !loading && (
+                          <p className="text-[11px] text-slate-500 dark:text-muted-foreground text-center mt-6">En attente des capteurs...</p>
+                        )}
+                      </div>
+                    </div>
+                  </SortableWidget>
+                );
+              }
+
+              return null;
+            })}
           </div>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Customize Dashboard Modal */}
       {isCustomizeOpen && (
