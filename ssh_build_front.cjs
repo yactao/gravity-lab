@@ -8,10 +8,13 @@ export NVM_DIR="$HOME/.nvm"
 
 echo "==== PULL DES NOUVEAUX FICHIERS FRONTEND ===="
 cd /opt/gravity-lab/smart-building
+git fetch origin
+git reset --hard origin/main
 git pull
 
 echo "\\n==== RECOMPILATION FRONTEND ===="
 cd frontend
+npm install
 npm run build
 
 echo "\\n==== REDEMARRAGE DE PM2 FRONTEND ===="

@@ -65,6 +65,18 @@ export declare class AppController {
         readingId: string;
         decoded: import("./iot/payload-formatter.service").DecodedPayload;
     }>;
+    getDashboardKpis(orgId: string, role: string): Promise<{
+        totalClients: number;
+        totalSites: number;
+        activeIncidents: number;
+        offlineGateways: number;
+        totalZones: number;
+        totalSensors: number;
+        outOfTargetSites: number;
+        globalHealthScore: number;
+        activeUsers: number;
+        criticalAlerts: number;
+    }>;
     globalSearch(q: string, orgId: string, role: string): Promise<any[]>;
     getUsers(orgId?: string): Promise<import("./entities/user.entity").User[]>;
     createUser(userData: any): Promise<import("./entities/user.entity").User[]>;

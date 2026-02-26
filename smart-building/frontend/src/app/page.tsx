@@ -342,33 +342,29 @@ export default function Home() {
                       </div>
 
                       <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
-                        <div className="p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex justify-between items-center">
+                        <div
+                          className="p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex justify-between items-center cursor-pointer hover:bg-orange-500/20 transition-colors"
+                          onClick={() => router.push('/alerts?filter=WARNING')}
+                        >
                           <div className="flex items-center gap-2.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_5px_rgba(249,115,22,0.8)]"></div>
                             <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Dépassement de seuils</p>
                           </div>
                           <span className="text-xs font-bold text-orange-500">
-                            {alerts.filter(a => a.message.toLowerCase().includes('co2') || a.message.toLowerCase().includes('seuil') || a.message.toLowerCase().includes('élevé')).length || 0}
+                            {alerts.filter(a => a.message.toLowerCase().includes('co2') || a.message.toLowerCase().includes('seuil') || a.message.toLowerCase().includes('élevé') || a.message.toLowerCase().includes('surchauffe')).length || 0}
                           </span>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex justify-between items-center">
+                        <div
+                          className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex justify-between items-center cursor-pointer hover:bg-red-500/20 transition-colors"
+                          onClick={() => router.push('/alerts?filter=CRITICAL')}
+                        >
                           <div className="flex items-center gap-2.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
                             <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Capteurs HS / Communication</p>
                           </div>
                           <span className="text-xs font-bold text-red-500">
                             {alerts.filter(a => a.message.toLowerCase().includes('communication') || a.message.toLowerCase().includes('batterie') || a.message.toLowerCase().includes('hs') || a.message.toLowerCase().includes('offline')).length || 0}
-                          </span>
-                        </div>
-
-                        <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 flex justify-between items-center">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 shadow-[0_0_5px_rgba(244,63,94,0.8)]"></div>
-                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Codes erreur CVC</p>
-                          </div>
-                          <span className="text-xs font-bold text-rose-500">
-                            {alerts.filter(a => a.message.toLowerCase().includes('cvc') || a.message.toLowerCase().includes('hvac') || a.message.toLowerCase().includes('surchauffe')).length || 0}
                           </span>
                         </div>
 

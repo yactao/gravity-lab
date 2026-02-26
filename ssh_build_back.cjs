@@ -8,11 +8,14 @@ export NVM_DIR="$HOME/.nvm"
 
 echo "==== PULL DES NOUVEAUX FICHIERS BACKEND ===="
 cd /opt/gravity-lab/smart-building
+git fetch origin
+git reset --hard origin/main
 git pull
 
 echo "\\n==== RECOMPILATION BACKEND ===="
 cd backend
 npm run build
+rm -f database.sqlite
 
 echo "\\n==== REDEMARRAGE DE PM2 BACKEND ===="
 pm2 reload gtb-backend

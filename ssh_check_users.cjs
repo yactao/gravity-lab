@@ -1,16 +1,17 @@
 const { Client } = require('ssh2');
-const fs = require('fs');
 
 const script = `
 export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
 
+cd /opt/gravity-lab/smart-building/backend
+
 node -e "
-const db = require('/opt/gravity-lab/smart-building/backend/node_modules/better-sqlite3')('/opt/gravity-lab/smart-building/backend/smartbuild_v3.sqlite');
-console.log('--- USERS ---');
-const users = db.prepare('SELECT id, email, role, password, organizationId FROM users').all();
-console.table(users);
+const Database = require('better-sqlite3');
+const db = new Database('smartbuild_v3.sqlite');
+const users = db.prepare('SELECT id, name, email, role, password, organizationId FROM users').all();
+console.log(users);
 "
 `;
 
@@ -20,15 +21,12 @@ conn.on('ready', () => {
         if (err) throw err;
         let output = '';
         stream.on('close', (code, signal) => {
-            fs.writeFileSync('vps_output_28.txt', output);
-            console.log('Output saved to vps_output_28.txt');
+            console.log(output);
             conn.end();
         }).on('data', (data) => {
             output += data;
-            process.stdout.write(data);
         }).stderr.on('data', (data) => {
             output += data;
-            process.stderr.write(data);
         });
     });
 }).connect({

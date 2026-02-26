@@ -10,12 +10,27 @@ graph TB
 
     subgraph CLI["⚡ agents-cli.js"]
         ORC["Orchestrator"]
-        ORC --> AGT1["Agent coder"]
-        ORC --> AGT2["Agent reviewer"]
-        ORC --> AGT3["Agent tester"]
-        ORC --> AGT4["Agent architect"]
-        ORC --> AGT5["Agent debugger"]
-        ORC --> AGT6["Agent researcher"]
+        
+        subgraph CoreTeam["Core Team (Dev)"]
+            AGT1["Agent coder"]
+            AGT2["Agent reviewer"]
+            AGT3["Agent tester"]
+            AGT4["Agent architect"]
+            AGT5["Agent debugger"]
+            AGT6["Agent researcher"]
+            AGT7["Agent challenger"]
+        end
+
+        subgraph MkgTeam["Marketing Team"]
+            MKT1["Marketing director"]
+            MKT2["Marketing copywriter"]
+            MKT3["Marketing designer"]
+            MKT4["Marketing seo-expert"]
+            MKT5["Marketing data-analyst"]
+        end
+        
+        ORC --> CoreTeam
+        ORC --> MkgTeam
     end
 
     subgraph APIs["☁️ APIs Externes"]
@@ -24,17 +39,19 @@ graph TB
     end
 
     GEM -->|"run_command"| ORC
-    AGT1 & AGT2 & AGT3 & AGT4 & AGT5 --> DS
+    AGT1 & AGT2 & AGT3 & AGT4 & AGT5 & AGT7 --> DS
     AGT6 --> KM
+    MKT1 & MKT2 & MKT3 & MKT4 --> DS
+    MKT5 --> KM
 ```
 
 ### Répartition des responsabilités
 
-| Couche | Agent | Rôle |
-|---|---|---|
-| 🧠 **Gemini** (natif) | Antigravity | Chef d'orchestre, planification, brainstorming, édition fichiers |
-| ☁️ **DeepSeek** (CLI) | coder, reviewer, tester, architect, debugger | Code, revue, tests, design, debug |
-| ☁️ **Kimi** (CLI) | researcher | Analyse longue, documentation, résumés |
+| Couche | Équipe / Agent | Rôle | LLM Assigné |
+|---|---|---|---|
+| 🧠 **Gemini** (natif) | Antigravity | Chef d'orchestre global, planification, édition fichiers | Gemini |
+| ☁️ **DeepSeek** (CLI) | **Core** : coder, reviewer, tester, architect, debugger, challenger<br>**Marketing** : director, copywriter, designer, seo-expert | Code, revue, tests, design système, debug, remise en cause.<br>Stratégie marketing, rédaction, design visuel, SEO. | DeepSeek |
+| ☁️ **Kimi** (CLI) | **Core** : researcher<br>**Marketing** : data-analyst | Analyse longue, documentation, résumés.<br>Analyse de données métriques et rapports campagnes. | Kimi |
 
 ---
 
@@ -44,38 +61,47 @@ graph TB
 antigravity lab/
 ├── .agents/
 │   ├── agents/
-│   │   └── code-reviewer.md
-│   ├── skills/                       # 15 skills
+│   │   ├── code-reviewer.md
+│   │   ├── core/                      # Equipe Dev
+│   │   │   ├── core-architect.md
+│   │   │   ├── core-challenger.md
+│   │   │   ├── core-coder.md
+│   │   │   ├── core-orchestrator.md
+│   │   │   ├── core-researcher.md
+│   │   │   ├── core-reviewer.md
+│   │   │   └── core-tester.md
+│   │   └── marketing/                 # Equipe Marketing
+│   │       ├── marketing-copywriter.md
+│   │       ├── marketing-data-analyst.md
+│   │       ├── marketing-designer.md
+│   │       ├── marketing-director.md
+│   │       └── marketing-seo-expert.md
+│   │
+│   ├── skills/                        # 19 skills
 │   │   ├── brainstorming/
-│   │   ├── dispatching-parallel-agents/
-│   │   ├── executing-plans/
-│   │   ├── finishing-a-development-branch/
-│   │   ├── multi-model-orchestration/  ★
-│   │   ├── receiving-code-review/
-│   │   ├── requesting-code-review/
-│   │   ├── subagent-driven-development/
-│   │   ├── systematic-debugging/
-│   │   ├── test-driven-development/
-│   │   ├── using-git-worktrees/
-│   │   ├── using-superpowers/
-│   │   ├── verification-before-completion/
-│   │   ├── writing-plans/
-│   │   └── writing-skills/
+│   │   ├── content-copywriting/       ★
+│   │   ├── marketing-data-analysis/   ★
+│   │   ├── marketing-strategy-planning/★
+│   │   ├── visual-design-creation/    ★
+│   │   ├── ... (autres skills)
+│   │
 │   └── workflows/
 │       ├── brainstorm.md
 │       ├── execute-plan.md
-│       ├── orchestrate.md            ★
+│       ├── orchestrate.md
+│       ├── core-orchestration.md      ★
+│       ├── marketing-orchestration.md ★
 │       └── write-plan.md
 │
-├── lib/orchestrator/                 # Moteur multi-modèles
-│   ├── config.js         (4.2 KB)   # Providers, rôles, prompts
-│   ├── llm-client.js     (3.4 KB)   # Client OpenAI-compatible
-│   ├── agent.js           (3.1 KB)   # Classe Agent
-│   ├── orchestrator.js   (9.4 KB)   # 3 modes d'exécution
-│   ├── task-manager.js   (4.0 KB)   # Gestion tâches
-│   └── output-formatter.js (4.1 KB) # Formatage résultats
+├── lib/orchestrator/                  # Moteur multi-modèles
+│   ├── config.js         (4.2 KB)     # Providers, rôles (incl. Marketing), prompts
+│   ├── llm-client.js     (3.4 KB)     # Client OpenAI-compatible
+│   ├── agent.js           (3.1 KB)     # Classe Agent
+│   ├── orchestrator.js   (9.4 KB)     # 3 modes d'exécution
+│   ├── task-manager.js   (4.0 KB)     # Gestion tâches
+│   └── output-formatter.js (4.1 KB)   # Formatage résultats
 │
-├── agents-cli.js         (9.1 KB)   # CLI d'orchestration
+├── agents-cli.js         (9.1 KB)     # CLI d'orchestration
 ├── .env                              # Clés API (DEEPSEEK, KIMI)
 ├── package.json                      # openai, dotenv
 └── superpowers/                      # Repo source Superpowers

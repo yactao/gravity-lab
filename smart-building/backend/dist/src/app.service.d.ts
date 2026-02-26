@@ -104,4 +104,16 @@ export declare class AppService implements OnModuleInit {
             value?: any;
         };
     }>;
+    getDashboardKpis(orgId: string, role: string): Promise<{
+        totalClients: number;
+        totalSites: number;
+        activeIncidents: number;
+        offlineGateways: number;
+        totalZones: number;
+        totalSensors: number;
+        outOfTargetSites: number;
+        globalHealthScore: number;
+        activeUsers: number;
+        criticalAlerts: number;
+    }>;
 }

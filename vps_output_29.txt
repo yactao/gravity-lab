@@ -4,8 +4,8 @@
 ┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 0        │ 0      │ 116  │ stopped   │ 0%       │ 0b       │ root     │ disabled │
-│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 43612    │ 34m    │ 4    │ online    │ 0%       │ 56.7mb   │ root     │ disabled │
+│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 0        │ 0      │ 118  │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 49417    │ 17m    │ 7    │ online    │ 0%       │ 57.3mb   │ root     │ disabled │
 └────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 Base supprimée. Redémarrage de PM2...
 [PM2] Applying action restartProcessId on app [gtb-backend](ids: [ 1 ])
@@ -14,52 +14,52 @@ Base supprimée. Redémarrage de PM2...
 ┌────┬─────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name            │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼─────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 46695    │ 0s     │ 116  │ online    │ 0%       │ 25.9mb   │ root     │ disabled │
-│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 43612    │ 34m    │ 4    │ online    │ 0%       │ 56.7mb   │ root     │ disabled │
+│ 1  │ gtb-backend     │ default     │ 0.39.7  │ fork    │ 50011    │ 0s     │ 118  │ online    │ 0%       │ 18.3mb   │ root     │ disabled │
+│ 0  │ gtb-frontend    │ default     │ 0.39.7  │ fork    │ 49417    │ 17m    │ 7    │ online    │ 0%       │ 57.3mb   │ root     │ disabled │
 └────┴─────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 Attente de 5 secondes pour le seeding...
 [TAILING] Tailing last 20 lines for [gtb-backend] process (change the value with --lines option)
 /root/.pm2/logs/gtb-backend-error.log last 20 lines:
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
-1|gtb-back | ⚠️ No sensors found to simulate data for.
+1|gtb-back |     at async Timeout._onTimeout (/opt/gravity-lab/smart-building/backend/dist/src/simulation.service.js:53:17) {
+1|gtb-back |   query: 'INSERT INTO "reading"("id", "value", "timestamp", "sensorId") VALUES (?, 12.37, ?, ?)',
+1|gtb-back |   parameters: [
+1|gtb-back |     'bd7fe41e-5eca-4df3-a828-4b1ea40d9940',
+1|gtb-back |     '2026-02-23 17:13:01.444',
+1|gtb-back |     '7d6d4b2f-4bcf-4dfd-815b-da1cfd57eafc'
+1|gtb-back |   ],
+1|gtb-back |   driverError: SqliteError: attempt to write a readonly database
+1|gtb-back |       at BetterSqlite3QueryRunner.query (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/driver/better-sqlite3/BetterSqlite3QueryRunner.js:90:34)
+1|gtb-back |       at async InsertQueryBuilder.execute (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/query-builder/InsertQueryBuilder.js:106:33)
+1|gtb-back |       at async SubjectExecutor.executeInsertOperations (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/persistence/SubjectExecutor.js:260:42)
+1|gtb-back |       at async SubjectExecutor.execute (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/persistence/SubjectExecutor.js:92:9)
+1|gtb-back |       at async EntityPersistExecutor.execute (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/persistence/EntityPersistExecutor.js:140:21)
+1|gtb-back |       at async Timeout._onTimeout (/opt/gravity-lab/smart-building/backend/dist/src/simulation.service.js:53:17) {
+1|gtb-back |     code: 'SQLITE_READONLY_DBMOVED'
+1|gtb-back |   },
+1|gtb-back |   code: 'SQLITE_READONLY_DBMOVED'
+1|gtb-back | }
+1|gtb-back | 
+1|gtb-back | Node.js v20.20.0
 
 /root/.pm2/logs/gtb-backend-out.log last 20 lines:
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sensors, GET} route[39m[38;5;3m +1ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, GET} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, POST} route[39m[38;5;3m +1ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/readings, GET} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/global, GET} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/temperature/average, GET} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/alerts, GET} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/hvac-performance, GET} route[39m[38;5;3m +1ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +1ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, POST} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/readings, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/global, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/temperature/average, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/alerts, GET} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/hvac-performance, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/search, GET} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +1ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
 1|gtb-back | 🚀 Starting Internal Simulation Service...
 1|gtb-back | 🌱 Seeding initial V2 data (Organizations, Users, Sites)...
 1|gtb-back | ✅ Database seeded with Multi-Tenant structure!
-1|gtb-back | [32m[Nest] 46695  - [39m02/23/2026, 2:40:32 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +64ms[39m
+1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +61ms[39m
+1|gtb-back | [WebSocket] Client connected: HPwXrbbGgtnCNnzTAAAB
 

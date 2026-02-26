@@ -1,13 +1,6 @@
 ==== PULL DES NOUVEAUX FICHIERS BACKEND ====
-From https://github.com/yactao/gravity-lab
-   84737df..3559658  main       -> origin/main
-error: Your local changes to the following files would be overwritten by merge:
-	smart-building/backend/dist/src/app.service.js
-	smart-building/backend/dist/src/app.service.js.map
-	smart-building/backend/dist/tsconfig.build.tsbuildinfo
-Please commit your changes or stash them before you merge.
-Aborting
-Updating 84737df..3559658
+HEAD is now at 37e265e fix(dashboard): update alerts feed text matching logic to reflect seeded data
+Already up to date.
 \n==== RECOMPILATION BACKEND ====
 
 > backend@0.0.1 build
