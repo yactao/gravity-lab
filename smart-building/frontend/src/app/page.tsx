@@ -204,15 +204,21 @@ export default function Home() {
                 return (
                   <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-12">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 h-full">
-                      <div className="lg:col-span-1 glass-card p-6 rounded-2xl flex flex-col justify-center items-center border-primary/20 relative overflow-hidden group">
+                      <div
+                        className={cn(
+                          "lg:col-span-1 glass-card p-6 rounded-2xl flex flex-col justify-center items-center border-primary/20 relative overflow-hidden group transition-all duration-300",
+                          "cursor-pointer hover:shadow-lg hover:-translate-y-1"
+                        )}
+                        onClick={() => router.push('/network')}
+                      >
                         <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
                         <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-2 relative z-10">Health Score Parc</p>
                         <div className="relative z-10 flex items-baseline">
                           <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{kpis?.globalHealthScore !== undefined ? kpis.globalHealthScore : healthScore}</span>
                           <span className="text-xl font-bold text-primary ml-1">/100</span>
                         </div>
-                        <p className="text-xs text-primary mt-2 flex items-center relative z-10 font-medium">
-                          {(kpis?.globalHealthScore || healthScore) > 80 ? 'Excellent état' : 'Attention requise'}
+                        <p className="text-xs text-primary mt-2 flex items-center relative z-10 font-medium group-hover:underline">
+                          {(kpis?.globalHealthScore || healthScore) > 80 ? 'Excellent état, voir détails' : 'Attention requise, voir détails'}
                         </p>
                         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
                       </div>
@@ -266,6 +272,7 @@ export default function Home() {
                               trendUp={false}
                               icon={Zap}
                               color="cyan"
+                              onClick={() => router.push('/energy')}
                             />
                             <StatsCard
                               title="Température Moyenne"
@@ -290,6 +297,7 @@ export default function Home() {
                               trendUp={alerts.length === 0}
                               icon={AlertTriangle}
                               color={alerts.length > 0 ? "red" : "purple"}
+                              onClick={() => router.push('/alerts')}
                             />
                           </>
                         )}
