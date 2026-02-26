@@ -114,6 +114,27 @@ export class AppService implements OnModuleInit {
 
       await this.sensorRepo.save([s1, s2, s3, s4, s5, s6]);
 
+      // 6. Gateways
+      const g1 = this.gatewayRepo.create({ name: 'GW Centrale UBBEE', serialNumber: 'GW-UB-001', status: 'online', protocol: 'lorawan', ipAddress: '192.168.1.10', site: sU1 });
+      const g2 = this.gatewayRepo.create({ name: 'GW Secondaire UBBEE', serialNumber: 'GW-UB-002', status: 'offline', protocol: 'zigbee', ipAddress: '192.168.1.11', site: sU1 });
+      const g3 = this.gatewayRepo.create({ name: 'GW Magasin RIVOLI', serialNumber: 'GW-CS-001', status: 'online', protocol: 'lorawan', site: sC1 });
+      const g4 = this.gatewayRepo.create({ name: 'GW Magasin RIVOLI 2', serialNumber: 'GW-CS-002', status: 'online', protocol: 'zigbee', site: sC1 });
+      const g5 = this.gatewayRepo.create({ name: 'GW Entrepôt M.', serialNumber: 'GW-LM-001', status: 'offline', protocol: 'lorawan', site: sL3 });
+
+      await this.gatewayRepo.save([g1, g2, g3, g4, g5]);
+
+      s1.gateway = g1;
+      s2.gateway = g3;
+      await this.sensorRepo.save([s1, s2]);
+
+      // 7. Seed Alerts (Défaut Parc)
+      const a1 = this.alertRepo.create({ message: 'Perte de communication avec capteur', severity: 'CRITICAL', timestamp: new Date(), active: true, sensor: s1 });
+      const a2 = this.alertRepo.create({ message: 'Taux CO2 extrêmement élevé (> 1200 ppm)', severity: 'CRITICAL', timestamp: new Date(), active: true, sensor: s2 });
+      const a3 = this.alertRepo.create({ message: 'Batterie faible (10%)', severity: 'WARNING', timestamp: new Date(), active: true, sensor: s1 });
+      const a4 = this.alertRepo.create({ message: 'Surchauffe détectée CVC', severity: 'WARNING', timestamp: new Date(), active: true, sensor: s4 });
+
+      await this.alertRepo.save([a1, a2, a3, a4]);
+
       console.log('✅ Database seeded with Multi-Tenant structure!');
     }
 
@@ -646,7 +667,13 @@ export class AppService implements OnModuleInit {
       .leftJoin('gateway.site', 'site');
     if (!isGlobalContext) gatewaysQuery = gatewaysQuery.where('site.organizationId = :orgId', { orgId });
     const totalGateways = await gatewaysQuery.getCount();
-    const offlineGateways = Math.floor(totalGateways * 0.05); // Mock 5% offline
+
+    let offlineGatewaysQuery = this.gatewayRepo.createQueryBuilder('gateway')
+      .leftJoin('gateway.site', 'site')
+      .where('gateway.status = :status', { status: 'offline' });
+    if (!isGlobalContext) offlineGatewaysQuery = offlineGatewaysQuery.andWhere('site.organizationId = :orgId', { orgId });
+    const offlineGateways = await offlineGatewaysQuery.getCount();
+
 
     const globalHealthScore = Math.max(0, 100 - activeIncidents * 2 - offlineGateways * 5);
 
