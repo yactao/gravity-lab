@@ -300,7 +300,7 @@ export default function ClientDetailsPage() {
                                 <h3 className="text-base font-bold text-slate-900 dark:text-white w-full absolute top-5 left-5 z-10">Jumeau Numérique (Synoptique Mode)</h3>
                                 <p className="text-xs text-slate-500 w-full absolute top-11 left-5 z-10">Aperçu 3D représentatif des infrastructures de {client.name}</p>
                                 <div className="w-full h-full pointer-events-auto">
-                                    <BuildingModel temperature={22} co2={450} />
+                                    <BuildingModel siteName={client.name} zones={client.sites && client.sites.length > 0 ? client.sites[0].zones : []} />
                                 </div>
                             </div>
                         </div>

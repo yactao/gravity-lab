@@ -1,135 +1,239 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Box, Html } from "@react-three/drei";
 import * as THREE from "three";
-import { Thermometer, Wind, MapPin } from "lucide-react";
+import { Thermometer, Wind, MapPin, Layers, Settings2, Info, Users } from "lucide-react";
 
 interface BuildingModelProps {
-    temperature?: number;
-    co2?: number;
+    siteName?: string;
+    zones?: any[];
 }
 
-// A single room block that changes color based on temperature
-function Room({ position, size, name, isMainRoom, temperature, co2, defaultColor }: any) {
-    // Color calculation based on temperature data
-    let baseColor = defaultColor || "#1e293b"; // Default color
+// Composant pour une "pièce" ou une "zone" dynamique
+function Room({ position, size, zone, activeLayer }: any) {
+    const [hovered, setHovered] = useState(false);
 
-    if (isMainRoom && temperature) {
-        baseColor = temperature > 24 ? "#ef4444" : temperature < 20 ? "#3b82f6" : "#10b981";
+    // Simulation de données temps réel par défaut pour le rendu visuel
+    const temperature = zone.temperature || (20 + Math.random() * 5); // 20 à 25°C
+    const co2 = zone.co2 || (400 + Math.random() * 600); // 400 à 1000 ppm
+    const isOccupied = zone.isOccupied !== undefined ? zone.isOccupied : Math.random() > 0.5;
+
+    // Logique de coloration par couche (Layer)
+    let baseColor = "#1e293b"; // Par défaut (Gris foncé)
+    let emissionColor = "#000000";
+
+    if (activeLayer === "temperature") {
+        baseColor = temperature > 24 ? "#ef4444" : temperature < 21 ? "#3b82f6" : "#10b981";
+    } else if (activeLayer === "co2") {
+        baseColor = co2 > 800 ? "#f59e0b" : "#10b981"; // Orange si > 800ppm, vert sinon
+    } else if (activeLayer === "occupancy") {
+        baseColor = isOccupied ? "#8b5cf6" : "#334155"; // Violet si occupé, gris si vide
+    }
+
+    if (hovered) {
+        emissionColor = baseColor;
     }
 
     return (
         <group position={position}>
-            {/* Floor */}
-            <Box args={[size[0], 0.1, size[2]]} position={[0, -0.05, 0]}>
-                <meshStandardMaterial color={baseColor} opacity={0.3} transparent />
+            {/* Sol de la pièce */}
+            <Box args={[size[0] - 0.2, 0.1, size[2] - 0.2]} position={[0, -0.05, 0]}>
+                <meshStandardMaterial color={baseColor} opacity={0.6} transparent />
             </Box>
 
-            {/* Walls (Glassmorphism effect) */}
-            <Box args={[size[0], size[1], size[2]]} position={[0, size[1] / 2, 0]}>
+            {/* Murs en verre (Glassmorphism 3D) */}
+            <Box
+                args={[size[0] - 0.2, size[1], size[2] - 0.2]}
+                position={[0, size[1] / 2, 0]}
+                onPointerOver={() => setHovered(true)}
+                onPointerOut={() => setHovered(false)}
+                onClick={() => console.log("Clic sur la zone:", zone.name)}
+            >
                 <meshPhysicalMaterial
                     color={baseColor}
-                    transmission={0.8}
+                    emissive={emissionColor}
+                    emissiveIntensity={hovered ? 0.5 : 0}
+                    transmission={0.9}
                     opacity={1}
-                    roughness={0.2}
+                    roughness={0.1}
                     metalness={0.1}
                     transparent
                 />
             </Box>
 
-            {/* Crispy HTML Marker overlaying the 3D scene */}
-            <Html position={[0, size[1] + 0.5, 0]} center zIndexRange={[100, 0]}>
-                <div className={`glass px-3 py-2 rounded-xl text-slate-900 dark:text-white shadow-2xl whitespace-nowrap min-w-[130px] backdrop-blur-md border ${isMainRoom ? 'bg-midnight-950/80 border-primary/30' : 'bg-midnight-950/60 border-slate-200 dark:border-white/5'} transition-all hover:scale-105 pointer-events-none`}>
-                    <p className="text-xs font-bold text-slate-900 dark:text-white/90 mb-1 border-b border-slate-200 dark:border-white/10 pb-1 flex justify-between items-center">
-                        <span className="flex items-center"><MapPin className="w-3 h-3 mr-1 text-primary/70" /> {name}</span>
-                        {isMainRoom && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-2" />}
-                    </p>
+            {/* Infobulle / Tag de la pièce */}
+            <Html position={[0, size[1] + 0.3, 0]} center zIndexRange={[100, 0]} style={{ pointerEvents: "none" }}>
+                <div className={`transition-all duration-300 ${hovered ? 'opacity-100 scale-110 translate-y-[-10px]' : 'opacity-80 scale-100'}`}>
+                    <div className="glass px-3 py-2 rounded-xl text-slate-900 dark:text-white shadow-2xl whitespace-nowrap min-w-[140px] backdrop-blur-md border border-slate-200/50 dark:border-white/10 bg-white/80 dark:bg-black/60">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white/90 mb-1 border-b border-slate-200 dark:border-white/10 pb-1 flex justify-between items-center">
+                            <span className="flex items-center"><MapPin className="w-3 h-3 mr-1 text-primary/70" /> {zone.name}</span>
+                            {hovered && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-2" />}
+                        </p>
 
-                    {isMainRoom ? (
                         <div className="flex flex-col gap-1.5 mt-1.5">
-                            <div className="flex items-center justify-between text-[11px]">
-                                <span className="flex items-center text-slate-500 dark:text-muted-foreground"><Thermometer className="w-3 h-3 mr-1" /> Temp</span>
-                                <span className="font-mono font-bold text-orange-400">{temperature?.toFixed(1)}°C</span>
-                            </div>
-                            {co2 && (
+                            {(activeLayer === "temperature" || activeLayer === "all") && (
+                                <div className="flex items-center justify-between text-[11px]">
+                                    <span className="flex items-center text-slate-500 dark:text-muted-foreground"><Thermometer className="w-3 h-3 mr-1" /> Temp</span>
+                                    <span className={`font-mono font-bold ${temperature > 24 ? 'text-red-400' : temperature < 21 ? 'text-blue-400' : 'text-emerald-400'}`}>
+                                        {temperature.toFixed(1)}°C
+                                    </span>
+                                </div>
+                            )}
+                            {(activeLayer === "co2" || activeLayer === "all") && (
                                 <div className="flex items-center justify-between text-[11px]">
                                     <span className="flex items-center text-slate-500 dark:text-muted-foreground"><Wind className="w-3 h-3 mr-1" /> CO2</span>
-                                    <span className="font-mono font-bold text-emerald-400">{co2?.toFixed(0)} ppm</span>
+                                    <span className={`font-mono font-bold ${co2 > 800 ? 'text-orange-400' : 'text-emerald-400'}`}>
+                                        {co2.toFixed(0)} ppm
+                                    </span>
+                                </div>
+                            )}
+                            {(activeLayer === "occupancy" || activeLayer === "all") && (
+                                <div className="flex items-center justify-between text-[11px]">
+                                    <span className="flex items-center text-slate-500 dark:text-muted-foreground"><Users className="w-3 h-3 mr-1" /> Bureau</span>
+                                    <span className={`font-mono font-bold ${isOccupied ? 'text-purple-400' : 'text-slate-400'}`}>
+                                        {isOccupied ? 'Occupé' : 'Vide'}
+                                    </span>
                                 </div>
                             )}
                         </div>
-                    ) : (
-                        <p className="text-[10px] text-slate-500 dark:text-muted-foreground mt-1 text-center italic">Non monitoré</p>
-                    )}
+                    </div>
                 </div>
             </Html>
         </group>
     );
 }
 
-export function BuildingModel({ temperature = 22, co2 = 450 }: BuildingModelProps) {
-    const [selectedSite, setSelectedSite] = useState("siege");
-    const [selectedFloor, setSelectedFloor] = useState("r1");
+export function BuildingModel({ siteName = "Bâtiment Principal", zones = [] }: BuildingModelProps) {
+    const [selectedFloor, setSelectedFloor] = useState("RDC");
+    const [activeLayer, setActiveLayer] = useState("temperature"); // temperature, co2, occupancy, all
+
+    // Si pas de zones fournies, on génère un faux étage type pour la démo
+    const fallbackZones = [
+        { id: 1, name: "Open Space A", floor: "RDC", size: [4, 1.5, 4], position: [-2.5, 0, -2.5] },
+        { id: 2, name: "Open Space B", floor: "RDC", size: [4, 1.5, 4], position: [2.5, 0, -2.5] },
+        { id: 3, name: "Salle Réunion 1", floor: "RDC", size: [3, 1.5, 3], position: [-3, 0, 2] },
+        { id: 4, name: "Local Serveur", floor: "RDC", size: [2, 1.5, 2], position: [0.5, 0, 2] },
+        { id: 5, name: "Cafétéria", floor: "RDC", size: [3, 1.5, 3], position: [3.5, 0, 2] },
+    ];
+
+    const displayZones = zones.length > 0 ? zones : fallbackZones;
+    const availableFloors = Array.from(new Set(displayZones.map(z => z.floor || "RDC")));
+
+    const currentFloorZones = displayZones.filter(z => (z.floor || "RDC") === selectedFloor);
+
+    // Calcule la taille totale du plancher dynamiquement pour le background
+    const floorWidth = 10;
+    const floorDepth = 10;
 
     return (
-        <div className="w-full h-full relative flex flex-col pointer-events-auto">
+        <div className="w-full h-full relative flex flex-col pointer-events-auto bg-slate-50 dark:bg-black/20 rounded-xl overflow-hidden shadow-inner">
 
-            {/* Contextual Selectors */}
-            <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2 pointer-events-auto">
-                <select
-                    value={selectedSite}
-                    onChange={(e) => setSelectedSite(e.target.value)}
-                    className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 hover:border-white/20 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 py-1.5 glass outline-none transition-colors cursor-pointer"
-                >
-                    <option value="siege">Siège Social UBBEE (Paris)</option>
-                    <option value="bordeaux">Magasin Concept Store (Bordeaux)</option>
-                    <option value="hotel">Hôtel Smart Rivoli (Paris)</option>
-                </select>
-                <select
-                    value={selectedFloor}
-                    onChange={(e) => setSelectedFloor(e.target.value)}
-                    className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 hover:border-white/20 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 py-1.5 glass outline-none transition-colors cursor-pointer"
-                >
-                    <option value="rdc">RDC</option>
-                    <option value="r1">Étage R+1</option>
-                    <option value="r2">Étage R+2</option>
-                </select>
+            {/* UI Overlay: Filters & Controls */}
+            <div className="absolute top-4 left-4 right-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none">
+
+                {/* Visual Layers / Filtres Métiers */}
+                <div className="flex gap-2 pointer-events-auto bg-white/80 dark:bg-black/60 backdrop-blur-md p-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-lg">
+                    <button
+                        onClick={() => setActiveLayer("temperature")}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLayer === "temperature" ? "bg-primary text-white shadow-md" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+                    >
+                        <Thermometer className="w-3.5 h-3.5 mr-1.5" /> Thermique
+                    </button>
+                    <button
+                        onClick={() => setActiveLayer("co2")}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLayer === "co2" ? "bg-orange-500 text-white shadow-md" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+                    >
+                        <Wind className="w-3.5 h-3.5 mr-1.5" /> Qualité d'Air
+                    </button>
+                    <button
+                        onClick={() => setActiveLayer("occupancy")}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLayer === "occupancy" ? "bg-purple-500 text-white shadow-md" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+                    >
+                        <Users className="w-3.5 h-3.5 mr-1.5" /> Occupation
+                    </button>
+                </div>
+
+                {/* Floor Selector */}
+                <div className="flex items-center gap-2 pointer-events-auto">
+                    <div className="flex bg-white/80 dark:bg-black/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-lg p-1">
+                        {availableFloors.map(floor => (
+                            <button
+                                key={floor}
+                                onClick={() => setSelectedFloor(floor)}
+                                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${selectedFloor === floor ? "bg-slate-200 dark:bg-white/20 text-slate-900 dark:text-white" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+                            >
+                                {floor}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
 
-            <Canvas camera={{ position: [6, 6, 6], fov: 45 }} className="flex-1 pointer-events-auto">
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={1} color="#06b6d4" />
+            {/* Bottom Legend */}
+            <div className="absolute bottom-4 left-4 z-10 pointer-events-none p-3 bg-white/80 dark:bg-black/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-xl shadow-lg">
+                <p className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-widest flex items-center"><Info className="w-3 h-3 mr-1" /> Légende Temps Réel</p>
+                <div className="flex items-center gap-4 text-xs font-medium text-slate-700 dark:text-slate-300">
+                    {activeLayer === "temperature" && (
+                        <>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5 shadow-[0_0_5px_rgba(59,130,246,0.5)]"></span> &lt; 21°C (Froid)</span>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></span> Idéal</span>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-red-500 mr-1.5 shadow-[0_0_5px_rgba(239,68,68,0.5)]"></span> &gt; 24°C (Chaud)</span>
+                        </>
+                    )}
+                    {activeLayer === "co2" && (
+                        <>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></span> &lt; 800 ppm</span>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-orange-500 mr-1.5 shadow-[0_0_5px_rgba(245,158,11,0.5)]"></span> &gt; 800 ppm (Aérer)</span>
+                        </>
+                    )}
+                    {activeLayer === "occupancy" && (
+                        <>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-slate-400 mr-1.5 shadow-[0_0_5px_rgba(148,163,184,0.5)]"></span> Salle Vide</span>
+                            <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5 shadow-[0_0_5px_rgba(139,92,246,0.5)]"></span> Occupé (Actif)</span>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* 3D Canvas */}
+            <Canvas camera={{ position: [8, 8, 8], fov: 45 }} className="flex-1 pointer-events-auto">
+                <ambientLight intensity={0.6} />
+                <pointLight position={[10, 15, 10]} intensity={1.5} color="#ffffff" castShadow />
                 <pointLight position={[-10, 10, -10]} intensity={0.5} color="#8b5cf6" />
 
-                {/* Floor Base */}
-                <Box args={[8, 0.2, 8]} position={[0, -0.1, 0]}>
-                    <meshStandardMaterial color="#0f172a" />
+                {/* Main Ground / Structure boundary */}
+                <Box args={[floorWidth, 0.1, floorDepth]} position={[0, -0.1, 0]}>
+                    <meshStandardMaterial color="#0f172a" opacity={0.8} transparent />
                     <lineSegments>
-                        <edgesGeometry args={[new THREE.BoxGeometry(8, 0.2, 8)]} />
+                        <edgesGeometry args={[new THREE.BoxGeometry(floorWidth, 0.1, floorDepth)]} />
                         <lineBasicMaterial color="#334155" />
                     </lineSegments>
                 </Box>
 
-                {/* Rooms */}
+                {/* Zones rendering */}
                 <group position={[0, 0, 0]}>
-                    {/* Open Space (Monitored) */}
-                    <Room position={[-1.5, 0, -1.5]} size={[3, 1.5, 3]} name="Open Space" isMainRoom={true} temperature={temperature} co2={co2} />
-
-                    {/* Meeting Room */}
-                    <Room position={[2, 0, -2]} size={[2, 1.5, 2]} name="Salle Réunion" isMainRoom={false} defaultColor="#ef4444" />
-
-                    {/* Server Room */}
-                    <Room position={[2.5, 0, 1.5]} size={[1.5, 2, 3]} name="Baies Serveurs" isMainRoom={false} defaultColor="#3b82f6" />
+                    {currentFloorZones.map((z, idx) => (
+                        <Room
+                            key={z.id || idx}
+                            position={z.position || [(idx % 3) * 3 - 3, 0, Math.floor(idx / 3) * 3 - 1.5]}
+                            size={z.size || [2.5, 1.5, 2.5]}
+                            zone={z}
+                            activeLayer={activeLayer}
+                        />
+                    ))}
                 </group>
 
+                {/* Interactivity Controls */}
                 <OrbitControls
                     enablePan={true}
-                    minPolarAngle={Math.PI / 6}
-                    maxPolarAngle={Math.PI / 2.2}
-                    minDistance={3}
-                    maxDistance={15}
+                    minPolarAngle={0}
+                    maxPolarAngle={Math.PI / 2.1} // Prevent looking completely from below
+                    minDistance={5}
+                    maxDistance={25}
+                    autoRotate={true}
+                    autoRotateSpeed={0.5}
                 />
             </Canvas>
         </div>
