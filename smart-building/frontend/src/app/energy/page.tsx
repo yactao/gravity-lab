@@ -102,15 +102,25 @@ export default function EnergyAnalyticsPage() {
 
                 const finalChartData = Array.from(mergedData.values()).sort((a, b) => a.day.localeCompare(b.day));
 
+                // Si timeframe est 'week', on ne garde que les 7 derniers jours
+                let displayData = finalChartData;
+                if (displayData.length > 0) {
+                    if (timeframe === 'week') {
+                        displayData = displayData.slice(-7);
+                    } else if (timeframe === 'month') {
+                        displayData = displayData.slice(-30); // 30 derniers jours
+                    }
+                }
+
                 // Scale energy values to look reasonable (mocking kWh per day from raw W ticks)
-                finalChartData.forEach(d => {
+                displayData.forEach(d => {
                     d.energy = Math.round(d.energy / 500); // Scale factor for demo visualizations
                     d.hvac = Math.round(d.hvac / 500);
                 });
 
                 // Calculate distribution
-                const totalGlobal = finalChartData.reduce((acc, curr) => acc + curr.energy, 0);
-                const totalHvac = finalChartData.reduce((acc, curr) => acc + curr.hvac, 0);
+                const totalGlobal = displayData.reduce((acc, curr) => acc + curr.energy, 0);
+                const totalHvac = displayData.reduce((acc, curr) => acc + curr.hvac, 0);
 
                 // Distribution Pie
                 const pieData = [
@@ -120,7 +130,7 @@ export default function EnergyAnalyticsPage() {
                     { name: "Éclairage", value: 10 },
                 ];
 
-                setChartData(finalChartData.length > 0 ? finalChartData : [
+                setChartData(displayData.length > 0 ? displayData : [
                     { day: "01/10", energy: 450, hvac: 180, temp: 18 },
                     { day: "02/10", energy: 420, hvac: 150, temp: 19 },
                     { day: "03/10", energy: 480, hvac: 200, temp: 16 }
