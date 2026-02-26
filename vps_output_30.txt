@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   0371673..149e47b  main       -> origin/main
-HEAD is now at 149e47b feat(dashboard): activate day/month toggle for energy comparison chart
+   149e47b..c71d7fe  main       -> origin/main
+HEAD is now at c71d7fe feat(energy): connect week/month timeframe toggle to charts and KPIs
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -36,14 +36,14 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 15.1s
+✓ Compiled successfully in 15.9s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/18) ...
   Generating static pages using 1 worker (4/18) 
   Generating static pages using 1 worker (8/18) 
   Generating static pages using 1 worker (13/18) 
-✓ Generating static pages using 1 worker (18/18) in 374.4ms
+✓ Generating static pages using 1 worker (18/18) in 385.5ms
   Finalizing page optimization ...
 
 Route (app)

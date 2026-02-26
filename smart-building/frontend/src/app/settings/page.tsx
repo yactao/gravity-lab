@@ -1,170 +1,307 @@
 "use client";
 
-import { Settings, User, Bell, Network, Shield } from "lucide-react";
+import { Settings, User, Bell, Network, Shield, Users, Clock, Palette, Webhook, Plus, Mail, Trash2, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useTenant } from "@/lib/TenantContext";
 
 export default function SettingsPage() {
-    const [activeTab, setActiveTab] = useState("general");
+    const { currentTenant } = useTenant();
+    const isAdmin = currentTenant?.role === "SUPER_ADMIN";
+    const [activeTab, setActiveTab] = useState("system");
 
     // Notification states
     const [emailAlerts, setEmailAlerts] = useState(true);
     const [smsAlerts, setSmsAlerts] = useState(false);
     const [pushAlerts, setPushAlerts] = useState(true);
+
+    // System states
     const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+    // Appearance states
+    const [themeColor, setThemeColor] = useState("emerald");
+
+    // Schedule states
+    const [workStart, setWorkStart] = useState("08:00");
+    const [workEnd, setWorkEnd] = useState("19:00");
 
     const tabs = [
         { id: "system", label: "Système", icon: Settings },
-        { id: "profile", label: "Profil", icon: User },
+        { id: "users", label: "Utilisateurs", icon: Users },
+        { id: "planning", label: "Horaires Prédéfinis", icon: Clock },
+        { id: "appearance", label: "Marque Blanche", icon: Palette },
+        { id: "integrations", label: "API & Webhooks", icon: Webhook },
         { id: "notifications", label: "Notifications", icon: Bell },
         { id: "network", label: "Réseau & MQTT", icon: Network },
         { id: "security", label: "Sécurité", icon: Shield },
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 max-w-[1400px] mx-auto pt-4 pb-12">
             {/* Header */}
-            <div>
+            <div className="border-b border-slate-200 dark:border-white/5 pb-6">
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center">
                     <Settings className="h-8 w-8 text-primary mr-3" />
-                    Paramètres Système
+                    Paramètres Avancés
                 </h1>
-                <p className="text-slate-500 dark:text-muted-foreground">Configuration de l'application et préférences de l'utilisateur.</p>
+                <p className="text-slate-500 dark:text-muted-foreground font-medium">Gestion fine de la plateforme, utilisateurs, et intégrations avec le SI.</p>
             </div>
 
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Settings Sidebar */}
-                <div className="w-full md:w-64 glass-card p-4 rounded-2xl h-fit">
-                    <nav className="space-y-1">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={cn(
-                                    "w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all text-left",
-                                    activeTab === tab.id
-                                        ? "bg-primary/20 text-primary border border-primary/20 shadow-[0_0_10px_rgba(6,182,212,0.1)]"
-                                        : "text-slate-500 dark:text-muted-foreground hover:bg-slate-100 dark:bg-white/5 hover:text-slate-900 dark:text-white"
-                                )}
-                            >
-                                <tab.icon className="h-4 w-4 mr-3" />
-                                {tab.label}
-                            </button>
-                        ))}
-                    </nav>
+                <div className="w-full md:w-64 flex flex-col gap-1">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={cn(
+                                "w-full flex items-center px-4 py-3 rounded-xl text-sm font-bold transition-all text-left group",
+                                activeTab === tab.id
+                                    ? "bg-primary text-slate-900 dark:text-white shadow-md shadow-primary/20"
+                                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                            )}
+                        >
+                            <tab.icon className={cn("h-4 w-4 mr-3 transition-colors", activeTab === tab.id ? "text-slate-900 dark:text-white" : "text-slate-400 group-hover:text-primary")} />
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Settings Content Area */}
-                <div className="flex-1 glass-card p-8 rounded-2xl min-h-[500px]">
+                <div className="flex-1 glass-card p-8 rounded-2xl min-h-[600px] border-slate-200 dark:border-white/5 animate-in fade-in zoom-in-95 duration-300">
+
                     {activeTab === "system" && (
                         <div className="max-w-xl space-y-6">
                             <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-4">Paramètres Système</h2>
 
                             <div className="space-y-4">
                                 <div className="flex flex-col">
-                                    <label className="text-sm font-medium text-slate-900 dark:text-white mb-1">Nom du Plateforme</label>
+                                    <label className="text-sm font-medium text-slate-900 dark:text-white mb-1">Nom de l'Espace</label>
                                     <input
                                         type="text"
-                                        defaultValue="SmartBuild GTB"
-                                        className="bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
+                                        defaultValue={currentTenant?.name || "SmartBuild GTB"}
+                                        className="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all text-sm font-medium"
                                     />
                                 </div>
 
                                 <div className="flex flex-col">
-                                    <label className="text-sm font-medium text-slate-900 dark:text-white mb-1">Fuseau Horaire</label>
-                                    <select className="bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 appearance-none">
+                                    <label className="text-sm font-medium text-slate-900 dark:text-white mb-1">Fuseau Horaire de Référence</label>
+                                    <select className="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 text-sm font-medium">
                                         <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
-                                        <option value="UTC">UTC</option>
+                                        <option value="UTC">UTC Globale</option>
                                     </select>
+                                    <p className="text-xs text-slate-500 mt-1">Sert de base de calcul pour la fermeture des bâtiments.</p>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/5 mt-6">
                                     <div>
-                                        <h4 className="text-slate-900 dark:text-white font-medium">Mode Sombre</h4>
-                                        <p className="text-xs text-slate-500 dark:text-muted-foreground">Appliquer le thème sombre par défaut sur tous les écrans</p>
-                                    </div>
-                                    <div className="w-11 h-6 bg-primary rounded-full relative cursor-pointer shadow-[0_0_8px_rgba(6,182,212,0.5)]">
-                                        <div className="absolute right-1 top-1 w-4 h-4 rounded-full bg-white transition-transform"></div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/5 mt-6">
-                                    <div>
-                                        <h4 className="text-slate-900 dark:text-white font-medium flex items-center">
-                                            Status de Plateforme
-                                            {maintenanceMode && <span className="ml-2 px-2 py-0.5 bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase rounded-full border border-orange-500/20">Maintenance</span>}
+                                        <h4 className="text-slate-900 dark:text-white font-bold flex items-center">
+                                            Mode Maintenance
+                                            {maintenanceMode && <span className="ml-2 px-2 py-0.5 bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase rounded-full border border-orange-500/20">Actif</span>}
                                         </h4>
-                                        <p className="text-xs text-slate-500 dark:text-muted-foreground">Activer le mode maintenance pour restreindre l'accès client</p>
+                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">Désactive l'accès aux utilisateurs standards et suspend les alertes sortantes.</p>
                                     </div>
                                     <div
                                         onClick={() => setMaintenanceMode(!maintenanceMode)}
-                                        className={cn("w-11 h-6 rounded-full relative cursor-pointer transition-colors shadow-[0_0_8px_rgba(6,182,212,0.1)]", maintenanceMode ? "bg-orange-500" : "bg-slate-300 dark:bg-slate-700")}>
-                                        <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", maintenanceMode ? "translate-x-6" : "translate-x-1")}></div>
+                                        className={cn("w-12 h-6 rounded-full relative cursor-pointer transition-colors shadow-inner", maintenanceMode ? "bg-orange-500" : "bg-slate-300 dark:bg-slate-700")}>
+                                        <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", maintenanceMode ? "translate-x-7" : "translate-x-1")}></div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="pt-8">
-                                <button className="bg-primary text-primary-foreground px-6 py-2 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] transition-all">
+                                <button className="bg-primary text-slate-900 dark:text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all">
                                     Sauvegarder les modifications
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {activeTab === "network" && (
+                    {activeTab === "users" && (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-4">
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Gestion des Accès</h2>
+                                    <p className="text-sm text-slate-500">Collaborateurs ayant accès au tableau de bord.</p>
+                                </div>
+                                <button className="flex items-center gap-2 bg-primary text-slate-900 dark:text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-emerald-400 transition-colors">
+                                    <Plus className="w-4 h-4" /> Inviter
+                                </button>
+                            </div>
+
+                            <div className="border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-black/20">
+                                <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                                    <thead className="text-xs text-slate-700 uppercase bg-slate-100 dark:bg-black/40 dark:text-slate-300">
+                                        <tr>
+                                            <th className="px-4 py-3">Utilisateur</th>
+                                            <th className="px-4 py-3">Rôle</th>
+                                            <th className="px-4 py-3">Statut</th>
+                                            <th className="px-4 py-3 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="border-b border-slate-200 dark:border-white/5">
+                                            <td className="px-4 py-3">
+                                                <div className="font-bold text-slate-900 dark:text-white">Alice Dubois</div>
+                                                <div className="text-xs">alice.dubois@client.fr</div>
+                                            </td>
+                                            <td className="px-4 py-3"><span className="px-2 py-1 bg-primary/20 text-primary font-bold rounded text-xs">Administrateur</span></td>
+                                            <td className="px-4 py-3"><span className="flex items-center gap-1 text-emerald-500 before:content-[''] before:w-2 before:h-2 before:bg-emerald-500 before:rounded-full">Actif</span></td>
+                                            <td className="px-4 py-3 text-right"><button className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4 ml-auto" /></button></td>
+                                        </tr>
+                                        <tr className="border-b border-slate-200 dark:border-white/5">
+                                            <td className="px-4 py-3">
+                                                <div className="font-bold text-slate-900 dark:text-white">Marc Dupont</div>
+                                                <div className="text-xs">marc.dupont@client.fr</div>
+                                            </td>
+                                            <td className="px-4 py-3"><span className="px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white font-bold rounded text-xs">Lecteur / Facility</span></td>
+                                            <td className="px-4 py-3"><span className="flex items-center gap-1 text-slate-400 before:content-[''] before:w-2 before:h-2 before:bg-slate-400 before:rounded-full">Invitation en attente</span></td>
+                                            <td className="px-4 py-3 text-right">
+                                                <button className="text-primary text-xs font-bold hover:underline mr-4">Relancer</button>
+                                                <button className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4 ml-auto inline" /></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "planning" && (
+                        <div className="max-w-2xl space-y-6">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-4">Horaires d'Ouverture du Bâtiment</h2>
+                            <p className="text-sm text-slate-500">Ces plages horaires permettent de basculer tous les équipements CVC (Chauffage, Ventilation, Climatisation) et éclairages en mode "Éco" automatiquement hors des heures d'ouverture.</p>
+
+                            <div className="space-y-4 pt-4">
+                                {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"].map(day => (
+                                    <div key={day} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5">
+                                        <span className="font-bold text-slate-900 dark:text-white mb-2 sm:mb-0 w-32">{day}</span>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-slate-500 mb-1 uppercase font-bold">Ouverture</span>
+                                                <input type="time" defaultValue="08:00" className="bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded px-3 py-1.5 text-sm font-bold w-28 text-slate-900 dark:text-white" />
+                                            </div>
+                                            <span className="text-slate-400 mt-4">-</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-slate-500 mb-1 uppercase font-bold">Fermeture</span>
+                                                <input type="time" defaultValue="19:00" className="bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded px-3 py-1.5 text-sm font-bold w-28 text-slate-900 dark:text-white" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <div className="flex items-center justify-between p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                                    <span className="font-bold text-orange-600 dark:text-orange-400">Samedi & Dimanche</span>
+                                    <span className="font-bold text-orange-600/70 dark:text-orange-400/70 text-sm">Mode ÉCO Continu H24</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "appearance" && (
                         <div className="max-w-xl space-y-6">
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-4">Configuration MQTT</h2>
-                            <p className="text-sm text-slate-500 dark:text-muted-foreground">Connectez le dashboard au broker IoT pour recevoir les flux de données brutes.</p>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-4">Identité Visuelle (Marque Blanche)</h2>
+                            <p className="text-sm text-slate-500">Personnalisez le rendu visuel de la plateforme pour qu'elle corresponde à votre charte graphique.</p>
 
-                            <div className="space-y-4">
-                                <div className="flex flex-col">
-                                    <label className="text-sm font-medium text-slate-900 dark:text-white mb-1">Adresse du Broker</label>
-                                    <input
-                                        type="text"
-                                        defaultValue="mqtt://localhost"
-                                        disabled
-                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-lg px-4 py-2 text-slate-500 dark:text-muted-foreground cursor-not-allowed"
-                                    />
-                                </div>
-                                <div className="flex flex-col">
-                                    <label className="text-sm font-medium text-slate-900 dark:text-white mb-1">Port</label>
-                                    <input
-                                        type="text"
-                                        defaultValue="1883"
-                                        disabled
-                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-lg px-4 py-2 text-slate-500 dark:text-muted-foreground cursor-not-allowed"
-                                    />
+                            <div className="space-y-8 pt-4">
+                                <div>
+                                    <label className="text-sm font-bold text-slate-900 dark:text-white mb-3 block">Couleur Primaire (Thème)</label>
+                                    <div className="flex gap-4">
+                                        {[
+                                            { id: 'emerald', color: 'bg-emerald-500' },
+                                            { id: 'blue', color: 'bg-blue-500' },
+                                            { id: 'purple', color: 'bg-purple-500' },
+                                            { id: 'orange', color: 'bg-orange-500' },
+                                        ].map(theme => (
+                                            <button
+                                                key={theme.id}
+                                                onClick={() => setThemeColor(theme.id)}
+                                                className={cn("w-12 h-12 rounded-full ring-offset-2 dark:ring-offset-slate-900 transition-all", theme.color, themeColor === theme.id ? "ring-2 ring-primary scale-110 shadow-lg" : "scale-100 opacity-50 hover:opacity-100")}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-start">
-                                    <Shield className="h-5 w-5 text-orange-500 mr-3 mt-0.5" />
-                                    <p className="text-sm text-orange-200">
-                                        La modification des paramètres réseau est actuellement bloquée par l'administrateur système (Raison: Mode Simulation Actif).
-                                    </p>
+                                <div className="flex flex-col">
+                                    <label className="text-sm font-bold text-slate-900 dark:text-white mb-3">Logo de l'Entreprise</label>
+                                    <div className="border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl p-8 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-black/20 hover:bg-slate-50 dark:hover:bg-black/40 transition-colors cursor-pointer group">
+                                        <Palette className="w-8 h-8 text-slate-400 group-hover:text-primary transition-colors mb-3" />
+                                        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Cliquez ou glissez une image (PNG/SVG, 400x100px max)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "integrations" && (
+                        <div className="max-w-2xl space-y-6">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-4">API & Webhooks B2B</h2>
+                            <p className="text-sm text-slate-500">Connectez vos propres systèmes internes (ERP, Jira, ServiceNow) pour réagir aux évènements de la GMAO.</p>
+
+                            <div className="space-y-6 pt-4">
+                                <div className="glass-card bg-slate-50/50 dark:bg-white/5 p-5 rounded-xl border border-slate-200 dark:border-white/10 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-[30px] -mr-8 -mt-8 pointer-events-none"></div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white flex items-center mb-1">
+                                        <Key className="w-4 h-4 mr-2 text-primary" />
+                                        Clé d'API (Read-Only)
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mb-4">Utilisée pour aspirer la data brute depuis vos scripts (PowerBI, Python).</p>
+
+                                    <div className="flex gap-2">
+                                        <code className="flex-1 bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 py-2 px-3 rounded-lg text-xs font-mono text-slate-600 dark:text-slate-300 overflow-hidden text-ellipsis">sk_live_9f8d7c6b5a4...</code>
+                                        <button className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold px-4 rounded-lg hover:bg-slate-300 dark:hover:bg-white/20 transition-colors">Copier</button>
+                                        <button className="bg-primary/20 text-primary border border-primary/30 text-xs font-bold px-4 rounded-lg hover:bg-primary hover:text-white transition-colors">Revaincre la clé</button>
+                                    </div>
+                                </div>
+
+                                <div className="glass-card bg-slate-50/50 dark:bg-white/5 p-5 rounded-xl border border-slate-200 dark:border-white/10 relative overflow-hidden">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="font-bold text-slate-900 dark:text-white flex items-center mb-1">
+                                                <Webhook className="w-4 h-4 mr-2 text-primary" />
+                                                Webhooks "Création d'Alerte"
+                                            </h3>
+                                            <p className="text-xs text-slate-500">POST Request envoyé lors d'un défaut matériel critique (CVC hors ligne).</p>
+                                        </div>
+                                        <div className="w-11 h-6 bg-primary rounded-full relative cursor-pointer shadow-inner">
+                                            <div className="absolute right-1 top-1 w-4 h-4 rounded-full bg-white transition-transform"></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-[10px] uppercase font-bold text-slate-500">URL du point d'entrée (Payload JSON)</label>
+                                        <input
+                                            type="url"
+                                            defaultValue="https://api.votre-erp.com/webhooks/smartbuild/alerts"
+                                            className="bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 py-2 px-3 rounded-lg text-sm font-mono text-slate-900 dark:text-white focus:outline-none focus:border-primary/50"
+                                        />
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-white/5 flex gap-2">
+                                        <button className="text-xs bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded font-bold">Voir un exemple de Payload</button>
+                                        <button className="text-xs bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded font-bold">Tester la requête (Ping)</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === "notifications" && (
-                        <div className="max-w-xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="max-w-xl space-y-6">
                             <h2 className="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-4 flex items-center">
-                                <Bell className="h-5 w-5 mr-3 text-primary" />
                                 Préférences d'Alertes
                             </h2>
                             <p className="text-sm text-slate-500 dark:text-muted-foreground">
-                                Choisissez comment le système doit vous contacter lorsqu'une règle domotique lève une alerte critique (ex. dépasssement de seuil, perte réseau).
+                                Choisissez comment le système doit vous contacter lorsqu'une règle domotique lève une alerte.
                             </p>
 
-                            <div className="space-y-6 pt-4">
+                            <div className="space-y-4 pt-4">
                                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10">
                                     <div>
-                                        <h4 className="text-slate-900 dark:text-white font-medium">Alertes par Email</h4>
-                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">Envoi d'un rapport détaillé pour chaque incident</p>
+                                        <h4 className="text-slate-900 dark:text-white font-bold flex items-center"><Mail className="w-4 h-4 mr-2" /> Rapport d'Incident Quotidien (Email)</h4>
+                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">Résumé des alertes non-traitées envoyé à 8h00.</p>
                                     </div>
                                     <div
-                                        className={cn("w-11 h-6 rounded-full relative cursor-pointer transition-colors", emailAlerts ? "bg-primary shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300 dark:bg-slate-700")}
+                                        className={cn("w-11 h-6 rounded-full relative cursor-pointer transition-colors shadow-inner", emailAlerts ? "bg-primary" : "bg-slate-300 dark:bg-slate-700")}
                                         onClick={() => setEmailAlerts(!emailAlerts)}
                                     >
                                         <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", emailAlerts ? "translate-x-6" : "translate-x-1")}></div>
@@ -173,47 +310,34 @@ export default function SettingsPage() {
 
                                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10">
                                     <div>
-                                        <h4 className="text-slate-900 dark:text-white font-medium">Alertes par SMS</h4>
-                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">Notification immédiate pour interventions d'urgence</p>
+                                        <h4 className="text-slate-900 dark:text-white font-bold flex items-center">Alertes Temps Réel SMS (Critique uniquement)</h4>
+                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">Notification immédiate pour interventions d'urgence.</p>
                                     </div>
                                     <div
-                                        className={cn("w-11 h-6 rounded-full relative cursor-pointer transition-colors", smsAlerts ? "bg-primary shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300 dark:bg-slate-700")}
+                                        className={cn("w-11 h-6 rounded-full relative cursor-pointer transition-colors shadow-inner", smsAlerts ? "bg-primary" : "bg-slate-300 dark:bg-slate-700")}
                                         onClick={() => setSmsAlerts(!smsAlerts)}
                                     >
                                         <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", smsAlerts ? "translate-x-6" : "translate-x-1")}></div>
                                     </div>
                                 </div>
-
-                                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10">
-                                    <div>
-                                        <h4 className="text-slate-900 dark:text-white font-medium">Push In-App (Navigateur)</h4>
-                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">Notifications sonores lorsque le cockpit est ouvert</p>
-                                    </div>
-                                    <div
-                                        className={cn("w-11 h-6 rounded-full relative cursor-pointer transition-colors", pushAlerts ? "bg-primary shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300 dark:bg-slate-700")}
-                                        onClick={() => setPushAlerts(!pushAlerts)}
-                                    >
-                                        <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", pushAlerts ? "translate-x-6" : "translate-x-1")}></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-6">
-                                <button className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all">
-                                    Enregistrer les préférences
-                                </button>
                             </div>
                         </div>
                     )}
 
-                    {["profile", "security"].includes(activeTab) && (
-                        <div className="h-full flex flex-col items-center justify-center text-slate-500 dark:text-muted-foreground space-y-4">
-                            <Settings className="h-12 w-12 opacity-20 animate-[spin_10s_linear_infinite]" />
-                            <p>Ce module est en cours de développement.</p>
+                    {["network", "security"].includes(activeTab) && (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-500 dark:text-muted-foreground space-y-4 py-20">
+                            <LockIcon tab={activeTab} />
+                            <p className="text-sm font-bold text-orange-500/70 py-1 px-4 border border-orange-500/20 bg-orange-500/10 rounded-full">Zone restreinte par UBBEE Infrastructures</p>
+                            <p className="text-sm text-center max-w-sm">La gestion du réseau MQTT IoT et des protocoles de sécurité avancée et cryptage SSL sont gérés directement par nos équipes infogérance.</p>
                         </div>
                     )}
                 </div>
             </div>
         </div>
     );
+}
+
+function LockIcon({ tab }: { tab: string }) {
+    if (tab === "network") return <Network className="h-16 w-16 opacity-20" />;
+    return <Shield className="h-16 w-16 opacity-20" />;
 }
