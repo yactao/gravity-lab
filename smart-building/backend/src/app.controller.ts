@@ -77,14 +77,18 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Get('sensors')
-  getSensors(@Headers('x-organization-id') orgId: string) {
-    return this.appService.getSensors(orgId);
+  getSensors(@Headers('x-organization-id') orgId: string, @Headers('x-user-role') role?: string) {
+    const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
+    const filterOrgId = (role === 'SUPER_ADMIN' && isGlobalContext) ? undefined : orgId;
+    return this.appService.getSensors(filterOrgId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('gateways')
-  getGateways(@Headers('x-organization-id') orgId: string) {
-    return this.appService.getGateways(orgId);
+  getGateways(@Headers('x-organization-id') orgId: string, @Headers('x-user-role') role?: string) {
+    const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
+    const filterOrgId = (role === 'SUPER_ADMIN' && isGlobalContext) ? undefined : orgId;
+    return this.appService.getGateways(filterOrgId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -114,8 +118,10 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Get('alerts')
-  getAlerts(@Headers('x-organization-id') orgId: string, @Query('siteId') siteId?: string) {
-    return this.appService.getAlerts(orgId, siteId);
+  getAlerts(@Headers('x-organization-id') orgId: string, @Headers('x-user-role') role?: string, @Query('siteId') siteId?: string) {
+    const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
+    const filterOrgId = (role === 'SUPER_ADMIN' && isGlobalContext) ? undefined : orgId;
+    return this.appService.getAlerts(filterOrgId, siteId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -126,8 +132,10 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Get('rules')
-  getRules(@Headers('x-organization-id') orgId: string) {
-    return this.rulesEngineService.getRules(orgId);
+  getRules(@Headers('x-organization-id') orgId: string, @Headers('x-user-role') role?: string) {
+    const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
+    const filterOrgId = (role === 'SUPER_ADMIN' && isGlobalContext) ? undefined : orgId;
+    return this.rulesEngineService.getRules(filterOrgId);
   }
 
   @UseGuards(JwtAuthGuard)
