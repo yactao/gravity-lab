@@ -8,6 +8,7 @@ interface StatsCardProps {
     trendUp?: boolean;
     icon: LucideIcon;
     color?: "cyan" | "purple" | "orange" | "green" | "red";
+    onClick?: () => void;
 }
 
 const colorMap = {
@@ -18,9 +19,15 @@ const colorMap = {
     red: "from-red-500/20 to-red-700/20 text-red-500",
 };
 
-export function StatsCard({ title, value, trend, trendUp, icon: Icon, color = "cyan" }: StatsCardProps) {
+export function StatsCard({ title, value, trend, trendUp, icon: Icon, color = "cyan", onClick }: StatsCardProps) {
     return (
-        <div className="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
+        <div
+            onClick={onClick}
+            className={cn(
+                "glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all duration-300",
+                onClick && "cursor-pointer hover:shadow-lg hover:-translate-y-1"
+            )}
+        >
             <div className="flex justify-between items-start">
                 <div>
                     <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground">{title}</p>

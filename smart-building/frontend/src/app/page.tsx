@@ -12,6 +12,7 @@ import { useTenant } from "@/lib/TenantContext";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useRouter } from 'next/navigation';
 
 const SortableWidget = ({ id, children, className }: { id: string, children: React.ReactNode, className?: string }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -38,6 +39,7 @@ const SortableWidget = ({ id, children, className }: { id: string, children: Rea
 
 export default function Home() {
   const { authFetch, currentTenant } = useTenant();
+  const router = useRouter();
   const [readings, setReadings] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [globalEnergy, setGlobalEnergy] = useState<any[]>([]);
@@ -225,6 +227,7 @@ export default function Home() {
                               trendUp={true}
                               icon={Building}
                               color="cyan"
+                              onClick={() => router.push('/sites')}
                             />
                             <StatsCard
                               title="Incidents en Cours"
@@ -233,6 +236,7 @@ export default function Home() {
                               trendUp={kpis.activeIncidents === 0}
                               icon={AlertOctagon}
                               color={kpis.activeIncidents > 0 ? "red" : "green"}
+                              onClick={() => router.push('/alerts')}
                             />
                             <StatsCard
                               title="Sites Hors Objectifs"
@@ -241,6 +245,7 @@ export default function Home() {
                               trendUp={kpis.outOfTargetSites === 0}
                               icon={Target}
                               color={kpis.outOfTargetSites > 0 ? "orange" : "green"}
+                              onClick={() => router.push('/sites?filter=out_of_target')} // Note: query param might need implementation on target page
                             />
                             <StatsCard
                               title="État de la Flotte IoT"
@@ -249,6 +254,7 @@ export default function Home() {
                               trendUp={kpis.offlineGateways === 0}
                               icon={Server}
                               color={kpis.offlineGateways > 0 ? "orange" : "cyan"}
+                              onClick={() => router.push('/network')}
                             />
                           </>
                         ) : (
