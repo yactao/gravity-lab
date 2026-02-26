@@ -14,7 +14,6 @@ export default function MapPage() {
 
     // Map Filters
     const [selectedSiteFilter, setSelectedSiteFilter] = useState<string>("");
-    const [selectedZoneFilter, setSelectedZoneFilter] = useState<string>("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,23 +66,12 @@ export default function MapPage() {
                 <div className="flex items-center gap-2">
                     <select
                         value={selectedSiteFilter}
-                        onChange={e => { setSelectedSiteFilter(e.target.value); setSelectedZoneFilter(""); }}
+                        onChange={e => setSelectedSiteFilter(e.target.value)}
                         className="bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
                     >
                         <option value="">Tous les sites</option>
                         {sites.map(site => (
                             <option key={site.id} value={site.id}>{site.name} ({site.city})</option>
-                        ))}
-                    </select>
-                    <select
-                        value={selectedZoneFilter}
-                        onChange={e => setSelectedZoneFilter(e.target.value)}
-                        disabled={!selectedSiteFilter}
-                        className="bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-primary backdrop-blur-md disabled:opacity-50"
-                    >
-                        <option value="">Toutes les zones</option>
-                        {selectedSiteFilter && sites.find(s => s.id === selectedSiteFilter)?.zones?.map((zone: any) => (
-                            <option key={zone.id} value={zone.id}>{zone.name}</option>
                         ))}
                     </select>
                 </div>
