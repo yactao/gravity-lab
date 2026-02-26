@@ -5,7 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { MonthlyComparisonChart } from "@/components/dashboard/MonthlyComparisonChart";
 
-import { Zap, Thermometer, Wind, AlertTriangle, Activity, ActivitySquare, CloudRain, Sun, Maximize2, Minimize2, MapPin, Settings2, X, Check } from "lucide-react";
+import { Zap, Thermometer, Wind, AlertTriangle, Activity, ActivitySquare, CloudRain, Sun, Maximize2, Minimize2, MapPin, Settings2, X, Check, Users, Server, AlertOctagon, TrendingDown, Building, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 
@@ -37,10 +37,11 @@ const SortableWidget = ({ id, children, className }: { id: string, children: Rea
 };
 
 export default function Home() {
-  const { authFetch } = useTenant();
+  const { authFetch, currentTenant } = useTenant();
   const [readings, setReadings] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [globalEnergy, setGlobalEnergy] = useState<any[]>([]);
+  const [kpis, setKpis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [widgets, setWidgets] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -93,14 +94,16 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [readingsRes, alertsRes, energyRes] = await Promise.all([
+        const [readingsRes, alertsRes, energyRes, kpisRes] = await Promise.all([
           authFetch("http://localhost:3001/api/readings?limit=50"),
           authFetch("http://localhost:3001/api/alerts"),
-          authFetch("http://localhost:3001/api/energy/global")
+          authFetch("http://localhost:3001/api/energy/global"),
+          authFetch("http://localhost:3001/api/dashboard/kpis")
         ]);
         if (readingsRes.ok) setReadings(await readingsRes.json());
         if (alertsRes.ok) setAlerts(await alertsRes.json());
         if (energyRes.ok) setGlobalEnergy(await energyRes.json());
+        if (kpisRes.ok) setKpis(await kpisRes.json());
       } catch (err) {
         console.error("Failed to fetch data", err);
       } finally {
@@ -199,48 +202,87 @@ export default function Home() {
                         <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
                         <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-2 relative z-10">Health Score Parc</p>
                         <div className="relative z-10 flex items-baseline">
-                          <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{healthScore}</span>
+                          <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{kpis?.globalHealthScore !== undefined ? kpis.globalHealthScore : healthScore}</span>
                           <span className="text-xl font-bold text-primary ml-1">/100</span>
                         </div>
                         <p className="text-xs text-primary mt-2 flex items-center relative z-10 font-medium">
-                          Excellent état
+                          {(kpis?.globalHealthScore || healthScore) > 80 ? 'Excellent état' : 'Attention requise'}
                         </p>
                         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
                       </div>
 
                       <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <StatsCard
-                          title="Consommation du Parc"
-                          value={energy ? `${energy.toFixed(0)} W` : "-- W"}
-                          trend={energy ? "+1.2%" : "..."}
-                          trendUp={false}
-                          icon={Zap}
-                          color="cyan"
-                        />
-                        <StatsCard
-                          title="Température Moyenne"
-                          value={temp ? `${temp.toFixed(1)}°C` : "--°C"}
-                          trend={temp ? "-0.1%" : "..."}
-                          trendUp={true}
-                          icon={Thermometer}
-                          color="orange"
-                        />
-                        <StatsCard
-                          title="Qualité d'Air (CO2)"
-                          value={co2 ? `${co2.toFixed(0)} ppm` : "-- ppm"}
-                          trend="Stable"
-                          trendUp={true}
-                          icon={Wind}
-                          color="green"
-                        />
-                        <StatsCard
-                          title="Alertes Actives"
-                          value={alerts.length.toString()}
-                          trend={alerts.length > 0 ? "+X" : "Stable"}
-                          trendUp={alerts.length === 0}
-                          icon={AlertTriangle}
-                          color={alerts.length > 0 ? "red" : "purple"}
-                        />
+                        {(currentTenant?.role === 'SUPER_ADMIN' || currentTenant?.role === 'ENERGY_MANAGER') && kpis ? (
+                          <>
+                            <StatsCard
+                              title="Bâtiments Gérés"
+                              value={kpis.totalSites.toString()}
+                              trend={`${kpis.totalClients} Clients`}
+                              trendUp={true}
+                              icon={Building}
+                              color="blue"
+                            />
+                            <StatsCard
+                              title="Incidents en Cours"
+                              value={kpis.activeIncidents.toString()}
+                              trend={`${kpis.criticalAlerts} Critiques`}
+                              trendUp={kpis.activeIncidents === 0}
+                              icon={AlertOctagon}
+                              color={kpis.activeIncidents > 0 ? "red" : "green"}
+                            />
+                            <StatsCard
+                              title="Sites Hors Objectifs"
+                              value={kpis.outOfTargetSites.toString()}
+                              trend={kpis.outOfTargetSites > 0 ? "À surveiller" : "Optimal"}
+                              trendUp={kpis.outOfTargetSites === 0}
+                              icon={Target}
+                              color={kpis.outOfTargetSites > 0 ? "orange" : "green"}
+                            />
+                            <StatsCard
+                              title="État de la Flotte IoT"
+                              value={kpis.totalSensors.toString()}
+                              trend={`${kpis.offlineGateways} GW hors-ligne`}
+                              trendUp={kpis.offlineGateways === 0}
+                              icon={Server}
+                              color={kpis.offlineGateways > 0 ? "orange" : "cyan"}
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <StatsCard
+                              title="Consommation du Parc"
+                              value={energy ? `${energy.toFixed(0)} W` : "-- W"}
+                              trend={energy ? "+1.2%" : "..."}
+                              trendUp={false}
+                              icon={Zap}
+                              color="cyan"
+                            />
+                            <StatsCard
+                              title="Température Moyenne"
+                              value={temp ? `${temp.toFixed(1)}°C` : "--°C"}
+                              trend={temp ? "-0.1%" : "..."}
+                              trendUp={true}
+                              icon={Thermometer}
+                              color="orange"
+                            />
+                            <StatsCard
+                              title="Qualité d'Air (CO2)"
+                              value={co2 ? `${co2.toFixed(0)} ppm` : "-- ppm"}
+                              trend="Stable"
+                              trendUp={true}
+                              icon={Wind}
+                              color="green"
+                            />
+                            <StatsCard
+                              title="Alertes Actives"
+                              value={alerts.length.toString()}
+                              trend={alerts.length > 0 ? "+X" : "Stable"}
+                              trendUp={alerts.length === 0}
+                              icon={AlertTriangle}
+                              color={alerts.length > 0 ? "red" : "purple"}
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
                   </SortableWidget>

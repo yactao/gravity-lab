@@ -594,6 +594,74 @@ export class AppService implements OnModuleInit {
     });
     return { success: true, message: `Action ${payload.action} command sent successfully.`, details: payload };
   }
-}
 
+  async getDashboardKpis(orgId: string, role: string) {
+    const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111' && (role === 'SUPER_ADMIN' || role === 'ENERGY_MANAGER');
+
+    const totalClients = isGlobalContext ? await this.orgRepo.count() : 1;
+
+    let sitesQuery = this.siteRepo.createQueryBuilder('site');
+    if (!isGlobalContext) sitesQuery = sitesQuery.where('site.organizationId = :orgId', { orgId });
+    const totalSites = await sitesQuery.getCount();
+
+    let alertsQuery = this.alertRepo.createQueryBuilder('alert')
+      .leftJoin('alert.sensor', 'sensor')
+      .leftJoin('sensor.zone', 'zone')
+      .leftJoin('zone.site', 'site')
+      .where('alert.active = :active', { active: true });
+    if (!isGlobalContext) alertsQuery = alertsQuery.andWhere('site.organizationId = :orgId', { orgId });
+
+    const activeIncidents = await alertsQuery.getCount();
+    const criticalAlerts = Math.floor(activeIncidents * 0.3); // Mocking 30% are critical for now 
+
+    // Find sites with active incidents (mocking "out of target" using sites with incidents)
+    const outOfTargetSitesQuery = this.alertRepo.createQueryBuilder('alert')
+      .select('zone.siteId')
+      .leftJoin('alert.sensor', 'sensor')
+      .leftJoin('sensor.zone', 'zone')
+      .leftJoin('zone.site', 'site')
+      .where('alert.active = :active', { active: true })
+      .groupBy('zone.siteId');
+    if (!isGlobalContext) outOfTargetSitesQuery.andWhere('site.organizationId = :orgId', { orgId });
+
+    const outOfTargetSitesResult = await outOfTargetSitesQuery.getRawMany();
+    const outOfTargetSites = outOfTargetSitesResult.length;
+
+    let zonesQuery = this.zoneRepo.createQueryBuilder('zone')
+      .leftJoin('zone.site', 'site');
+    if (!isGlobalContext) zonesQuery = zonesQuery.where('site.organizationId = :orgId', { orgId });
+    const totalZones = await zonesQuery.getCount();
+
+    let sensorsQuery = this.sensorRepo.createQueryBuilder('sensor')
+      .leftJoin('sensor.zone', 'zone')
+      .leftJoin('zone.site', 'site');
+    if (!isGlobalContext) sensorsQuery = sensorsQuery.where('site.organizationId = :orgId', { orgId });
+    const totalSensors = await sensorsQuery.getCount();
+
+    let usersQuery = this.userRepo.createQueryBuilder('user');
+    if (!isGlobalContext) usersQuery = usersQuery.where('user.organizationId = :orgId', { orgId });
+    const activeUsers = await usersQuery.getCount();
+
+    let gatewaysQuery = this.gatewayRepo.createQueryBuilder('gateway')
+      .leftJoin('gateway.site', 'site');
+    if (!isGlobalContext) gatewaysQuery = gatewaysQuery.where('site.organizationId = :orgId', { orgId });
+    const totalGateways = await gatewaysQuery.getCount();
+    const offlineGateways = Math.floor(totalGateways * 0.05); // Mock 5% offline
+
+    const globalHealthScore = Math.max(0, 100 - activeIncidents * 2 - offlineGateways * 5);
+
+    return {
+      totalClients,
+      totalSites,
+      activeIncidents,
+      offlineGateways,
+      totalZones,
+      totalSensors,
+      outOfTargetSites,
+      globalHealthScore,
+      activeUsers,
+      criticalAlerts
+    };
+  }
+}
 

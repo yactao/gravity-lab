@@ -142,6 +142,16 @@ export class AppController {
   processIotWebhook(@Body() webhookData: any) {
     return this.appService.processIotWebhook(webhookData);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('dashboard/kpis')
+  getDashboardKpis(
+    @Headers('x-organization-id') orgId: string,
+    @Headers('x-user-role') role: string
+  ) {
+    return this.appService.getDashboardKpis(orgId, role);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('search')
   globalSearch(
