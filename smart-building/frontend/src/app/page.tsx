@@ -144,6 +144,8 @@ export default function Home() {
   // Calculate a fake "Health Score" based on data
   const healthScore = Math.max(0, 100 - (alerts.length * 5) - (co2 && co2 > 1000 ? 10 : 0));
 
+  const isGlobalContext = currentTenant?.id === '11111111-1111-1111-1111-111111111111';
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12 pt-4">
 
@@ -153,7 +155,7 @@ export default function Home() {
           <div className="flex items-center text-slate-900 dark:text-white mb-2">
             <ActivitySquare className="h-8 w-8 mr-3 text-primary" />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60 bg-clip-text text-transparent mr-4">
-              Cockpit Global
+              {isGlobalContext ? "Cockpit Global" : "Cockpit Client"}
             </h1>
             <button
               onClick={() => setIsCustomizeOpen(true)}
@@ -162,7 +164,9 @@ export default function Home() {
               <Settings2 className="w-3.5 h-3.5" /> Personnaliser
             </button>
           </div>
-          <p className="text-slate-500 dark:text-muted-foreground font-medium">Vue d'ensemble et pilotage en temps réel du parc immobilier UBBEE.</p>
+          <p className="text-slate-500 dark:text-muted-foreground font-medium">
+            {isGlobalContext ? "Vue d'ensemble et pilotage en temps réel du parc immobilier UBBEE." : "Vue d'ensemble de votre parc immobilier."}
+          </p>
         </div>
 
         <div className="flex items-center gap-6">
@@ -212,7 +216,7 @@ export default function Home() {
                       </div>
 
                       <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {(currentTenant?.role === 'SUPER_ADMIN' || currentTenant?.role === 'ENERGY_MANAGER') && kpis ? (
+                        {isGlobalContext && kpis ? (
                           <>
                             <StatsCard
                               title="Bâtiments Gérés"

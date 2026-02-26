@@ -61,6 +61,17 @@ export function Header() {
                                         <p className="text-[10px] font-bold text-slate-500 uppercase px-2">Basculer le contexte vers :</p>
                                     </div>
                                     <div className="max-h-64 overflow-y-auto custom-scrollbar p-1">
+                                        <button
+                                            onClick={() => switchTenant('11111111-1111-1111-1111-111111111111', 'Tous les clients')}
+                                            className={cn(
+                                                "w-full text-left px-3 py-2 text-xs font-bold rounded-lg flex items-center transition-colors border border-transparent mb-1",
+                                                currentTenant?.id === '11111111-1111-1111-1111-111111111111' ? "bg-primary text-white" : "text-primary hover:bg-primary/10"
+                                            )}
+                                        >
+                                            <Briefcase className="w-4 h-4 mr-2" />
+                                            Vue d'ensemble
+                                        </button>
+                                        <div className="h-px w-full bg-slate-200 dark:bg-white/10 my-1"></div>
                                         {organizations.map(org => (
                                             <button
                                                 key={org.id}
