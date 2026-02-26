@@ -220,7 +220,7 @@ export default function Home() {
                               trend={`${kpis.totalClients} Clients`}
                               trendUp={true}
                               icon={Building}
-                              color="blue"
+                              color="cyan"
                             />
                             <StatsCard
                               title="Incidents en Cours"
