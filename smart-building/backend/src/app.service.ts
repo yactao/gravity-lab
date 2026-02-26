@@ -160,8 +160,38 @@ export class AppService implements OnModuleInit {
   }
 
   async getSites(orgId?: string) {
-    const where = orgId ? { organizationId: orgId } : {};
-    return this.siteRepo.find({ where, relations: ['zones'] });
+    const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
+    const where = orgId && !isGlobalContext ? { organizationId: orgId } : {};
+
+    const sites = await this.siteRepo.find({ where, relations: ['zones'] });
+
+    let activeAlertsQuery = this.alertRepo.createQueryBuilder('alert')
+      .leftJoinAndSelect('alert.sensor', 'sensor')
+      .leftJoinAndSelect('sensor.zone', 'zone')
+      .where('alert.active = :active', { active: true });
+
+    if (orgId && !isGlobalContext) {
+      activeAlertsQuery = activeAlertsQuery
+        .leftJoin('zone.site', 'site')
+        .andWhere('site.organizationId = :orgId', { orgId });
+    }
+
+    const alerts = await activeAlertsQuery.getMany();
+
+    return sites.map(site => {
+      const siteAlerts = alerts.filter(a => site.zones.some(z => z.id === a.sensor?.zone?.id));
+      const hasCritical = siteAlerts.some(a => a.severity === 'CRITICAL');
+      const hasWarning = siteAlerts.some(a => a.severity === 'WARNING');
+
+      let statusColor = 'green';
+      if (hasCritical) statusColor = 'red';
+      else if (hasWarning) statusColor = 'orange';
+
+      return {
+        ...site,
+        statusColor
+      };
+    });
   }
 
   async getOrganizations() {

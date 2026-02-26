@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Building2, Search, Plus, Filter, MoreVertical, MapPin, Building, Activity, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
@@ -16,10 +16,13 @@ interface Site {
     city: string;
     status: string;
     zonesCount?: number;
+    statusColor?: "green" | "orange" | "red";
 }
 
 export default function SitesListPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const filterParam = searchParams.get('filter');
     const { authFetch, currentTenant } = useTenant();
     const [sites, setSites] = useState<Site[]>([]);
     const [loading, setLoading] = useState(true);
@@ -50,10 +53,24 @@ export default function SitesListPage() {
         fetchSites();
     }, [authFetch, currentTenant?.id]);
 
-    const filteredSites = sites.filter(site =>
-        site.name.toLowerCase().includes(search.toLowerCase()) ||
-        site.city.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredSites = sites.filter(site => {
+        const matchesSearch = site.name.toLowerCase().includes(search.toLowerCase()) ||
+            site.city.toLowerCase().includes(search.toLowerCase());
+
+        if (filterParam === 'out_of_target') {
+            return matchesSearch && (site.statusColor === 'red' || site.statusColor === 'orange');
+        }
+        return matchesSearch;
+    });
+
+    const getStatusUI = (color: "green" | "orange" | "red" = "green") => {
+        switch (color) {
+            case 'red': return { text: "Hors Objectif (Critique)", classes: "text-red-500 dark:text-red-400", bg: "bg-red-500" };
+            case 'orange': return { text: "Surveillance Requise", classes: "text-orange-500 dark:text-orange-400", bg: "bg-orange-500" };
+            case 'green':
+            default: return { text: "Optimal", classes: "text-emerald-500 dark:text-emerald-400", bg: "bg-emerald-500" };
+        }
+    };
 
     return (
         <div className="space-y-6 max-w-[1400px] mx-auto pb-12 pt-4">
@@ -153,10 +170,15 @@ export default function SitesListPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <span className="inline-flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                                                Connecté
-                                            </span>
+                                            {(() => {
+                                                const ui = getStatusUI(site.statusColor);
+                                                return (
+                                                    <span className={`inline-flex items-center justify-center text-[10px] font-bold uppercase tracking-widest ${ui.classes}`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${ui.bg} mr-1.5 ${site.statusColor !== 'green' ? 'animate-pulse' : ''}`}></span>
+                                                        {ui.text}
+                                                    </span>
+                                                )
+                                            })()}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <a href={`/sites/${site.id}`} className="px-4 py-2 text-xs font-bold text-slate-900 dark:text-white bg-primary hover:bg-emerald-400 rounded-lg transition-colors shadow-sm inline-block">
