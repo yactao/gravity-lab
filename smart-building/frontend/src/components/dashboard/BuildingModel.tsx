@@ -109,17 +109,8 @@ export function BuildingModel({ siteName = "Bâtiment Principal", zones = [] }: 
     const [selectedFloor, setSelectedFloor] = useState("RDC");
     const [activeLayer, setActiveLayer] = useState("temperature"); // temperature, co2, occupancy, all
 
-    // Si pas de zones fournies, on génère un faux étage type pour la démo
-    const fallbackZones = [
-        { id: 1, name: "Open Space A", floor: "RDC", size: [4, 1.5, 4], position: [-2.5, 0, -2.5] },
-        { id: 2, name: "Open Space B", floor: "RDC", size: [4, 1.5, 4], position: [2.5, 0, -2.5] },
-        { id: 3, name: "Salle Réunion 1", floor: "RDC", size: [3, 1.5, 3], position: [-3, 0, 2] },
-        { id: 4, name: "Local Serveur", floor: "RDC", size: [2, 1.5, 2], position: [0.5, 0, 2] },
-        { id: 5, name: "Cafétéria", floor: "RDC", size: [3, 1.5, 3], position: [3.5, 0, 2] },
-    ];
-
-    const displayZones = zones.length > 0 ? zones : fallbackZones;
-    const availableFloors = Array.from(new Set(displayZones.map(z => z.floor || "RDC")));
+    const displayZones = zones;
+    const availableFloors = displayZones.length > 0 ? Array.from(new Set(displayZones.map(z => z.floor || "RDC"))) : ["RDC"];
 
     const currentFloorZones = displayZones.filter(z => (z.floor || "RDC") === selectedFloor);
 
@@ -131,7 +122,18 @@ export function BuildingModel({ siteName = "Bâtiment Principal", zones = [] }: 
         <div className="w-full h-full relative flex flex-col pointer-events-auto bg-slate-50 dark:bg-black/20 rounded-xl overflow-hidden shadow-inner">
 
             {/* UI Overlay: Filters & Controls */}
-            <div className="absolute top-4 left-4 right-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none">
+
+            {zones.length === 0 && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-50/80 dark:bg-black/80 backdrop-blur-sm rounded-xl">
+                    <div className="glass px-6 py-8 rounded-2xl flex flex-col items-center text-center max-w-sm border border-slate-200 dark:border-white/10 shadow-xl">
+                        <Layers className="w-12 h-12 text-slate-400 mb-4" />
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Jumeau Numérique Vide</h3>
+                        <p className="text-sm text-slate-500">Ce site n'a pas encore de zones virtuelles (espaces, bureaux). Veuillez synchroniser les capteurs ou d'ajouter manuellement vos zones via le portail de Gestion de Parc.</p>
+                    </div>
+                </div>
+            )}
+
+            <div className={`absolute top-4 left-4 right-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none ${zones.length === 0 ? 'opacity-30' : ''}`}>
 
                 {/* Visual Layers / Filtres Métiers */}
                 <div className="flex gap-2 pointer-events-auto bg-white/80 dark:bg-black/60 backdrop-blur-md p-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-lg">
