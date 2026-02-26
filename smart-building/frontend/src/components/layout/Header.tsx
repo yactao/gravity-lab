@@ -16,12 +16,15 @@ export function Header() {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const isAdmin = currentTenant?.role === "SUPER_ADMIN" || currentTenant?.role === "ENERGY_MANAGER";
     const [organizations, setOrganizations] = useState<any[]>([]);
-
     useEffect(() => {
         if (isAdmin) {
             authFetch("http://localhost:3001/api/organizations")
                 .then(r => r.ok && r.json())
-                .then(data => data && setOrganizations(data))
+                .then(data => {
+                    if (data) {
+                        setOrganizations(data.filter((org: any) => org.id !== '11111111-1111-1111-1111-111111111111'));
+                    }
+                })
                 .catch(console.error);
         }
     }, [isAdmin, authFetch]);

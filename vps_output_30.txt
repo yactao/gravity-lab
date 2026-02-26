@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   a722ff6..4e3d9f9  main       -> origin/main
-HEAD is now at 4e3d9f9 fix(clients): filter clients list properly when in specific client context
+   4e3d9f9..821e9e6  main       -> origin/main
+HEAD is now at 821e9e6 feat(clients): hide UBBEE from CRM clients list
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -36,14 +36,14 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 17.9s
+✓ Compiled successfully in 15.2s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/18) ...
   Generating static pages using 1 worker (4/18) 
   Generating static pages using 1 worker (8/18) 
   Generating static pages using 1 worker (13/18) 
-✓ Generating static pages using 1 worker (18/18) in 397.2ms
+✓ Generating static pages using 1 worker (18/18) in 416.8ms
   Finalizing page optimization ...
 
 Route (app)
