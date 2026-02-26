@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   0abf6e3..4c5645f  main       -> origin/main
-HEAD is now at 4c5645f refactor(map): remove useless zone filter from global map
+   4c5645f..bdb3d4a  main       -> origin/main
+HEAD is now at bdb3d4a feat(twin): dynamic visual layers & zones for Digital Twin
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -10,7 +10,7 @@ npm warn EBADENGINE   required: { node: '>=22.0.0', npm: '>=10.5.1' },
 npm warn EBADENGINE   current: { node: 'v20.20.0', npm: '10.8.2' }
 npm warn EBADENGINE }
 
-up to date, audited 484 packages in 1s
+up to date, audited 484 packages in 2s
 
 154 packages are looking for funding
   run `npm fund` for details
@@ -36,14 +36,14 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 14.6s
+✓ Compiled successfully in 15.1s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/18) ...
   Generating static pages using 1 worker (4/18) 
   Generating static pages using 1 worker (8/18) 
   Generating static pages using 1 worker (13/18) 
-✓ Generating static pages using 1 worker (18/18) in 371.4ms
+✓ Generating static pages using 1 worker (18/18) in 396.7ms
   Finalizing page optimization ...
 
 Route (app)

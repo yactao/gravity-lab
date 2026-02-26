@@ -14,7 +14,8 @@ export default function ClientDetailsPage() {
 
     const [client, setClient] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("infos"); // infos, dashboard, users
+    const [activeTab, setActiveTab] = useState("infos");
+    const [selectedTwinSiteId, setSelectedTwinSiteId] = useState<string>(""); // infos, dashboard, users
 
     // Add Site states
     const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
@@ -296,11 +297,35 @@ export default function ClientDetailsPage() {
                             </div>
 
                             {/* Jumeau Numérique / Synoptique */}
-                            <div className="glass-card p-5 rounded-2xl flex flex-col items-center justify-center border-slate-200 dark:border-white/5 relative h-[400px]">
-                                <h3 className="text-base font-bold text-slate-900 dark:text-white w-full absolute top-5 left-5 z-10">Jumeau Numérique (Synoptique Mode)</h3>
-                                <p className="text-xs text-slate-500 w-full absolute top-11 left-5 z-10">Aperçu 3D représentatif des infrastructures de {client.name}</p>
-                                <div className="w-full h-full pointer-events-auto">
-                                    <BuildingModel siteName={client.name} zones={client.sites && client.sites.length > 0 ? client.sites[0].zones : []} />
+                            <div className="glass-card p-5 rounded-2xl flex flex-col items-center justify-center border-slate-200 dark:border-white/5 relative h-[450px]">
+                                <div className="w-full absolute top-5 left-5 z-10 pointer-events-none">
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-white pointer-events-auto">Jumeau Numérique (Synoptique Local)</h3>
+                                    <p className="text-xs text-slate-500 mt-1 pointer-events-auto">Aperçu 3D interactif et supervision en temps réel.</p>
+                                </div>
+
+                                {client.sites && client.sites.length > 0 && (
+                                    <select
+                                        className="absolute top-5 right-5 z-20 bg-white/80 dark:bg-black/80 backdrop-blur-md border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs font-bold rounded-xl px-4 py-2 outline-none shadow-lg cursor-pointer hover:border-primary/50 transition-colors"
+                                        value={selectedTwinSiteId || (client.sites[0]?.id || '')}
+                                        onChange={(e) => setSelectedTwinSiteId(e.target.value)}
+                                    >
+                                        {client.sites.map((site: any) => (
+                                            <option key={site.id} value={site.id}>{site.name} ({site.city})</option>
+                                        ))}
+                                    </select>
+                                )}
+
+                                <div className="w-full h-full pointer-events-auto pt-7">
+                                    {client.sites && client.sites.length > 0 ? (
+                                        (() => {
+                                            const activeTwinSite = client.sites.find((s: any) => s.id === selectedTwinSiteId) || client.sites[0];
+                                            return <BuildingModel siteName={activeTwinSite.name} zones={activeTwinSite.zones || []} />;
+                                        })()
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full w-full bg-slate-50 dark:bg-black/20 rounded-xl border border-dashed border-slate-200 dark:border-white/10 mt-6">
+                                            <p className="text-slate-500 font-medium">Bâtiment non modélisé. Configurez un premier site.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
