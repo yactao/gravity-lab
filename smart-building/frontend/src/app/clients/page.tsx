@@ -40,11 +40,7 @@ export default function ClientsPage() {
             const res = await authFetch("http://localhost:3001/api/organizations");
             if (res.ok) {
                 const data = await res.json();
-                if (currentTenant && currentTenant.role === "SUPER_ADMIN") {
-                    setOrganizations(data.filter((org: any) => org.id === currentTenant.id));
-                } else {
-                    setOrganizations(data);
-                }
+                setOrganizations(data);
             }
         } catch (err) {
             console.error("Failed to fetch clients", err);
@@ -165,12 +161,12 @@ export default function ClientsPage() {
                 <div className="glass-card p-6 rounded-2xl border-slate-200 dark:border-white/5">
                     <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
-                            <Target className="h-6 w-6 text-amber-500" />
+                            <Signal className="h-6 w-6 text-amber-500" />
                         </div>
                         <div>
-                            <p className="text-sm text-slate-500 dark:text-muted-foreground font-medium uppercase tracking-wider">Comptes Utilisateurs</p>
+                            <p className="text-sm text-slate-500 dark:text-muted-foreground font-medium uppercase tracking-wider">Ubots (Gateways)</p>
                             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                {organizations.reduce((acc, org) => acc + (org.usersCount || 0), 0)}
+                                {organizations.reduce((acc, org) => acc + (org.gatewaysCount || 0), 0)}
                             </h3>
                         </div>
                     </div>
@@ -203,7 +199,7 @@ export default function ClientsPage() {
                                 <th className="px-6 py-4 font-semibold">Nom de l'Organisation</th>
                                 <th className="px-6 py-4 font-semibold text-center">Type</th>
                                 <th className="px-6 py-4 font-semibold text-center">Établissements (Sites)</th>
-                                <th className="px-6 py-4 font-semibold text-center">Comptes Utilisateur</th>
+                                <th className="px-6 py-4 font-semibold text-center">Ubots (Gateways)</th>
                                 <th className="px-6 py-4 font-semibold text-center">Statut Licence</th>
                                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
                             </tr>
@@ -235,7 +231,7 @@ export default function ClientsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-primary transition-colors">{org.name}</p>
-                                                    <p className="text-xs text-slate-500 dark:text-muted-foreground mt-0.5">{(org.usersCount || 0) > 0 ? "Actif" : "En configuration"}</p>
+                                                    <p className="text-xs text-slate-500 dark:text-muted-foreground mt-0.5">{(org.gatewaysCount || 0) > 0 ? "Actif" : "En configuration"}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -252,8 +248,8 @@ export default function ClientsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <div className="flex items-center justify-center">
-                                                <Target className="h-4 w-4 text-slate-400 dark:text-muted-foreground mr-1.5" />
-                                                <span className="font-bold text-slate-900 dark:text-white">{org.usersCount}</span>
+                                                <Signal className="h-4 w-4 text-slate-400 dark:text-muted-foreground mr-1.5" />
+                                                <span className="font-bold text-slate-900 dark:text-white">{org.gatewaysCount || 0}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">

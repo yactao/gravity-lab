@@ -203,9 +203,13 @@ export class AppService implements OnModuleInit {
     return orgs.map(org => {
       // Calcul du nombred 'équipements (devicesCount)
       let devicesCount = 0;
+      let gatewaysCount = 0;
       if (org.sites) {
         org.sites.forEach(site => {
-          if (site.gateways) devicesCount += site.gateways.length;
+          if (site.gateways) {
+            devicesCount += site.gateways.length;
+            gatewaysCount += site.gateways.length;
+          }
           if (site.zones) {
             site.zones.forEach(zone => {
               if (zone.sensors) devicesCount += zone.sensors.length;
@@ -218,6 +222,7 @@ export class AppService implements OnModuleInit {
         ...org,
         sitesCount: org.sites ? org.sites.length : 0,
         usersCount: org.users ? org.users.length : 0,
+        gatewaysCount,
         devicesCount
       };
     });

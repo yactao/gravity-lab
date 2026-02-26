@@ -1,5 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS BACKEND ====
-HEAD is now at 37e265e fix(dashboard): update alerts feed text matching logic to reflect seeded data
+From https://github.com/yactao/gravity-lab
+   8e3a4ea..6bdbe53  main       -> origin/main
+HEAD is now at 6bdbe53 feat(sites): add status color mapping and filter based on 'hors objectif' state from alerts
 Already up to date.
 \n==== RECOMPILATION BACKEND ====
 
