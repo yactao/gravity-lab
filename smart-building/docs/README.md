@@ -18,6 +18,9 @@ Ce répertoire contient tous les documents de référence pour comprendre, dépl
 4. **[Dossier d'Exploitation (RUN)](./04_exploitation.md)**
    Guide de déploiement, de redémarrage des services, et environnement d'exécution (PM2). Procédures standard de maintien en conditions opérationnelles (MCO).
 
+5. **[Hébergement, Réseau & Infrastructure](./05_hebergement_et_reseau.md)**
+   Topologie Serveur sur le VPS (DigitalOcean), sécurisation des ports, proxy frontal (NGINX), maintien en processus croisés via PM2 et stratégie de gestion de la BDD actuelle.
+
 ---
 
 *Généré pour la livraison de la Version 1 (V1) du produit.*
