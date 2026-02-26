@@ -97,10 +97,10 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const [readingsRes, alertsRes, energyRes, kpisRes] = await Promise.all([
-          authFetch("http://localhost:3001/api/readings?limit=50"),
-          authFetch("http://localhost:3001/api/alerts"),
-          authFetch("http://localhost:3001/api/energy/global"),
-          authFetch("http://localhost:3001/api/dashboard/kpis")
+          authFetch("/api/readings?limit=50"),
+          authFetch("/api/alerts"),
+          authFetch("/api/energy/global"),
+          authFetch("/api/dashboard/kpis")
         ]);
         if (readingsRes.ok) setReadings(await readingsRes.json());
         if (alertsRes.ok) setAlerts(await alertsRes.json());
@@ -167,7 +167,7 @@ export default function Home() {
             </button>
           </div>
           <p className="text-slate-500 dark:text-muted-foreground font-medium">
-            {isGlobalContext ? "Vue d'ensemble et pilotage en temps réel du parc immobilier UBBEE." : "Vue d'ensemble de votre parc immobilier."}
+            {isGlobalContext ? "Vue d'ensemble et pilotage en temps réel du parc immobilier Global." : "Vue d'ensemble de votre parc immobilier."}
           </p>
         </div>
 

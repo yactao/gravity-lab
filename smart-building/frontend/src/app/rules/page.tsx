@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Building, Box, Activity, Zap, Play, Send, Bot, User, Plus, ArrowRight, Save, Settings2, Thermometer, Wind, Lightbulb, Leaf, Moon } from "lucide-react";
+import { Sparkles, Building, Box, Activity, Zap, Play, Send, Bot, User, Plus, ArrowRight, Save, Settings2, Thermometer, Wind, Lightbulb, Leaf, Moon, ShieldAlert, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 
@@ -12,6 +12,8 @@ const conditions = [
     { icon: Wind, name: "CO2", operators: [">", "<"], value: "ppm" },
 ];
 const actionsList = [
+    { icon: ShieldAlert, name: "Créer Alerte Critique" },
+    { icon: AlertTriangle, name: "Créer Alerte Warning" },
     { icon: Thermometer, name: "Ajuster Consigne CVC" },
     { icon: Lightbulb, name: "Allumer/Éteindre Lumières" },
     { icon: Zap, name: "Couper Alimentation" },
@@ -218,9 +220,36 @@ export default function RulesPage() {
                                         {triggers.map((t, index) => (
                                             <div key={index} className="flex items-center gap-3 p-3 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10 relative">
                                                 {index > 0 && <div className="absolute -top-3 left-4 text-[10px] font-bold text-amber-500 bg-white dark:bg-[#0B1120] px-1">ET</div>}
-                                                <span className="text-sm font-medium text-slate-900 dark:text-white">{t.name}</span>
-                                                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded text-xs font-bold">{t.condition}</span>
-                                                <span className="text-sm font-mono text-slate-500 dark:text-muted-foreground">{t.value}</span>
+                                                <span className="text-sm font-medium text-slate-900 dark:text-white shrink-0">{t.name}</span>
+                                                <select
+                                                    value={t.condition}
+                                                    onChange={e => {
+                                                        const newTriggers = [...triggers];
+                                                        newTriggers[index].condition = e.target.value;
+                                                        setTriggers(newTriggers);
+                                                    }}
+                                                    className="w-12 h-8 bg-slate-100 dark:bg-black/50 border border-amber-500/20 text-amber-500 rounded text-xs font-bold font-mono outline-none focus:border-amber-500"
+                                                >
+                                                    <option value=">">&gt;</option>
+                                                    <option value="<">&lt;</option>
+                                                    <option value="=">=</option>
+                                                </select>
+                                                <div className="flex items-center flex-1">
+                                                    <input
+                                                        type="number"
+                                                        value={t.value}
+                                                        onChange={e => {
+                                                            const newTriggers = [...triggers];
+                                                            newTriggers[index].value = e.target.value;
+                                                            setTriggers(newTriggers);
+                                                        }}
+                                                        className="w-20 h-8 px-2 bg-slate-100 dark:bg-black/50 border border-slate-200 dark:border-white/10 border-r-0 text-slate-900 dark:text-white text-sm font-mono rounded-l outline-none focus:border-primary"
+                                                        placeholder="Valeur"
+                                                    />
+                                                    <span className="h-8 px-2 bg-slate-200 dark:bg-white/10 border border-slate-200 dark:border-white/10 border-l-0 text-slate-500 text-xs rounded-r flex items-center">
+                                                        {conditions.find(c => c.name === t.name)?.value || ""}
+                                                    </span>
+                                                </div>
                                             </div>
                                         ))}
                                         <button onClick={() => setTriggers([])} className="text-xs text-red-400 hover:text-red-300 w-full text-right mt-2">Effacer les déclencheurs</button>
@@ -251,9 +280,19 @@ export default function RulesPage() {
                                         {actions.map((act, index) => (
                                             <div key={index} className="flex items-center gap-3 p-3 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10 relative">
                                                 {index > 0 && <div className="absolute -top-3 left-4 text-[10px] font-bold text-cyan-400 bg-white dark:bg-[#0B1120] px-1">ET</div>}
-                                                <span className="text-sm font-medium text-slate-900 dark:text-white">{act.name}</span>
-                                                <ArrowRight className="h-4 w-4 text-slate-500 dark:text-muted-foreground" />
-                                                <span className="px-2 py-0.5 bg-cyan-400/20 text-cyan-300 rounded text-xs font-bold">{act.target}</span>
+                                                <span className="text-sm font-medium text-slate-900 dark:text-white shrink-0">{act.name}</span>
+                                                <ArrowRight className="h-4 w-4 text-slate-500 dark:text-muted-foreground shrink-0" />
+                                                <input
+                                                    type="text"
+                                                    value={act.target}
+                                                    onChange={e => {
+                                                        const newActions = [...actions];
+                                                        newActions[index].target = e.target.value;
+                                                        setActions(newActions);
+                                                    }}
+                                                    className="flex-1 min-w-0 h-8 px-2 bg-slate-100 dark:bg-black/50 border border-cyan-400/20 text-cyan-500 dark:text-cyan-300 rounded text-xs font-bold font-mono outline-none focus:border-cyan-400"
+                                                    placeholder="Cible / Valeur..."
+                                                />
                                             </div>
                                         ))}
                                         <button onClick={() => setActions([])} className="text-xs text-red-400 hover:text-red-300 w-full text-right mt-2">Effacer les actions</button>
