@@ -1,7 +1,5 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
-From https://github.com/yactao/gravity-lab
-   bdb3d4a..5c12a45  main       -> origin/main
-HEAD is now at 5c12a45 feat(twin): add site selector for digital twin on client dashboard
+HEAD is now at 2d56f45 feat: No-Code IoT interoperability (Drag&Drop + Universal Parser)
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -36,19 +34,20 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 14.8s
+✓ Compiled successfully in 14.7s
   Running TypeScript ...
   Collecting page data using 1 worker ...
-  Generating static pages using 1 worker (0/18) ...
-  Generating static pages using 1 worker (4/18) 
-  Generating static pages using 1 worker (8/18) 
-  Generating static pages using 1 worker (13/18) 
-✓ Generating static pages using 1 worker (18/18) in 379.7ms
+  Generating static pages using 1 worker (0/19) ...
+  Generating static pages using 1 worker (4/19) 
+  Generating static pages using 1 worker (9/19) 
+  Generating static pages using 1 worker (14/19) 
+✓ Generating static pages using 1 worker (19/19) in 733.2ms
   Finalizing page optimization ...
 
 Route (app)
 ┌ ○ /
 ├ ○ /_not-found
+├ ○ /admin/integrations/mapping
 ├ ○ /alerts
 ├ ○ /billing
 ├ ○ /clients

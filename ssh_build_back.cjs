@@ -14,8 +14,8 @@ git pull
 
 echo "\\n==== RECOMPILATION BACKEND ===="
 cd backend
+npm install
 npm run build
-rm -f database.sqlite
 
 echo "\\n==== REDEMARRAGE DE PM2 BACKEND ===="
 pm2 reload gtb-backend
@@ -27,8 +27,8 @@ conn.on('ready', () => {
         if (err) throw err;
         let output = '';
         stream.on('close', (code, signal) => {
-            fs.writeFileSync('vps_output_26.txt', output);
-            console.log('Output saved to vps_output_26.txt');
+            fs.writeFileSync('vps_output_back.txt', output);
+            console.log('Output saved to vps_output_back.txt');
             conn.end();
         }).on('data', (data) => {
             output += data;

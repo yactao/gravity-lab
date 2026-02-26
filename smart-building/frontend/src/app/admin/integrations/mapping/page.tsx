@@ -97,7 +97,7 @@ export default function MappingPage() {
                 mappings: mappedItems
             };
 
-            const res = await fetch("http://localhost:3001/api/integrations/mapping", {
+            const res = await authFetch("http://localhost:3001/api/integrations/mapping", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
