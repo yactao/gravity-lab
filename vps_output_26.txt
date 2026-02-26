@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS BACKEND ====
 From https://github.com/yactao/gravity-lab
-   8e3a4ea..6bdbe53  main       -> origin/main
-HEAD is now at 6bdbe53 feat(sites): add status color mapping and filter based on 'hors objectif' state from alerts
+   6bdbe53..a722ff6  main       -> origin/main
+HEAD is now at a722ff6 feat(clients): add gateways count and display all clients for global context
 Already up to date.
 \n==== RECOMPILATION BACKEND ====
 

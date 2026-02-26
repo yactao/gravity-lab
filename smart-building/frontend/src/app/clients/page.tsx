@@ -40,7 +40,11 @@ export default function ClientsPage() {
             const res = await authFetch("http://localhost:3001/api/organizations");
             if (res.ok) {
                 const data = await res.json();
-                setOrganizations(data);
+                if (currentTenant?.id && currentTenant.id !== '11111111-1111-1111-1111-111111111111') {
+                    setOrganizations(data.filter((org: any) => org.id === currentTenant.id));
+                } else {
+                    setOrganizations(data);
+                }
             }
         } catch (err) {
             console.error("Failed to fetch clients", err);
