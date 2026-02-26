@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Clock, MapPin, Activity, Check, Plus, Hexagon, X, MessageSquareWarning } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 import { cn } from "@/lib/utils";
@@ -20,9 +21,12 @@ interface Alert {
 
 export default function AlertsPage() {
     const { authFetch } = useTenant();
+    const searchParams = useSearchParams();
+    const initialFilter = searchParams.get('filter') || "all";
+
     const [alerts, setAlerts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<string>("all"); // 'all', 'CRITICAL', 'WARNING'
+    const [filter, setFilter] = useState<string>(initialFilter); // 'all', 'CRITICAL', 'WARNING'
     const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
     const [newTicket, setNewTicket] = useState({ message: "", severity: "WARNING" });
 
@@ -43,6 +47,13 @@ export default function AlertsPage() {
 
         fetchAlerts();
     }, []);
+
+    useEffect(() => {
+        const queryFilter = searchParams.get('filter');
+        if (queryFilter) {
+            setFilter(queryFilter);
+        }
+    }, [searchParams]);
 
     const handleAcknowledge = (id: string) => {
         // En vrai: appel API PATCH pour marquer comme non-active
