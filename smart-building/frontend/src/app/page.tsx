@@ -45,6 +45,7 @@ export default function Home() {
   const [globalEnergy, setGlobalEnergy] = useState<any[]>([]);
   const [kpis, setKpis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [chartTimeframe, setChartTimeframe] = useState<'day' | 'month'>('month');
   const [widgets, setWidgets] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('smartbuild_dashboard_widgets');
@@ -317,12 +318,12 @@ export default function Home() {
                           <p className="text-xs text-slate-500 dark:text-muted-foreground">Économies d'énergie sur l'année</p>
                         </div>
                         <div className="flex space-x-1 bg-slate-100 dark:bg-white/5 p-1 rounded-lg">
-                          <button className="px-3 py-1 rounded text-xs font-medium text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white transition-colors">Jour</button>
-                          <button className="px-3 py-1 rounded text-xs font-bold bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm">Mois</button>
+                          <button onClick={() => setChartTimeframe('day')} className={cn("px-3 py-1 rounded text-xs transition-colors", chartTimeframe === 'day' ? "font-bold bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm" : "font-medium text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white")}>Jour</button>
+                          <button onClick={() => setChartTimeframe('month')} className={cn("px-3 py-1 rounded text-xs transition-colors", chartTimeframe === 'month' ? "font-bold bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm" : "font-medium text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white")}>Mois</button>
                         </div>
                       </div>
                       <div className="flex-1 w-full relative -z-10 group-hover:z-0 transition-all">
-                        <MonthlyComparisonChart />
+                        <MonthlyComparisonChart timeframe={chartTimeframe} />
                       </div>
                     </div>
                   </SortableWidget>

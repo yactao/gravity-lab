@@ -6,14 +6,32 @@ import { useMemo } from "react";
 
 interface MonthlyComparisonChartProps {
     data?: any[];
+    timeframe?: 'day' | 'month';
 }
 
-export function MonthlyComparisonChart({ data }: MonthlyComparisonChartProps) {
+export function MonthlyComparisonChart({ data, timeframe = 'month' }: MonthlyComparisonChartProps) {
     const { theme } = useTheme();
     const isDark = theme === "dark";
 
     // Generate realistic comparative data showing energy savings
     const defaultData = useMemo(() => {
+        if (timeframe === 'day') {
+            const days = Array.from({ length: 30 }, (_, i) => `${i + 1}`);
+            return days.map((day, index) => {
+                const isWeekend = index % 7 === 5 || index % 7 === 6;
+                let baseN1 = 100 + Math.random() * 50;
+                if (isWeekend) baseN1 = baseN1 * 0.3; // Low baseline on weekends
+
+                let baseN = baseN1 * (0.80 + Math.random() * 0.10);
+
+                return {
+                    label: day,
+                    "Année N-1 (kWh)": Math.round(baseN1),
+                    "Année N (kWh)": Math.round(baseN)
+                };
+            });
+        }
+
         const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
         return months.map((month, index) => {
             // Base consumption higher in winter, lower in spring/autumn, high in summer (AC)
@@ -28,12 +46,12 @@ export function MonthlyComparisonChart({ data }: MonthlyComparisonChartProps) {
             let baseN = baseN1 * (0.80 + Math.random() * 0.05);
 
             return {
-                month,
+                label: month,
                 "Année N-1 (kWh)": Math.round(baseN1),
                 "Année N (kWh)": Math.round(baseN)
             };
         });
-    }, []);
+    }, [timeframe]);
 
     const chartData = data || defaultData;
 
@@ -49,7 +67,7 @@ export function MonthlyComparisonChart({ data }: MonthlyComparisonChartProps) {
                     stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}
                 />
                 <XAxis
-                    dataKey="month"
+                    dataKey="label"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 11, fill: isDark ? "#94a3b8" : "#64748b" }}
