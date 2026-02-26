@@ -345,20 +345,20 @@ export default function Home() {
                         <div className="p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex justify-between items-center">
                           <div className="flex items-center gap-2.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_5px_rgba(249,115,22,0.8)]"></div>
-                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Règles non déclenchées</p>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Dépassement de seuils</p>
                           </div>
                           <span className="text-xs font-bold text-orange-500">
-                            {alerts.filter(a => a.message.toLowerCase().includes('règle') || a.message.toLowerCase().includes('rule')).length || 0}
+                            {alerts.filter(a => a.message.toLowerCase().includes('co2') || a.message.toLowerCase().includes('seuil') || a.message.toLowerCase().includes('élevé')).length || 0}
                           </span>
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex justify-between items-center">
                           <div className="flex items-center gap-2.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
-                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Capteurs HS / Hors-ligne</p>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Capteurs HS / Communication</p>
                           </div>
                           <span className="text-xs font-bold text-red-500">
-                            {alerts.filter(a => a.message.toLowerCase().includes('offline') || a.message.toLowerCase().includes('timeout') || a.message.toLowerCase().includes('hs')).length || (alerts.length > 0 ? 1 : 0)}
+                            {alerts.filter(a => a.message.toLowerCase().includes('communication') || a.message.toLowerCase().includes('batterie') || a.message.toLowerCase().includes('hs') || a.message.toLowerCase().includes('offline')).length || 0}
                           </span>
                         </div>
 
@@ -368,7 +368,7 @@ export default function Home() {
                             <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">Codes erreur CVC</p>
                           </div>
                           <span className="text-xs font-bold text-rose-500">
-                            {alerts.filter(a => a.message.toLowerCase().includes('hvac') || a.message.toLowerCase().includes('cvc') || a.message.toLowerCase().includes('clim')).length || 0}
+                            {alerts.filter(a => a.message.toLowerCase().includes('cvc') || a.message.toLowerCase().includes('hvac') || a.message.toLowerCase().includes('surchauffe')).length || 0}
                           </span>
                         </div>
 
