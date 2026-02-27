@@ -21,6 +21,9 @@ Ce répertoire contient tous les documents de référence pour comprendre, dépl
 5. **[Hébergement, Réseau & Infrastructure](./05_hebergement_et_reseau.md)**
    Topologie Serveur sur le VPS (DigitalOcean), sécurisation des ports, proxy frontal (NGINX), maintien en processus croisés via PM2 et stratégie de gestion de la BDD actuelle.
 
+6. **[Copilote IA UBBEE](./06_copilot_ia.md)**
+   Fonctionnalités avancées du module IA, orchestration du Function Calling LLM, et sécurisation du contrôle des équipements (Human-in-the-Loop).
+
 ---
 
 *Généré pour la livraison de la Version 1 (V1) du produit.*
