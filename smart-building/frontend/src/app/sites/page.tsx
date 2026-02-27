@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Building2, Search, Plus, Filter, MoreVertical, MapPin, Building, Activity, Shield } from "lucide-react";
+import { Building2, Search, Plus, Filter, MapPin, Building, Activity, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 
@@ -27,6 +27,8 @@ export default function SitesListPage() {
     const [sites, setSites] = useState<Site[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const isAdmin = currentTenant?.role === "ENERGY_MANAGER" || currentTenant?.role === "SUPER_ADMIN";
 
@@ -46,6 +48,54 @@ export default function SitesListPage() {
             console.error("Failed to fetch sites", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const text = await file.text();
+            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+            // Expected CSV format: name,address,postalCode,city,type
+            let successCount = 0;
+            // Skip header if first line contains 'nom' or 'name'
+            const startIndex = lines[0].toLowerCase().includes('nom') || lines[0].toLowerCase().includes('name') ? 1 : 0;
+
+            for (let i = startIndex; i < lines.length; i++) {
+                // Split by comma or semicolon
+                const separator = lines[i].includes(';') ? ';' : ',';
+                const row = lines[i].split(separator);
+                if (row.length >= 4) {
+                    const siteData = {
+                        name: row[0].trim(),
+                        address: row[1].trim(),
+                        postalCode: row[2].trim(),
+                        city: row[3].trim(),
+                        type: row[4]?.trim() || 'Bureaux',
+                        status: 'active'
+                    };
+
+                    const res = await authFetch("http://localhost:3001/api/sites", {
+                        method: 'POST',
+                        body: JSON.stringify(siteData),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (res.ok) successCount++;
+                }
+            }
+            alert(`✅ Import terminé : ${successCount} sites créés avec succès !`);
+            fetchSites();
+        } catch (err) {
+            console.error("Erreur lors de l'import :", err);
+            alert("❌ Une erreur est survenue lors de l'import CSV.");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -86,9 +136,21 @@ export default function SitesListPage() {
 
                 {isAdmin && (
                     <div className="flex items-center gap-3">
+                        <label className={`bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center transition-all cursor-pointer shadow-[0_0_15px_rgba(30,41,59,0.2)] hover:shadow-[0_0_20px_rgba(30,41,59,0.4)] ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <Upload className="w-5 h-5 mr-2" />
+                            {isUploading ? "Importation..." : "Importer (CSV)"}
+                            <input
+                                type="file"
+                                accept=".csv"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                                disabled={isUploading}
+                                ref={fileInputRef}
+                            />
+                        </label>
                         <button onClick={() => router.push('/clients')} className="bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center transition-all">
                             <Plus className="w-5 h-5 mr-2" />
-                            Créer (via un Client)
+                            Créer un Site
                         </button>
                     </div>
                 )}
