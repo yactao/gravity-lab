@@ -7,6 +7,7 @@ import { useTenant } from "@/lib/TenantContext";
 import { GlobalSearch } from "./GlobalSearch";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
+import { WeatherWidget } from "../dashboard/WeatherWidget";
 
 export function Header() {
     const { currentTenant, logout, switchTenant, authFetch } = useTenant();
@@ -40,12 +41,15 @@ export function Header() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
     return (
-        <header className="fixed top-0 right-0 left-64 h-16 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-40 px-6 flex items-center justify-between transition-colors">
+        <header className="sticky top-0 w-full h-16 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-40 px-6 flex items-center justify-between transition-colors">
             {/* Search Bar - Global OmniSearch Component */}
             <GlobalSearch />
 
             {/* Right Actions / Profile (UBBEE mode) */}
             <div className="flex items-center space-x-6">
+
+                {/* Weather Geolocation */}
+                <WeatherWidget />
 
                 {/* Global Client Switcher */}
                 {isAdmin && organizations.length > 0 && (
