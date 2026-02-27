@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   e7c1e15..6787b18  main       -> origin/main
-HEAD is now at 6787b18 feat(ai): build glassmorphic floating copilot chat widget with human-in-the-loop permission UI
+   6787b18..f183f4f  main       -> origin/main
+HEAD is now at f183f4f style(ui): revert sidebar logo subtitle back to BY IOT-EVE
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -10,7 +10,7 @@ npm warn EBADENGINE   required: { node: '>=22.0.0', npm: '>=10.5.1' },
 npm warn EBADENGINE   current: { node: 'v20.20.0', npm: '10.8.2' }
 npm warn EBADENGINE }
 
-up to date, audited 484 packages in 2s
+up to date, audited 484 packages in 1s
 
 154 packages are looking for funding
   run `npm fund` for details
@@ -36,7 +36,7 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 22.4s
+✓ Compiled successfully in 15.5s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/19) ...
