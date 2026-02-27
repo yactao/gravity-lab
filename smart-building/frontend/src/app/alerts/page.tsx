@@ -16,6 +16,15 @@ interface Alert {
     sensor?: {
         name: string;
         type: string;
+        zone?: {
+            name: string;
+            site?: {
+                name: string;
+                organization?: {
+                    name: string;
+                }
+            }
+        }
     };
 }
 
@@ -114,13 +123,17 @@ export default function AlertsPage() {
         }
     };
 
-    // Helper pour générer un 'lieu' factice à partir du message ou du sensor
-    // Car pour l'instant le backend V1 ne relie pas complètement l'alerte au nom du site dans l'API simplifiée.
-    const extractLocation = (alert: Alert) => {
-        if (alert.message.includes('Accueil')) return "Siège Paris - Accueil";
-        if (alert.message.includes('Open Space')) return "Siège Paris - Open Space";
-        if (alert.message.includes('Conseil')) return "Siège Paris - Salle Conseil";
-        return "Bâtiment Principal";
+    const getLocationText = (alert: Alert) => {
+        if (!alert.sensor?.zone) return "Bâtiment Principal";
+        const orgName = alert.sensor.zone.site?.organization?.name;
+        const siteName = alert.sensor.zone.site?.name;
+        const zoneName = alert.sensor.zone.name;
+
+        let loc = "";
+        if (orgName) loc += `${orgName} - `;
+        if (siteName) loc += `${siteName} `;
+        if (zoneName) loc += `(${zoneName})`;
+        return loc.trim() || "Bâtiment Principal";
     };
 
     return (
@@ -249,7 +262,7 @@ export default function AlertsPage() {
                                             <div className="flex items-center text-xs text-slate-500 dark:text-muted-foreground gap-4">
                                                 <span className="flex items-center">
                                                     <MapPin className="w-3 h-3 mr-1" />
-                                                    {extractLocation(alert)}
+                                                    {getLocationText(alert)}
                                                 </span>
                                                 <span className="flex items-center">
                                                     <Hexagon className="w-3 h-3 mr-1 text-primary/70" />

@@ -432,7 +432,7 @@ export class AppService implements OnModuleInit {
     return this.alertRepo.find({
       where,
       order: { timestamp: 'DESC' },
-      relations: ['sensor', 'sensor.zone', 'sensor.zone.site'],
+      relations: ['sensor', 'sensor.zone', 'sensor.zone.site', 'sensor.zone.site.organization'],
     });
   }
 
