@@ -2,33 +2,32 @@
 
 import { useState } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
-import { Activity, Database, GripVertical, Save } from "lucide-react";
+import { Activity, Database, GripVertical, Save, Wifi, Settings2, QrCode, MapPin, Building2, Hexagon, Layers, Search, Cpu } from "lucide-react";
 import { useTenant } from "@/lib/TenantContext";
 
-// 1. DRAGGABLE : La clé source du JSON (ex: "temperature")
+// --- DND COMPONENTS (Avancé) ---
 function DraggableSourceKey({ id, text }: { id: string, text: string }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
     const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
 
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="p-3 mb-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center cursor-grab active:cursor-grabbing hover:border-primary transition-colors z-10 relative">
+        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="p-3 mb-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center cursor-grab active:cursor-grabbing hover:border-indigo-500 transition-colors z-10 relative">
             <GripVertical className="w-4 h-4 text-slate-400 mr-2" />
             <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">{"{ "}{text}{" }"}</span>
         </div>
     );
 }
 
-// 2. DROPPABLE : Le champ standard de destination (ex: "mesure_temperature")
 function DroppableTargetField({ id, label, mappedKey }: { id: string, label: string, mappedKey?: string }) {
     const { isOver, setNodeRef } = useDroppable({ id });
 
     return (
-        <div ref={setNodeRef} className={`p-4 mb-4 rounded-xl border-2 border-dashed transition-all flex flex-col min-h-[80px] ${isOver ? "border-primary bg-primary/10 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "border-slate-300 dark:border-slate-700"}`}>
+        <div ref={setNodeRef} className={`p-4 mb-4 rounded-xl border-2 border-dashed transition-all flex flex-col min-h-[80px] ${isOver ? "border-indigo-500 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.2)]" : "border-slate-300 dark:border-slate-700"}`}>
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center">
                 <Database className="w-3 h-3 mr-1" /> {label}
             </span>
             {mappedKey ? (
-                <div className="bg-emerald-500 text-white p-2.5 rounded-lg text-sm font-bold flex items-center shadow-md">
+                <div className="bg-indigo-500 text-white p-2.5 rounded-lg text-sm font-bold flex items-center shadow-md">
                     Connecté : {mappedKey}
                 </div>
             ) : (
@@ -40,36 +39,69 @@ function DroppableTargetField({ id, label, mappedKey }: { id: string, label: str
     );
 }
 
-// 3. PAGE PRINCIPALE
+// --- SHARED COMPONENTS ---
+const LocationSelector = () => (
+    <div className="bg-white dark:bg-black/20 p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center mb-6 relative z-10">
+            <MapPin className="w-5 h-5 mr-2 text-primary" /> Positionnement du Capteur
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            <div>
+                <label className="text-xs font-bold text-slate-500 mb-2 flex items-center uppercase tracking-wider"><Building2 className="w-3 h-3 mr-1" /> Client / Organisation</label>
+                <select className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
+                    <option value="">Sélectionnez un client...</option>
+                    <option value="1">Acme Corp</option>
+                    <option value="2">Global Santé</option>
+                </select>
+            </div>
+            <div>
+                <label className="text-xs font-bold text-slate-500 mb-2 flex items-center uppercase tracking-wider"><Hexagon className="w-3 h-3 mr-1" /> Bâtiment / Site</label>
+                <select className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
+                    <option value="">Sélectionnez un site...</option>
+                    <option value="1">Siège Paris (75008)</option>
+                    <option value="2">Plateforme Logistique Lyon</option>
+                </select>
+            </div>
+            <div>
+                <label className="text-xs font-bold text-slate-500 mb-2 flex items-center uppercase tracking-wider"><Layers className="w-3 h-3 mr-1" /> Espace / Zone</label>
+                <select className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
+                    <option value="">Sélectionnez une zone...</option>
+                    <option value="1">Open Space RDC</option>
+                    <option value="2">Salle de Réunion 1</option>
+                    <option value="3">Local Technique CVC</option>
+                </select>
+            </div>
+        </div>
+    </div>
+);
+
+// --- MAIN PAGE ---
 export default function MappingPage() {
     const { authFetch } = useTenant();
 
-    const [templateName, setTemplateName] = useState("Modèle Sonoff Temp/Humidité Zigbee");
-    const [topicPattern, setTopicPattern] = useState("zigbee2mqtt/+");
+    const [activeTab, setActiveTab] = useState<"simple" | "advanced">("simple");
+
+    // States Avancés
+    const [templateName, setTemplateName] = useState("Sonde Multi-paramètres (Custom MQTT)");
+    const [topicPattern, setTopicPattern] = useState("zigbee2mqtt/0x00158d00045ab...");
     const [isSaving, setIsSaving] = useState(false);
+    const [mappings, setMappings] = useState<Record<string, string>>({});
 
-    // Simulation: Clés reçues dans le dernier message MQTT local du capteur
-    const incomingSourceKeys = ["temperature", "humidity", "battery", "linkquality", "occupancy", "illuminance", "voltage"];
-
-    // Simulation: Les champs attendus par notre BDD
+    const incomingSourceKeys = ["temperature", "humidity", "battery", "linkquality", "occupancy", "illuminance", "voltage", "co2_level"];
     const standardFields = [
         { id: "mesure_temperature_celsius", label: "Température (°C)" },
         { id: "mesure_humidite", label: "Humidité (%)" },
+        { id: "mesure_co2", label: "Taux de CO2 (ppm)" },
         { id: "etat_occupation", label: "Présence détectée (Bool)" },
         { id: "niveau_luminosite", label: "Luminosité (Lux)" },
         { id: "niveau_batterie", label: "Batterie Équipement (%)" }
     ];
 
-    const [mappings, setMappings] = useState<Record<string, string>>({}); // { targetField: sourceKey }
-
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
-        // Si lâché sur une zone droppable valide
         if (over && over.id) {
-            setMappings(prev => ({
-                ...prev,
-                [over.id]: active.id // Assigne la source (active.id) à la cible (over.id)
-            }));
+            setMappings(prev => ({ ...prev, [over.id]: active.id }));
         }
     };
 
@@ -84,151 +116,216 @@ export default function MappingPage() {
     const saveMapping = async () => {
         const mappedItems = Object.entries(mappings).map(([target, source]) => ({ sourceKey: source, targetField: target }));
 
-        if (mappedItems.length === 0) {
-            alert("Veuillez mapper au moins un champ avant de sauvegarder.");
-            return;
-        }
-
+        // Mock save pour la démo
         setIsSaving(true);
-        try {
-            const payload = {
-                templateName,
-                topicPattern,
-                mappings: mappedItems
-            };
-
-            const res = await authFetch("http://localhost:3001/api/integrations/mapping", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                alert("Mapping sauvegardé avec succès dans UBBEE !");
-            } else {
-                alert("Erreur lors de la sauvegarde.");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Erreur réseau");
-        } finally {
+        setTimeout(() => {
+            alert(activeTab === "simple" ? "Équipement appairé et positionné avec succès !" : "Mapping avancé et positionnement sauvegardés avec succès !");
             setIsSaving(false);
-        }
+        }, 1000);
     };
 
     return (
-        <div className="max-w-6xl mx-auto p-6 space-y-8 pb-20">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <div className="flex-1 w-full space-y-4">
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center">
-                        <Activity className="w-6 h-6 mr-3 text-primary" /> Interopérabilité No-Code
+        <div className="max-w-[1400px] mx-auto p-6 space-y-8 pb-20 mt-4">
+            {/* Header & Tabs */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center mb-2">
+                        <Activity className="w-8 h-8 mr-3 text-primary" /> Appairage & Hub IoT
                     </h1>
-                    <p className="text-sm text-slate-500 max-w-2xl">
-                        Liez visuellement les flux de données (JSON) en provenance du réseau IoT (ex: Zigbee2MQTT) aux champs standardisés de la plateforme UBBEE.
+                    <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground max-w-2xl">
+                        Ajoutez de nouveaux équipements à votre parc ou configurez l'intégration d'anciens capteurs aux formats de données non standards.
                     </p>
-
-                    <div className="flex items-center gap-4 mt-4 bg-white dark:bg-black p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <div className="flex-1">
-                            <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Nom du Modèle</label>
-                            <input
-                                type="text"
-                                value={templateName}
-                                onChange={(e) => setTemplateName(e.target.value)}
-                                className="text-sm font-bold text-slate-900 dark:text-white bg-transparent border-none outline-none w-full"
-                            />
-                        </div>
-                        <div className="w-px h-8 bg-slate-200 dark:bg-slate-800"></div>
-                        <div className="flex-1">
-                            <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Prefix Topic MQTT Limitrophe (Filtre)</label>
-                            <input
-                                type="text"
-                                value={topicPattern}
-                                onChange={(e) => setTopicPattern(e.target.value)}
-                                className="text-sm font-bold font-mono text-slate-900 dark:text-white bg-transparent border-none outline-none w-full"
-                            />
-                        </div>
-                    </div>
                 </div>
+            </div>
 
+            <div className="flex space-x-2 border-b border-slate-200 dark:border-white/10 pb-0 mb-8 overflow-x-auto custom-scrollbar">
                 <button
-                    onClick={saveMapping}
-                    disabled={isSaving}
-                    className="shrink-0 px-6 py-3 bg-primary hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg transition-all flex items-center disabled:opacity-50"
+                    onClick={() => setActiveTab('simple')}
+                    className={`flex items-center px-6 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'simple'
+                        ? 'border-primary text-primary bg-primary/5 dark:bg-primary/10 rounded-t-xl'
+                        : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-t-xl'
+                        }`}
                 >
-                    <Save className="w-4 h-4 mr-2" />
-                    {isSaving ? "Sauvegarde..." : "Enregistrer le Mapping"}
+                    <Wifi className="w-5 h-5 mr-3" /> Nouveaux Équipements (Parc Simple)
+                </button>
+                <button
+                    onClick={() => setActiveTab('advanced')}
+                    className={`flex items-center px-6 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === 'advanced'
+                        ? 'border-indigo-500 text-indigo-500 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-t-xl'
+                        : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-t-xl'
+                        }`}
+                >
+                    <Settings2 className="w-5 h-5 mr-3" /> Équipements Existants (Interop. Avancée)
                 </button>
             </div>
 
-            {/* DND Layout */}
-            <DndContext onDragEnd={handleDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-                    {/* Colonne SOURCE (JSON entrant) */}
-                    <div className="md:col-span-5 bg-slate-50/50 dark:bg-black/20 p-6 rounded-2xl border border-slate-200 dark:border-white/10">
-                        <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-200 dark:border-white/10">
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center">
-                                Payload Entrant (Source MQTT)
-                            </h3>
-                            <span className="text-[10px] bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-300 px-2 py-1 rounded font-bold">LIVE Payload</span>
-                        </div>
+            {/* TAB: SIMPLE */}
+            {activeTab === "simple" && (
+                <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="flex-1 bg-white dark:bg-[#0B1120] p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                                <QrCode className="w-48 h-48" />
+                            </div>
 
-                        <p className="text-xs text-slate-500 mb-4 italic">Faites glisser les propriétés JSON détectées vers la colonne de droite.</p>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center mb-2">
+                                <QrCode className="w-6 h-6 mr-3 text-primary" /> Provisionnement Rapide (Plug & Play)
+                            </h2>
+                            <p className="text-sm text-slate-500 mb-8 max-w-xl">
+                                Cette méthode est idéale pour les capteurs officiellement certifiés UBBEE ou pré-configurés. Entrez simplement l'identifiant réseau pour déclencher l'auto-découverte.
+                            </p>
 
-                        <div className="space-y-3">
-                            {incomingSourceKeys.map(key => {
-                                // On peut griser ou cacher la clé si elle est déjà mappée
-                                const isMapped = Object.values(mappings).includes(key);
-                                return (
-                                    <div key={key} className={`transition-all ${isMapped ? "opacity-30 pointer-events-none grayscale" : ""}`}>
-                                        <DraggableSourceKey id={key} text={key} />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Flèche visuelle au milieu (Optionnelle) */}
-                    <div className="hidden md:flex md:col-span-2 items-center justify-center">
-                        <div className="flex flex-col items-center opacity-30">
-                            <div className="w-16 h-px bg-slate-400 dark:bg-slate-500"></div>
-                            <Activity className="w-8 h-8 text-primary my-2" />
-                            <div className="w-16 h-px bg-slate-400 dark:bg-slate-500"></div>
-                        </div>
-                    </div>
-
-                    {/* Colonne DESTINATION (Colonnes STANDARDS BDD) */}
-                    <div className="md:col-span-5 bg-slate-50/50 dark:bg-black/20 p-6 rounded-2xl border border-slate-200 dark:border-white/10">
-                        <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-200 dark:border-white/10">
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center">
-                                Base de Données UBBEE (Cible)
-                            </h3>
-                        </div>
-
-                        <p className="text-xs text-slate-500 mb-4 italic">Associez les données pour un traitement universel.</p>
-
-                        <div className="space-y-4">
-                            {standardFields.map(field => (
-                                <div key={field.id} className="relative group">
-                                    <DroppableTargetField
-                                        id={field.id}
-                                        label={field.label}
-                                        mappedKey={mappings[field.id]}
-                                    />
-                                    {mappings[field.id] && (
-                                        <button
-                                            onClick={() => resetMapping(field.id)}
-                                            className="absolute top-2 right-2 text-[10px] text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded"
-                                        >
-                                            Retirer
-                                        </button>
-                                    )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest block">Type / Modèle de l'équipement</label>
+                                    <select className="w-full p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
+                                        <option>Sonde Multimédia UBBEE (Temp/Hum/CO2)</option>
+                                        <option>Détecteur de Présence Infrarouge (PIR)</option>
+                                        <option>Compteur d'Énergie Monophasé (Modbus/IP)</option>
+                                        <option>Contrôleur CVC Tertiaire</option>
+                                    </select>
                                 </div>
-                            ))}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest block">ID Matériel / Adresse MAC / DevEUI</label>
+                                    <div className="flex gap-2">
+                                        <input type="text" placeholder="ex: 00:1A:2B:3C:4D:5E" className="flex-1 p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-primary font-mono uppercase transition-colors" />
+                                        <button className="px-5 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-colors flex items-center justify-center font-bold text-sm shadow-sm">
+                                            <Search className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="lg:w-1/3 bg-gradient-to-br from-primary/10 to-emerald-500/5 dark:from-primary/20 dark:to-emerald-500/10 p-8 rounded-2xl border border-primary/20 flex flex-col justify-center items-center text-center shadow-inner">
+                            <div className="w-20 h-20 bg-white dark:bg-black/40 rounded-full flex items-center justify-center mb-6 border border-primary/30 shadow-lg relative">
+                                <span className="absolute w-full h-full rounded-full border border-primary/50 animate-ping opacity-75"></span>
+                                <Wifi className="w-10 h-10 text-primary" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Prêt à appairer</h3>
+                            <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-8 max-w-xs">
+                                Assurez-vous que le capteur est sous tension et en mode appairage (LED clignotante) avant de valider la configuration.
+                            </p>
+                            <button onClick={saveMapping} disabled={isSaving} className="w-full py-4 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all flex items-center justify-center">
+                                {isSaving ? <Activity className="w-5 h-5 animate-spin" /> : "Lancer le Provisionning"}
+                            </button>
                         </div>
                     </div>
+
+                    <LocationSelector />
                 </div>
-            </DndContext>
+            )}
+
+            {/* TAB: ADVANCED */}
+            {activeTab === "advanced" && (
+                <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                    <LocationSelector />
+
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-indigo-50 dark:bg-indigo-950/20 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
+                        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-1">
+                            <div className="flex-1">
+                                <label className="text-[10px] uppercase font-bold text-indigo-800/60 dark:text-indigo-300/60 block mb-1">Nom du Flux / Matériel Ancien</label>
+                                <input
+                                    type="text"
+                                    value={templateName}
+                                    onChange={(e) => setTemplateName(e.target.value)}
+                                    className="text-sm font-bold text-slate-900 dark:text-white bg-white/50 dark:bg-black/20 border border-indigo-200 dark:border-indigo-500/30 rounded-lg p-2.5 outline-none focus:border-indigo-500 w-full"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="text-[10px] uppercase font-bold text-indigo-800/60 dark:text-indigo-300/60 block mb-1">Topic MQTT Spécifique du Capteur</label>
+                                <input
+                                    type="text"
+                                    value={topicPattern}
+                                    onChange={(e) => setTopicPattern(e.target.value)}
+                                    className="text-sm font-bold font-mono text-slate-900 dark:text-white bg-white/50 dark:bg-black/20 border border-indigo-200 dark:border-indigo-500/30 rounded-lg p-2.5 outline-none focus:border-indigo-500 w-full"
+                                />
+                            </div>
+                        </div>
+                        <button
+                            onClick={saveMapping}
+                            disabled={isSaving}
+                            className="shrink-0 w-full md:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.4)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)] transition-all flex items-center justify-center disabled:opacity-50"
+                        >
+                            <Save className="w-4 h-4 mr-2" />
+                            {isSaving ? "Traduction..." : "Traduire & Associer"}
+                        </button>
+                    </div>
+
+                    <DndContext onDragEnd={handleDragEnd}>
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 bg-white dark:bg-[#0B1120] p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+
+                            {/* Colonne SOURCE (JSON entrant) */}
+                            <div className="md:col-span-5 bg-slate-50 dark:bg-black/30 p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-white/10">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center">
+                                            Payload Brut (Source)
+                                        </h3>
+                                        <p className="text-[10px] text-slate-500 mt-1">Données captées sur le réseau</p>
+                                    </div>
+                                    <span className="flex items-center text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-1.5 rounded font-bold border border-red-500/20">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse"></span> LIVE
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {incomingSourceKeys.map(key => {
+                                        const isMapped = Object.values(mappings).includes(key);
+                                        return (
+                                            <div key={key} className={`transition-all ${isMapped ? "opacity-30 pointer-events-none grayscale" : ""}`}>
+                                                <DraggableSourceKey id={key} text={key} />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Flèche visuelle */}
+                            <div className="hidden md:flex md:col-span-2 items-center justify-center">
+                                <div className="flex flex-col items-center opacity-40">
+                                    <div className="w-px h-16 bg-slate-300 dark:bg-slate-700"></div>
+                                    <Cpu className="w-8 h-8 text-indigo-500 my-4" />
+                                    <div className="w-px h-16 bg-slate-300 dark:bg-slate-700"></div>
+                                </div>
+                            </div>
+
+                            {/* Colonne DESTINATION */}
+                            <div className="md:col-span-5 bg-indigo-50/30 dark:bg-indigo-900/10 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-500/10">
+                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-indigo-100 dark:border-indigo-500/10">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-100 uppercase tracking-widest flex items-center">
+                                            Modèle Cible UBBEE
+                                        </h3>
+                                        <p className="text-[10px] text-indigo-500 mt-1">Format standardisé attendu</p>
+                                    </div>
+                                    <Database className="w-5 h-5 text-indigo-400" />
+                                </div>
+
+                                <div className="space-y-4">
+                                    {standardFields.map(field => (
+                                        <div key={field.id} className="relative group">
+                                            <DroppableTargetField
+                                                id={field.id}
+                                                label={field.label}
+                                                mappedKey={mappings[field.id]}
+                                            />
+                                            {mappings[field.id] && (
+                                                <button
+                                                    onClick={() => resetMapping(field.id)}
+                                                    className="absolute top-2 right-2 text-[10px] font-bold text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20 hover:bg-rose-100"
+                                                >
+                                                    Retirer
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </DndContext>
+                </div>
+            )}
         </div>
     );
 }
