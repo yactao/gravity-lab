@@ -84,16 +84,21 @@ export default function ClientDetailsPage() {
     const handleUpdateSite = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const { name, type, address, postalCode, city } = editingSite;
             const res = await authFetch(`http://localhost:3001/api/sites/${editingSite.id}`, {
                 method: "PUT",
-                body: JSON.stringify(editingSite)
+                body: JSON.stringify({ name, type, address, postalCode, city })
             });
             if (res.ok) {
                 setIsEditSiteOpen(false);
                 await fetchClientDetails();
+            } else {
+                console.error("Erreur serveur lors de la mise à jour");
+                alert("Une erreur est survenue lors de la mise à jour du site.");
             }
         } catch (e) {
             console.error(e);
+            alert("Erreur de connexion.");
         }
     };
 
