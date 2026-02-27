@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   4288763..0f77711  main       -> origin/main
-HEAD is now at 0f77711 feat(ui): split KPI block into 5 separate draggable independent widgets
+   0f77711..503bce1  main       -> origin/main
+HEAD is now at 503bce1 feat(ui): implement user invitation system with role delegation in global settings
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -10,7 +10,7 @@ npm warn EBADENGINE   required: { node: '>=22.0.0', npm: '>=10.5.1' },
 npm warn EBADENGINE   current: { node: 'v20.20.0', npm: '10.8.2' }
 npm warn EBADENGINE }
 
-up to date, audited 484 packages in 4s
+up to date, audited 484 packages in 2s
 
 154 packages are looking for funding
   run `npm fund` for details
@@ -36,14 +36,14 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 25.7s
+✓ Compiled successfully in 17.7s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/19) ...
   Generating static pages using 1 worker (4/19) 
   Generating static pages using 1 worker (9/19) 
   Generating static pages using 1 worker (14/19) 
-✓ Generating static pages using 1 worker (19/19) in 465.4ms
+✓ Generating static pages using 1 worker (19/19) in 407.8ms
   Finalizing page optimization ...
 
 Route (app)

@@ -304,7 +304,7 @@ export default function SettingsPage() {
                                     <div className="flex gap-2">
                                         <code className="flex-1 bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 py-2 px-3 rounded-lg text-xs font-mono text-slate-600 dark:text-slate-300 overflow-hidden text-ellipsis">sk_live_9f8d7c6b5a4...</code>
                                         <button className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white text-xs font-bold px-4 rounded-lg hover:bg-slate-300 dark:hover:bg-white/20 transition-colors">Copier</button>
-                                        <button className="bg-primary/20 text-primary border border-primary/30 text-xs font-bold px-4 rounded-lg hover:bg-primary hover:text-white transition-colors">Revaincre la clé</button>
+                                        <button className="bg-primary/20 text-primary border border-primary/30 text-xs font-bold px-4 rounded-lg hover:bg-primary hover:text-white transition-colors">Renouveler la clé</button>
                                     </div>
                                 </div>
 
