@@ -105,19 +105,14 @@ export default function LicensePage() {
                                 <Edit2 className="w-4 h-4 mr-2" /> Modifier l'abonnement
                             </button>
                         )}
-                        <button className="w-full py-3 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl font-semibold transition-colors flex items-center justify-center">
+                        <button
+                            onClick={isAdmin ? () => setIsEditModalOpen(true) : undefined}
+                            className={cn(
+                                "w-full py-3 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl font-semibold transition-colors flex items-center justify-center",
+                                isAdmin ? "" : "opacity-50 cursor-not-allowed"
+                            )}>
                             Voir les offres <ArrowRight className="w-4 h-4 ml-2" />
                         </button>
-                    </div>
-
-                    <div className="glass-card rounded-2xl p-6 bg-slate-100 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10 flex items-start">
-                        <AlertCircle className="w-6 h-6 text-orange-400 mr-4 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Mise à jour prochaine</h4>
-                            <p className="text-xs text-slate-500 dark:text-muted-foreground leading-relaxed">
-                                Le renouvellement automatique est activé. Votre prochaine facture sera éditée le <strong>01 Décembre 2023</strong>.
-                            </p>
-                        </div>
                     </div>
                 </div>
 
@@ -184,22 +179,33 @@ export default function LicensePage() {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    {/* Infrastructure Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
-                            <Cloud className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-300 dark:text-white/5 group-hover:scale-110 transition-transform duration-500" />
-                            <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1 relative z-10">Région Cloud</h4>
-                            <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">eu-west-3 (Paris)</p>
-                            <p className="text-xs font-mono text-slate-400 mt-4 relative z-10">Conforme RGPD</p>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
-                            <Zap className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-300 dark:text-white/5 group-hover:scale-110 transition-transform duration-500" />
-                            <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1 relative z-10">Support Technique</h4>
-                            <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">Priorité SLA 99.9%</p>
-                            <p className="text-xs font-mono text-slate-400 mt-4 relative z-10">Garantie d'intervention 2H</p>
-                        </div>
-                    </div>
+            {/* Infrastructure & Billing Info (3 aligned blocks) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                {/* Block 1: Mise à jour */}
+                <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
+                    <AlertCircle className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-300 dark:text-white/5 group-hover:scale-110 transition-transform duration-500" />
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1 relative z-10">Prochaine Facture</h4>
+                    <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">01 Décembre 2023</p>
+                    <p className="text-xs font-mono text-slate-400 mt-4 relative z-10 text-orange-500/80">Renouvellement Automatique</p>
+                </div>
+
+                {/* Block 2: Region Cloud */}
+                <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
+                    <Cloud className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-300 dark:text-white/5 group-hover:scale-110 transition-transform duration-500" />
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1 relative z-10">Région Cloud</h4>
+                    <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">eu-west-3 (Paris)</p>
+                    <p className="text-xs font-mono text-slate-400 mt-4 relative z-10">Conforme RGPD</p>
+                </div>
+
+                {/* Block 3: Support */}
+                <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
+                    <Zap className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-300 dark:text-white/5 group-hover:scale-110 transition-transform duration-500" />
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1 relative z-10">Support Technique</h4>
+                    <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">Priorité SLA 99.9%</p>
+                    <p className="text-xs font-mono text-slate-400 mt-4 relative z-10">Garantie d'intervention 2H</p>
                 </div>
             </div>
 
