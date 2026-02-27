@@ -18,6 +18,7 @@ npm install
 npm run build
 
 echo "\\n==== REDEMARRAGE DE PM2 BACKEND ===="
+cd ..
 pm2 reload ecosystem.config.cjs --update-env
 `;
 
