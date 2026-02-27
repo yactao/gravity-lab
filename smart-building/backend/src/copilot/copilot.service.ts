@@ -23,7 +23,7 @@ export class CopilotService {
     private apiKey: string;
 
     constructor(private readonly appService: AppService) {
-        this.apiKey = process.env.DEEPSEEK_API_KEY || '';
+        this.apiKey = (process.env.DEEPSEEK_API_KEY || '').replace(/['"]/g, '');
         if (!this.apiKey) {
             this.logger.warn('DEEPSEEK_API_KEY is not defined in .env! Copilot will not work.');
         }
