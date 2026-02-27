@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   68944b7..ae0fe5b  main       -> origin/main
-HEAD is now at ae0fe5b feat(ui): add real-time adapted weather widget based on geolocation
+   ae0fe5b..4288763  main       -> origin/main
+HEAD is now at 4288763 style: remove old static weather widgets from dashboards
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -36,14 +36,14 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 14.4s
+✓ Compiled successfully in 15.7s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/19) ...
   Generating static pages using 1 worker (4/19) 
   Generating static pages using 1 worker (9/19) 
   Generating static pages using 1 worker (14/19) 
-✓ Generating static pages using 1 worker (19/19) in 377.2ms
+✓ Generating static pages using 1 worker (19/19) in 455.2ms
   Finalizing page optimization ...
 
 Route (app)

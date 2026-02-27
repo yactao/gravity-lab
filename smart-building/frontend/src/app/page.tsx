@@ -52,7 +52,11 @@ export default function Home() {
       if (saved) return JSON.parse(saved);
     }
     return {
-      stats: true,
+      healthScore: true,
+      stat1: true,
+      stat2: true,
+      stat3: true,
+      stat4: true,
       comparativeChart: true,
       alertsFeed: true,
       iotFeed: true,
@@ -60,10 +64,10 @@ export default function Home() {
   });
   const [widgetOrder, setWidgetOrder] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('smartbuild_dashboard_order');
+      const saved = localStorage.getItem('smartbuild_dashboard_order_v2');
       if (saved) return JSON.parse(saved);
     }
-    return ['stats', 'comparativeChart', 'alertsFeed', 'iotFeed'];
+    return ['healthScore', 'stat1', 'stat2', 'stat3', 'stat4', 'comparativeChart', 'alertsFeed', 'iotFeed'];
   });
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
@@ -72,7 +76,7 @@ export default function Home() {
   }, [widgets]);
 
   useEffect(() => {
-    localStorage.setItem('smartbuild_dashboard_order', JSON.stringify(widgetOrder));
+    localStorage.setItem('smartbuild_dashboard_order_v2', JSON.stringify(widgetOrder));
   }, [widgetOrder]);
 
   const sensors = useSensors(
@@ -187,118 +191,85 @@ export default function Home() {
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={widgetOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 grid-flow-row-dense">
+          <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 grid-flow-row-dense">
             {widgetOrder.map(id => {
-              if (id === 'stats' && widgets.stats) {
-                return (
-                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-12">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 h-full">
-                      <div
-                        className={cn(
-                          "lg:col-span-1 glass-card p-6 rounded-2xl flex flex-col justify-center items-center border-primary/20 relative overflow-hidden group transition-all duration-300",
-                          "cursor-pointer hover:shadow-lg hover:-translate-y-1"
-                        )}
-                        onClick={() => router.push('/network')}
-                      >
-                        <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-2 relative z-10">Health Score Parc</p>
-                        <div className="relative z-10 flex items-baseline">
-                          <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{kpis?.globalHealthScore !== undefined ? kpis.globalHealthScore : healthScore}</span>
-                          <span className="text-xl font-bold text-primary ml-1">/100</span>
-                        </div>
-                        <p className="text-xs text-primary mt-2 flex items-center relative z-10 font-medium group-hover:underline">
-                          {(kpis?.globalHealthScore || healthScore) > 80 ? 'Excellent état, voir détails' : 'Attention requise, voir détails'}
-                        </p>
-                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
-                      </div>
 
-                      <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {isGlobalContext && kpis ? (
-                          <>
-                            <StatsCard
-                              title="Bâtiments Gérés"
-                              value={kpis.totalSites.toString()}
-                              trend={`${kpis.totalClients} Clients`}
-                              trendUp={true}
-                              icon={Building}
-                              color="cyan"
-                              onClick={() => router.push('/sites')}
-                            />
-                            <StatsCard
-                              title="Incidents en Cours"
-                              value={kpis.activeIncidents.toString()}
-                              trend={`${kpis.criticalAlerts} Critiques`}
-                              trendUp={kpis.activeIncidents === 0}
-                              icon={AlertOctagon}
-                              color={kpis.activeIncidents > 0 ? "red" : "green"}
-                              onClick={() => router.push('/alerts')}
-                            />
-                            <StatsCard
-                              title="Sites Hors Objectifs"
-                              value={kpis.outOfTargetSites.toString()}
-                              trend={kpis.outOfTargetSites > 0 ? "À surveiller" : "Optimal"}
-                              trendUp={kpis.outOfTargetSites === 0}
-                              icon={Target}
-                              color={kpis.outOfTargetSites > 0 ? "orange" : "green"}
-                              onClick={() => router.push('/sites?filter=out_of_target')} // Note: query param might need implementation on target page
-                            />
-                            <StatsCard
-                              title="État de la Flotte IoT"
-                              value={kpis.totalSensors.toString()}
-                              trend={`${kpis.offlineGateways} GW hors-ligne`}
-                              trendUp={kpis.offlineGateways === 0}
-                              icon={Server}
-                              color={kpis.offlineGateways > 0 ? "orange" : "cyan"}
-                              onClick={() => router.push('/network')}
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <StatsCard
-                              title="Consommation du Parc"
-                              value={energy ? `${energy.toFixed(0)} W` : "-- W"}
-                              trend={energy ? "+1.2%" : "..."}
-                              trendUp={false}
-                              icon={Zap}
-                              color="cyan"
-                              onClick={() => router.push('/energy')}
-                            />
-                            <StatsCard
-                              title="Température Moyenne"
-                              value={temp ? `${temp.toFixed(1)}°C` : "--°C"}
-                              trend={temp ? "-0.1%" : "..."}
-                              trendUp={true}
-                              icon={Thermometer}
-                              color="orange"
-                            />
-                            <StatsCard
-                              title="Qualité d'Air (CO2)"
-                              value={co2 ? `${co2.toFixed(0)} ppm` : "-- ppm"}
-                              trend="Stable"
-                              trendUp={true}
-                              icon={Wind}
-                              color="green"
-                            />
-                            <StatsCard
-                              title="Alertes Actives"
-                              value={alerts.length.toString()}
-                              trend={alerts.length > 0 ? "+X" : "Stable"}
-                              trendUp={alerts.length === 0}
-                              icon={AlertTriangle}
-                              color={alerts.length > 0 ? "red" : "purple"}
-                              onClick={() => router.push('/alerts')}
-                            />
-                          </>
-                        )}
+              if (id === 'healthScore' && widgets.healthScore) {
+                return (
+                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-2">
+                    <div
+                      className={cn(
+                        "h-full glass-card p-6 rounded-2xl flex flex-col justify-center items-center border-primary/20 relative overflow-hidden group transition-all duration-300",
+                        "cursor-pointer hover:shadow-lg hover:-translate-y-1"
+                      )}
+                      onClick={() => router.push('/network')}
+                    >
+                      <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+                      <p className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-2 relative z-10 text-center">Health Score</p>
+                      <div className="relative z-10 flex items-baseline">
+                        <span className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{kpis?.globalHealthScore !== undefined ? kpis.globalHealthScore : healthScore}</span>
+                        <span className="text-lg font-bold text-primary ml-1">/100</span>
                       </div>
+                      <p className="text-[10px] text-primary mt-2 flex items-center relative z-10 font-medium group-hover:underline text-center">
+                        {(kpis?.globalHealthScore || healthScore) > 80 ? 'Excellent' : 'Attention requise'}
+                      </p>
+                      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
                     </div>
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'stat1' && widgets.stat1) {
+                return (
+                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-2 h-full">
+                    {isGlobalContext && kpis ? (
+                      <StatsCard title="Bâtiments Gérés" value={kpis.totalSites.toString()} trend={`${kpis.totalClients} Clients`} trendUp={true} icon={Building} color="cyan" onClick={() => router.push('/sites')} />
+                    ) : (
+                      <StatsCard title="Conso. du Parc" value={energy ? `${energy.toFixed(0)} W` : "-- W"} trend={energy ? "+1.2%" : "..."} trendUp={false} icon={Zap} color="cyan" onClick={() => router.push('/energy')} />
+                    )}
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'stat2' && widgets.stat2) {
+                return (
+                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-2 h-full">
+                    {isGlobalContext && kpis ? (
+                      <StatsCard title="Incidents en Cours" value={kpis.activeIncidents.toString()} trend={`${kpis.criticalAlerts} Critiques`} trendUp={kpis.activeIncidents === 0} icon={AlertOctagon} color={kpis.activeIncidents > 0 ? "red" : "green"} onClick={() => router.push('/alerts')} />
+                    ) : (
+                      <StatsCard title="Temp. Moyenne" value={temp ? `${temp.toFixed(1)}°C` : "--°C"} trend={temp ? "-0.1%" : "..."} trendUp={true} icon={Thermometer} color="orange" />
+                    )}
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'stat3' && widgets.stat3) {
+                return (
+                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-2 h-full">
+                    {isGlobalContext && kpis ? (
+                      <StatsCard title="Sites Hors Objectifs" value={kpis.outOfTargetSites.toString()} trend={kpis.outOfTargetSites > 0 ? "À surveiller" : "Optimal"} trendUp={kpis.outOfTargetSites === 0} icon={Target} color={kpis.outOfTargetSites > 0 ? "orange" : "green"} onClick={() => router.push('/sites?filter=out_of_target')} />
+                    ) : (
+                      <StatsCard title="Qualité Air (CO2)" value={co2 ? `${co2.toFixed(0)} ppm` : "-- ppm"} trend="Stable" trendUp={true} icon={Wind} color="green" />
+                    )}
+                  </SortableWidget>
+                );
+              }
+
+              if (id === 'stat4' && widgets.stat4) {
+                return (
+                  <SortableWidget key={id} id={id} className="col-span-1 lg:col-span-2 h-full">
+                    {isGlobalContext && kpis ? (
+                      <StatsCard title="État Flotte IoT" value={kpis.totalSensors.toString()} trend={`${kpis.offlineGateways} GW off`} trendUp={kpis.offlineGateways === 0} icon={Server} color={kpis.offlineGateways > 0 ? "orange" : "cyan"} onClick={() => router.push('/network')} />
+                    ) : (
+                      <StatsCard title="Alertes Actives" value={alerts.length.toString()} trend={alerts.length > 0 ? "+X" : "Stable"} trendUp={alerts.length === 0} icon={AlertTriangle} color={alerts.length > 0 ? "red" : "purple"} onClick={() => router.push('/alerts')} />
+                    )}
                   </SortableWidget>
                 );
               }
 
               if (id === 'comparativeChart' && widgets.comparativeChart) {
                 return (
-                  <SortableWidget key={id} id={id} className={cn("flex", (widgets.alertsFeed || widgets.iotFeed) ? "col-span-1 lg:col-span-8 lg:row-span-2" : "col-span-1 lg:col-span-12")}>
+                  <SortableWidget key={id} id={id} className={cn("flex", (widgets.alertsFeed || widgets.iotFeed) ? "col-span-1 lg:col-span-6 lg:row-span-2" : "col-span-1 lg:col-span-10")}>
                     <div className="glass-card w-full p-6 h-[460px] rounded-2xl flex flex-col border-slate-200 dark:border-white/5">
                       <div className="flex justify-between items-center mb-6">
                         <div>
@@ -320,7 +291,7 @@ export default function Home() {
 
               if (id === 'alertsFeed' && widgets.alertsFeed) {
                 return (
-                  <SortableWidget key={id} id={id} className={cn("flex", widgets.comparativeChart ? "col-span-1 lg:col-span-4 lg:row-span-1" : "col-span-1 lg:col-span-6")}>
+                  <SortableWidget key={id} id={id} className={cn("flex", widgets.comparativeChart ? "col-span-1 lg:col-span-4 lg:row-span-1" : "col-span-1 lg:col-span-5")}>
                     <div className="glass-card w-full p-4 rounded-2xl flex flex-col h-[220px] border-slate-200 dark:border-white/5">
                       <div className="flex justify-between items-center mb-3">
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center">
@@ -371,7 +342,7 @@ export default function Home() {
 
               if (id === 'iotFeed' && widgets.iotFeed) {
                 return (
-                  <SortableWidget key={id} id={id} className={cn("flex", widgets.comparativeChart ? "col-span-1 lg:col-span-4 lg:row-span-1" : "col-span-1 lg:col-span-6")}>
+                  <SortableWidget key={id} id={id} className={cn("flex", widgets.comparativeChart ? "col-span-1 lg:col-span-4 lg:row-span-1" : "col-span-1 lg:col-span-5")}>
                     <div className="glass-card w-full p-4 rounded-2xl flex flex-col border-slate-200 dark:border-white/5 bg-gradient-to-b from-white/5 to-transparent h-[216px]">
                       <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center mb-3">
                         <Activity className="h-4 w-4 mr-1.5 text-primary" />
@@ -426,10 +397,14 @@ export default function Home() {
               <p className="text-xs text-slate-500 mt-1">Activez ou désactivez les widgets pour modifier l'affichage de votre cockpit.</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               {/* Widget Options */}
               {[
-                { key: "stats", label: "Indicateurs Clés (KPIs)", icon: ActivitySquare },
+                { key: "healthScore", label: "Health Score", icon: ActivitySquare },
+                { key: "stat1", label: isGlobalContext ? "Bâtiments Gérés" : "Consommation Parc", icon: Zap },
+                { key: "stat2", label: isGlobalContext ? "Incidents en Cours" : "Température Moyenne", icon: Thermometer },
+                { key: "stat3", label: isGlobalContext ? "Sites Hors Objectifs" : "Qualité d'Air", icon: Wind },
+                { key: "stat4", label: isGlobalContext ? "État Flotte IoT" : "Alertes Actives", icon: AlertTriangle },
                 { key: "comparativeChart", label: "Comparatif Consommation", icon: Zap },
                 { key: "alertsFeed", label: "Flux des Défauts", icon: AlertTriangle },
                 { key: "iotFeed", label: "Flux IoT en Direct", icon: Activity },
