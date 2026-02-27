@@ -21,7 +21,7 @@ const navItems: NavItemType[] = [
     { name: "Carte Globale", href: "/map", icon: Hexagon },
     { name: "Rapports Énergétiques", href: "/energy", icon: BarChart2 },
     { name: "Network Monitoring", href: "/network", icon: Wifi },
-    { name: "Interop. No-Code", href: "/admin/integrations/mapping", icon: CloudUpload },
+    { name: "Appairage IoT (No-Code)", href: "/admin/integrations/mapping", icon: CloudUpload },
     { name: "Générateur de Règles", href: "/rules", icon: Sparkles },
     { name: "Alertes & Maintenance", href: "/alerts", icon: AlertTriangle },
     { name: "Paramétrage", href: "/settings", icon: Settings, hasSub: true },
