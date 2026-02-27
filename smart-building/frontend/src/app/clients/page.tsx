@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { Building2, Search, Plus, Filter, MoreVertical, Briefcase, Activity, Target, Shield, MapPin, Signal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
+import { useRouter } from "next/navigation";
 
 export default function ClientsPage() {
     const { authFetch, currentTenant } = useTenant();
+    const router = useRouter();
     const [organizations, setOrganizations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -127,6 +129,10 @@ export default function ClientsPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <button onClick={() => router.push('/sites')} className="bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center transition-all">
+                        <Building2 className="w-5 h-5 mr-2" />
+                        Voir tous les sites
+                    </button>
                     <button onClick={() => setIsAddClientOpen(true)} className="bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center transition-all">
                         <Plus className="w-5 h-5 mr-2" />
                         Nouveau Client
@@ -178,8 +184,8 @@ export default function ClientsPage() {
             </div>
 
             {/* Organizations Table */}
-            <div className="glass-card rounded-2xl overflow-hidden border-slate-200 dark:border-white/5 shadow-sm">
-                <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-white/[0.02]">
+            <div className="glass-card rounded-2xl overflow-visible border-slate-200 dark:border-white/5 shadow-sm">
+                <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-white/[0.02] rounded-t-2xl">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Liste des Clients</h3>
                     <div className="flex items-center gap-2">
                         <div className="relative">
@@ -196,7 +202,7 @@ export default function ClientsPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-visible min-h-[300px]">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50 dark:bg-black/20 text-[11px] uppercase tracking-wider text-slate-500 dark:text-muted-foreground/80 border-b border-slate-200 dark:border-white/5">
