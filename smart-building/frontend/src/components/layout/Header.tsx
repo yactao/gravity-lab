@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChevronDown, User, Search, LogOut, Briefcase, Sun, Moon, Building2 } from "lucide-react";
+import { Bell, ChevronDown, User, Search, LogOut, Briefcase, Sun, Moon, Building2, CheckCircle2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
@@ -14,9 +14,13 @@ export function Header() {
     const pathname = usePathname();
     const { theme, setTheme } = useTheme();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+    const [alerts, setAlerts] = useState<any[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const alertsRef = useRef<HTMLDivElement>(null);
     const isAdmin = currentTenant?.role === "SUPER_ADMIN" || currentTenant?.role === "ENERGY_MANAGER";
     const [organizations, setOrganizations] = useState<any[]>([]);
+
     useEffect(() => {
         if (isAdmin) {
             authFetch("http://localhost:3001/api/organizations")
@@ -30,11 +34,32 @@ export function Header() {
         }
     }, [isAdmin, authFetch]);
 
-    // Close dropdown
+    useEffect(() => {
+        if (!currentTenant?.id) return;
+        const fetchAlerts = async () => {
+            try {
+                const res = await authFetch("http://localhost:3001/api/alerts");
+                if (res.ok) {
+                    const data = await res.json();
+                    setAlerts(data.filter((a: any) => a.active));
+                }
+            } catch (err) {
+                console.error("Failed to load alerts", err);
+            }
+        };
+        fetchAlerts();
+        const interval = setInterval(fetchAlerts, 60000);
+        return () => clearInterval(interval);
+    }, [currentTenant, authFetch]);
+
+    // Close dropdowns
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsProfileOpen(false);
+            }
+            if (alertsRef.current && !alertsRef.current.contains(event.target as Node)) {
+                setIsAlertsOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -101,14 +126,64 @@ export function Header() {
 
                 <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="relative p-2 rounded-full hover:bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white transition-colors"
+                    className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                     {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </button>
-                <button className="relative p-2 rounded-full hover:bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:text-white transition-colors">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"></span>
-                </button>
+
+                {/* Notifications Bell */}
+                <div className="relative" ref={alertsRef}>
+                    <button
+                        onClick={() => setIsAlertsOpen(!isAlertsOpen)}
+                        className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                        <Bell className="h-5 w-5" />
+                        {alerts.length > 0 && (
+                            <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-slate-950 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"></span>
+                        )}
+                    </button>
+
+                    {/* Alerts Dropdown */}
+                    {isAlertsOpen && (
+                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-white/10 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                            <div className="px-4 py-2 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifications</h3>
+                                <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">{alerts.length} nouvelle(s)</span>
+                            </div>
+                            <div className="max-h-[300px] overflow-y-auto px-2 py-2 flex flex-col space-y-1 custom-scrollbar">
+                                {alerts.length === 0 ? (
+                                    <div className="px-4 py-6 text-center text-slate-500 dark:text-slate-400 text-sm">
+                                        <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-primary opacity-50" />
+                                        Aucune alerte en cours.
+                                    </div>
+                                ) : (
+                                    alerts.map((alert: any) => (
+                                        <div key={alert.id} className="p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent hover:border-slate-100 dark:hover:border-white/5 transition-colors cursor-pointer group">
+                                            <div className="flex items-start">
+                                                <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 mr-3 shadow-sm ${alert.severity === 'critical' ? 'bg-red-500 shadow-red-500/50' : alert.severity === 'warning' ? 'bg-orange-500 shadow-orange-500/50' : 'bg-blue-500 shadow-blue-500/50'}`} />
+                                                <div>
+                                                    <p className="text-[13px] font-bold text-slate-900 dark:text-white leading-tight mb-1 group-hover:text-primary transition-colors">{alert.message}</p>
+                                                    <div className="flex items-center text-[10px] text-slate-500 dark:text-slate-400 font-medium space-x-2">
+                                                        <span>{new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        <span>•</span>
+                                                        <span className="truncate max-w-[150px]">{alert.sensor?.name || 'Equipement inconnu'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            {alerts.length > 0 && (
+                                <div className="px-4 py-2 border-t border-slate-100 dark:border-white/5">
+                                    <button className="w-full text-center text-[11px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider">
+                                        Voir toutes les alertes
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 {/* Profile Button (V3) */}
                 <div className="relative" ref={dropdownRef}>
