@@ -5,11 +5,11 @@ import { Receipt, DownloadCloud, CreditCard, Calendar, FileText, CheckCircle2, C
 
 // Mock data for invoices
 const INVOICES = [
-    { id: "INV-2023-11", date: "01 Nov 2023", amount: "499.00", status: "payé", pdflink: "#" },
-    { id: "INV-2023-10", date: "01 Oct 2023", amount: "499.00", status: "payé", pdflink: "#" },
-    { id: "INV-2023-09", date: "01 Sep 2023", amount: "450.00", status: "payé", pdflink: "#" },
-    { id: "INV-2023-08", date: "01 Aou 2023", amount: "450.00", status: "payé", pdflink: "#" },
-    { id: "INV-2023-07", date: "01 Jui 2023", amount: "450.00", status: "payé", pdflink: "#" },
+    { id: "INV-2026-02", date: "01 Fév 2026", amount: "499.00", status: "payé", pdflink: "#" },
+    { id: "INV-2026-01", date: "01 Jan 2026", amount: "499.00", status: "payé", pdflink: "#" },
+    { id: "INV-2025-12", date: "01 Déc 2025", amount: "450.00", status: "payé", pdflink: "#" },
+    { id: "INV-2025-11", date: "01 Nov 2025", amount: "450.00", status: "payé", pdflink: "#" },
+    { id: "INV-2025-10", date: "01 Oct 2025", amount: "450.00", status: "payé", pdflink: "#" },
 ];
 
 export default function BillingPage() {
@@ -70,7 +70,7 @@ export default function BillingPage() {
                             </div>
                             <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-semibold flex items-center">
                                 <Calendar className="w-4 h-4 mr-2 text-slate-500" />
-                                01 Déc 2023
+                                01 Mar 2026
                             </div>
                         </div>
 

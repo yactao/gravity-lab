@@ -188,7 +188,7 @@ export default function LicensePage() {
                 <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-white/5 relative overflow-hidden group">
                     <AlertCircle className="absolute -right-4 -bottom-4 w-24 h-24 text-slate-300 dark:text-white/5 group-hover:scale-110 transition-transform duration-500" />
                     <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1 relative z-10">Prochaine Facture</h4>
-                    <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">01 Décembre 2023</p>
+                    <p className="text-slate-500 dark:text-muted-foreground text-sm relative z-10">01 Mars 2026</p>
                     <p className="text-xs font-mono text-slate-400 mt-4 relative z-10 text-orange-500/80">Renouvellement Automatique</p>
                 </div>
 
