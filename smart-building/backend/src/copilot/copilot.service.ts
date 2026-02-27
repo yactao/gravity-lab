@@ -52,7 +52,7 @@ export class CopilotService {
                 type: 'function',
                 function: {
                     name: 'set_device_state',
-                    description: 'Change the state (ON/OFF, setpoint, brightness, etc) of a device or equipment. REQUIRES HUMAN CONFIRMATION for critical actions.',
+                    description: 'Préparer une action de changement d\'état (ON/OFF, consigne, etc). L\'APPEL DE CET OUTIL NE DÉCLENCHE PAS L\'ACTION PHYSIQUEMENT, IL AFFICHE SEULEMENT LE BOUTON DE CONFIRMATION DANS L\'INTERFACE UBBEE. Appelle-le sans demander à l\'utilisateur.',
                     parameters: {
                         type: 'object',
                         properties: {
@@ -84,15 +84,14 @@ export class CopilotService {
     async processChat(userMessage: string, tenantId: string, userRole: string): Promise<any> {
         // 1. Initial Context injection
         const systemPrompt = `Tu es le Copilote UBBEE, un assistant IA expert en GTB et Energy Management.
-Tu gères le bâtiment de manière intelligente. 
 IMPORTANT: L'utilisateur actuel a le rôle "${userRole}" sur le tenant "${tenantId}".
-NE SOUMETS PAS de commandes de contrôle sans être certain de l'ID de l'appareil.
-Si tu ne connais pas l'ID d'un appareil, utilise **toujours** l'outil "list_my_available_devices" en premier pour rechercher par nom, site ou type.
-Lorsque tu trouves l'ID de l'appareil, EXÉCUTE DIRECTEMENT l'action avec l'outil approprié ("set_device_state"). 
-NE LUI DEMANDE SURTOUT PAS SA CONFIRMATION DANS LE TEXTE, C'EST L'INTERFACE GRAPHIQUE QUI LE FERA automatiquement avec un bouton orange. Appelle juste la fonction technique silencieusement.
-L'heure actuelle locale est ${new Date().toISOString()}.
-Ne réponds jamais avec un JSON direct à l'utilisateur.
-Si la sécurité ou la permission n'est pas claire, dis à l'utilisateur que tu ne peux pas.`;
+
+REGLES DE COMPORTEMENT:
+1. Si l'utilisateur demande une action sur un équipement dont tu ne connais pas le ID, appelle systématiquement "list_my_available_devices" en premier.
+2. Une fois l'ID trouvé, APPELLE IMMÉDIATEMENT la fonction "set_device_state".
+3. NE DEMANDE JAMAIS UNE CONFIRMATION TEXTUELLE ("Voulez-vous que je le fasse ?"). L'appel de "set_device_state" ne fait que générer la carte de validation graphique sur l'écran du client ! C'est le client qui cliquera.
+4. Contente-toi de dire "Je vous prépare l'action..." et déclenche l'outil "set_device_state" silencieusement.
+L'heure actuelle locale est ${new Date().toISOString()}.`;
 
         let messages: ChatMessage[] = [
             { role: 'system', content: systemPrompt },
