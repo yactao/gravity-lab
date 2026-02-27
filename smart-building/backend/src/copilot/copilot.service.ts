@@ -68,11 +68,11 @@ export class CopilotService {
                 type: 'function',
                 function: {
                     name: 'list_my_available_devices',
-                    description: 'Get a list of devices available to the user, optionally filtered by room or type.',
+                    description: 'Get a list of all devices available to the user. ALWAYS use this tool first if you do not know a device ID or need to find devices in a specific site/room/zone.',
                     parameters: {
                         type: 'object',
                         properties: {
-                            room: { type: 'string', description: 'Optional room name to filter (e.g. "Open Space", "Réunion").' },
+                            searchText: { type: 'string', description: 'Optional search text to filter by name, site, or room (e.g. "Casa", "Open Space").' },
                             deviceType: { type: 'string', description: 'Optional device type (e.g. "hvac", "light", "sensor").' }
                         }
                     }
@@ -83,13 +83,13 @@ export class CopilotService {
 
     async processChat(userMessage: string, tenantId: string, userRole: string): Promise<any> {
         // 1. Initial Context injection
-        const systemPrompt = `Tu es le Copilote UBBEE, un assistant IA expert en GTB (Gestion Technique du Bâtiment) et Energy Management.
+        const systemPrompt = `Tu es le Copilote UBBEE, un assistant IA expert en GTB et Energy Management.
 Tu gères le bâtiment de manière intelligente. 
 IMPORTANT: L'utilisateur actuel a le rôle "${userRole}" sur le tenant "${tenantId}".
-NE SOUMETS PAS de commandes de contrôle pour des appareils qui ne lui appartiennent pas.
+NE SOUMETS PAS de commandes de contrôle sans être certain de l'ID de l'appareil.
+Si tu ne connais pas l'ID d'un appareil, utilise **toujours** l'outil "list_my_available_devices" en premier pour rechercher par nom, site ou type.
 L'heure actuelle locale est ${new Date().toISOString()}.
-Utilise le Function Calling (les outils) pour trouver l'ID des équipements, obtenir leur état, et générer des commandes.
-Ne réponds jamais avec un JSON direct à l'utilisateur, appelle la fonction. 
+Ne réponds jamais avec un JSON direct à l'utilisateur.
 Si la sécurité ou la permission n'est pas claire, dis à l'utilisateur que tu ne peux pas.`;
 
         let messages: ChatMessage[] = [
@@ -169,10 +169,11 @@ Si la sécurité ou la permission n'est pas claire, dis à l'utilisateur que tu 
 
                     // Basic filtering
                     let filtered = devices;
-                    if (toolArgs.room) {
+                    if (toolArgs.searchText) {
                         filtered = devices.filter((d: any) =>
-                            d.name.toLowerCase().includes(toolArgs.room.toLowerCase()) ||
-                            (d.zone && d.zone.name.toLowerCase().includes(toolArgs.room.toLowerCase()))
+                            d.name.toLowerCase().includes(toolArgs.searchText.toLowerCase()) ||
+                            (d.zone && d.zone.name.toLowerCase().includes(toolArgs.searchText.toLowerCase())) ||
+                            (d.zone && d.zone.site && d.zone.site.name.toLowerCase().includes(toolArgs.searchText.toLowerCase()))
                         );
                     }
                     if (toolArgs.deviceType) {
@@ -185,7 +186,9 @@ Si la sécurité ou la permission n'est pas claire, dis à l'utilisateur que tu 
                         devices: filtered.map((d: any) => ({
                             id: d.id,
                             name: d.name,
-                            type: d.type
+                            type: d.type,
+                            zone: d.zone?.name || 'Inconnue',
+                            site: d.zone?.site?.name || 'Inconnu'
                         }))
                     };
                 }
