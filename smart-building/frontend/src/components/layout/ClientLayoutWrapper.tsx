@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { CopilotWidget } from "@/components/copilot/CopilotWidget";
 
 export function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -27,6 +28,7 @@ export function ClientLayoutWrapper({ children }: { children: React.ReactNode })
                 <div className="pt-8 px-4 sm:px-8 pb-8">
                     {children}
                 </div>
+                <CopilotWidget />
             </main>
         </div>
     );
