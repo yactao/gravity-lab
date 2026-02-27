@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Briefcase, BarChart2, Wifi, CloudUpload, Settings, FileText, Receipt, Hexagon, ChevronDown, Sparkles, AlertTriangle, Map } from "lucide-react";
+import { LayoutDashboard, Briefcase, BarChart2, Wifi, CloudUpload, Settings, FileText, Receipt, Hexagon, ChevronDown, Sparkles, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -18,10 +18,10 @@ type NavItemType = {
 const navItems: NavItemType[] = [
     { name: "Accueil", href: "/", icon: LayoutDashboard },
     { name: "Gestion de Parc", href: "/clients", icon: Briefcase },
-    { name: "Carte Globale", href: "/map", icon: Hexagon }, // Utilisation de l'icône de carte pour l'instant
+    { name: "Carte Globale", href: "/map", icon: Hexagon },
     { name: "Rapports Énergétiques", href: "/energy", icon: BarChart2 },
     { name: "Network Monitoring", href: "/network", icon: Wifi },
-    { name: "Appairage IoT", href: "/onboarding", icon: CloudUpload },
+    { name: "Interop. No-Code", href: "/admin/integrations/mapping", icon: CloudUpload },
     { name: "Générateur de Règles", href: "/rules", icon: Sparkles },
     { name: "Alertes & Maintenance", href: "/alerts", icon: AlertTriangle },
     { name: "Paramétrage", href: "/settings", icon: Settings, hasSub: true },
@@ -29,15 +29,22 @@ const navItems: NavItemType[] = [
     { name: "Facturation", href: "/billing", icon: Receipt },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+    isCollapsed: boolean;
+    onToggle: () => void;
+}
+
+export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     const pathname = usePathname();
     const { currentTenant } = useTenant();
-    const [expanded, setExpanded] = useState<string | null>(null);
+    const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+
+    // If collapsed, we force collapse all submenus
+    const actualExpandedMenu = isCollapsed ? null : expandedMenu;
 
     if (!currentTenant) return null;
 
     const filteredNavItems = navItems.map(item => {
-        // Dynamic href for "Gestion de Parc" based on role
         if (item.name === "Gestion de Parc") {
             return {
                 ...item,
@@ -47,7 +54,7 @@ export function Sidebar() {
         return item;
     }).filter((item) => {
         if (currentTenant.role === "CLIENT") {
-            if (item.href && ["/rules", "/network", "/settings", "/license", "/onboarding"].includes(item.href)) {
+            if (item.href && ["/rules", "/network", "/settings", "/license", "/onboarding", "/admin/integrations/mapping"].includes(item.href)) {
                 return false;
             }
         }
@@ -55,51 +62,72 @@ export function Sidebar() {
     });
 
     return (
-        <aside className="fixed left-0 top-0 h-screen w-64 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-r border-slate-200 dark:border-white/5 flex flex-col z-50 transition-colors">
+        <aside
+            className={cn(
+                "fixed top-4 bottom-4 left-4 z-50 flex flex-col rounded-3xl transition-all duration-300 ease-out border border-slate-200/50 dark:border-white/5 shadow-2xl backdrop-blur-3xl overflow-hidden",
+                isCollapsed ? "w-[72px]" : "w-64",
+                "bg-white/80 dark:bg-slate-950/80"
+            )}
+        >
             {/* Logo Area */}
-            <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-white/5">
-                <Hexagon className="h-6 w-6 text-primary mr-2 stroke-[1.5]" />
-                <div className="flex flex-col">
-                    <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60 bg-clip-text text-transparent leading-tight mt-1">
-                        UBBEE
-                    </span>
-                    <span className="text-[9px] font-semibold text-primary/100 dark:text-primary/80 uppercase tracking-widest mt-0.5">
-                        BY IOTEVA
-                    </span>
-                </div>
+            <div className="h-20 flex items-center justify-center shrink-0 border-b border-slate-200/50 dark:border-white/5 relative">
+                <Hexagon className={cn("text-primary stroke-[1.5] transition-all duration-300", isCollapsed ? "h-8 w-8" : "h-7 w-7 absolute left-5")} />
+                {!isCollapsed && (
+                    <div className="flex flex-col absolute left-14">
+                        <span className="text-xl font-black bg-gradient-to-br from-slate-900 to-slate-500 dark:from-white dark:to-white/40 bg-clip-text text-transparent leading-none">
+                            UBBEE
+                        </span>
+                        <span className="text-[8px] font-bold text-primary tracking-[0.2em] mt-1">
+                            BOS PLATFORM
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-6 px-3 space-y-1">
+            <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 space-y-1.5 scrollbar-hide">
                 {filteredNavItems.map((item) => {
                     if (item.subItems) {
-                        const isExpanded = expanded === item.name;
+                        const isExpanded = actualExpandedMenu === item.name;
                         const isChildActive = item.subItems.some((sub: any) => pathname === sub.href || (sub.href !== "/" && pathname.startsWith(sub.href)));
                         return (
-                            <div key={item.name} className="flex flex-col space-y-1 mb-1">
+                            <div key={item.name} className="flex flex-col space-y-1 relative group">
                                 <button
-                                    onClick={() => setExpanded(isExpanded ? null : item.name)}
+                                    onClick={() => !isCollapsed && setExpandedMenu(isExpanded ? null : item.name)}
                                     className={cn(
-                                        "flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group w-full",
+                                        "flex items-center rounded-xl transition-all duration-300 w-full overflow-hidden",
+                                        isCollapsed ? "justify-center h-12 w-12 mx-auto" : "justify-between px-4 py-3",
                                         isChildActive && !isExpanded
-                                            ? "bg-primary/5 text-primary border border-primary/10"
-                                            : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                                            ? "bg-primary text-white shadow-md shadow-primary/20"
+                                            : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-white/5"
                                     )}
                                 >
-                                    <div className="flex items-center">
+                                    <div className="flex items-center justify-center">
                                         <item.icon className={cn(
-                                            "h-5 w-5 mr-3 transition-colors",
-                                            isChildActive ? "text-primary" : "text-slate-400 dark:text-muted-foreground group-hover:text-slate-900 dark:group-hover:text-white"
+                                            "transition-colors shrink-0",
+                                            isCollapsed ? "h-5 w-5" : "h-5 w-5 mr-3",
+                                            isChildActive && !isCollapsed ? "text-white" : "",
+                                            (!isChildActive || isCollapsed) && "group-hover:scale-110 duration-300"
                                         )} />
-                                        <span className="font-medium">{item.name}</span>
+                                        {!isCollapsed && <span className="font-semibold text-sm">{item.name}</span>}
                                     </div>
-                                    <ChevronDown className={cn(
-                                        "h-4 w-4 transition-transform",
-                                        isExpanded ? "rotate-180 text-slate-900 dark:text-white" : "text-slate-400 dark:text-muted-foreground/50 group-hover:text-slate-900 dark:group-hover:text-white"
-                                    )} />
+                                    {!isCollapsed && (
+                                        <ChevronDown className={cn(
+                                            "h-4 w-4 transition-transform duration-300 shrink-0",
+                                            isExpanded ? "rotate-180" : ""
+                                        )} />
+                                    )}
                                 </button>
-                                {isExpanded && (
-                                    <div className="mt-1 ml-4 pl-4 border-l border-slate-200 dark:border-white/10 space-y-1">
+
+                                {/* Tooltip when collapsed */}
+                                {isCollapsed && (
+                                    <div className="absolute left-14 top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-xl">
+                                        {item.name}
+                                    </div>
+                                )}
+
+                                {!isCollapsed && isExpanded && (
+                                    <div className="mt-1.5 ml-5 pl-4 border-l-2 border-slate-200 dark:border-slate-800 space-y-1">
                                         {item.subItems.map((subItem: any) => {
                                             const isSubActive = pathname === subItem.href || (subItem.href !== "/" && pathname.startsWith(subItem.href));
                                             return (
@@ -107,10 +135,10 @@ export function Sidebar() {
                                                     key={subItem.name}
                                                     href={subItem.href}
                                                     className={cn(
-                                                        "flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-sm",
+                                                        "flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium",
                                                         isSubActive
-                                                            ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(16,185,129,0.15)]"
-                                                            : "text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                                                            ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                                                     )}
                                                 >
                                                     {subItem.name}
@@ -125,30 +153,48 @@ export function Sidebar() {
 
                     const isActive = item.href ? (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))) : false;
                     return (
-                        <Link
-                            key={item.name}
-                            href={item.href || "#"}
-                            className={cn(
-                                "flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group",
-                                isActive
-                                    ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
-                                    : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                        <div key={item.name} className="relative group">
+                            <Link
+                                href={item.href || "#"}
+                                className={cn(
+                                    "flex items-center rounded-xl transition-all duration-300",
+                                    isCollapsed ? "justify-center h-12 w-12 mx-auto" : "justify-between px-4 py-3 w-full",
+                                    isActive
+                                        ? "bg-gradient-to-r from-primary to-emerald-400 text-white shadow-lg shadow-primary/25"
+                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-white/5"
+                                )}
+                            >
+                                <div className="flex items-center justify-center">
+                                    <item.icon className={cn(
+                                        "transition-transform shrink-0",
+                                        isCollapsed ? "h-5 w-5" : "h-5 w-5 mr-3",
+                                        isActive ? "text-white" : "group-hover:scale-110 duration-300"
+                                    )} />
+                                    {!isCollapsed && <span className="font-semibold text-sm">{item.name}</span>}
+                                </div>
+                            </Link>
+
+                            {/* Tooltip when collapsed */}
+                            {isCollapsed && (
+                                <div className="absolute left-14 top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-xl">
+                                    {item.name}
+                                </div>
                             )}
-                        >
-                            <div className="flex items-center">
-                                <item.icon className={cn(
-                                    "h-5 w-5 mr-3 transition-colors",
-                                    isActive ? "text-primary" : "text-slate-400 dark:text-muted-foreground group-hover:text-slate-900 dark:group-hover:text-white"
-                                )} />
-                                <span className="font-medium">{item.name}</span>
-                            </div>
-                            {item.hasSub && (
-                                <ChevronDown className="h-4 w-4 text-slate-400 dark:text-muted-foreground/50 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
-                            )}
-                        </Link>
+                        </div>
                     );
                 })}
             </nav>
+
+            {/* Toggle Button / Footer */}
+            <div className="p-3 border-t border-slate-200/50 dark:border-white/5 flex justify-center shrink-0">
+                <button
+                    onClick={onToggle}
+                    className="flex justify-center flex-1 items-center h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+                    title={isCollapsed ? "Déployer le menu" : "Réduire le menu"}
+                >
+                    {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                </button>
+            </div>
         </aside>
     );
 }
