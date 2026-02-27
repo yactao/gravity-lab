@@ -23,6 +23,7 @@ module.exports = {
             env: {
                 NODE_ENV: "production",
                 PORT: "3001",
+                DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY || "sk-7922a0832bc3430a9bed41b7399487f9",
                 // Pensez à configurer vos credentials Hostinger DB en Prod
                 DB_HOST: "localhost",
                 DB_PORT: "5432",

@@ -18,7 +18,7 @@ npm install
 npm run build
 
 echo "\\n==== REDEMARRAGE DE PM2 BACKEND ===="
-pm2 reload gtb-backend
+pm2 reload ecosystem.config.cjs --update-env
 `;
 
 const conn = new Client();
