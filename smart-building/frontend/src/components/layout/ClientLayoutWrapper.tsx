@@ -24,7 +24,7 @@ export function ClientLayoutWrapper({ children }: { children: React.ReactNode })
                     }`}
             >
                 <Header />
-                <div className="pt-24 px-4 sm:px-8 pb-8">
+                <div className="pt-8 px-4 sm:px-8 pb-8">
                     {children}
                 </div>
             </main>

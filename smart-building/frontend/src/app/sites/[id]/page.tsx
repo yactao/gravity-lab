@@ -203,14 +203,6 @@ export default function SiteDashboardPage() {
                 </div>
 
                 <div className="flex gap-4">
-                    {/* Météo Widget Site */}
-                    <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm">
-                        <Sun className="h-6 w-6 text-yellow-400" />
-                        <div>
-                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-tight">Météo Locale</p>
-                            <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">19°C {site.city}</h4>
-                        </div>
-                    </div>
                     {/* Health Score Site */}
                     <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
                         <ShieldCheck className="h-6 w-6 text-emerald-500" />

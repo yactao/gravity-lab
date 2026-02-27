@@ -56,7 +56,6 @@ export default function Home() {
       comparativeChart: true,
       alertsFeed: true,
       iotFeed: true,
-      weather: true,
     };
   });
   const [widgetOrder, setWidgetOrder] = useState<string[]>(() => {
@@ -173,17 +172,6 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-6">
-          {/* Weather Widget */}
-          {widgets.weather && (
-            <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
-              <Sun className="h-6 w-6 text-yellow-400" />
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">18°C Paris</h4>
-                <p className="text-xs text-slate-500 dark:text-muted-foreground">Ensoleillé</p>
-              </div>
-            </div>
-          )}
-
           {/* System Status */}
           <div className="text-right glass-card p-3 rounded-xl border border-slate-200 dark:border-white/5">
             <p className="text-xs font-medium text-slate-500 dark:text-muted-foreground mb-1 uppercase tracking-wider">État Réseau IoT</p>
@@ -445,7 +433,6 @@ export default function Home() {
                 { key: "comparativeChart", label: "Comparatif Consommation", icon: Zap },
                 { key: "alertsFeed", label: "Flux des Défauts", icon: AlertTriangle },
                 { key: "iotFeed", label: "Flux IoT en Direct", icon: Activity },
-                { key: "weather", label: "Widget Météo", icon: Sun },
               ].map((item) => (
                 <div
                   key={item.key}
