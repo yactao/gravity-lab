@@ -355,8 +355,8 @@ export default function ClientDetailsPage() {
                                 <p className="text-xs text-slate-500 mt-1">Supervisez les accès ({client.name})</p>
                             </div>
                             {isAdmin && (
-                                <button onClick={() => setIsAddUserOpen(true)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 font-bold rounded-xl transition-all shadow-sm flex items-center text-sm">
-                                    <Plus className="h-4 w-4 mr-2 text-emerald-500" /> Nouvel Utilisateur
+                                <button onClick={() => setIsAddUserOpen(true)} className="px-4 py-2 bg-primary/10 hover:bg-primary/20 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-primary dark:text-emerald-400 font-bold rounded-xl transition-all shadow-sm flex items-center text-sm border border-primary/20">
+                                    <Mail className="h-4 w-4 mr-2" /> Inviter un collaborateur
                                 </button>
                             )}
                         </div>
@@ -506,31 +506,47 @@ export default function ClientDetailsPage() {
                 </div>
             )}
 
-            {/* Modal: Add User */}
+            {/* Modal: Invite User */}
             {isAddUserOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                     <div className="w-full max-w-md bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl relative">
                         <button onClick={() => setIsAddUserOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="h-5 w-5" /></button>
-                        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-white flex items-center"><Users className="w-5 h-5 mr-2 text-primary" /> Nouvel Utilisateur</h2>
-                        <form onSubmit={handleCreateUser} className="space-y-4">
-                            <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nom Complet</label>
-                                <input type="text" required value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" /></div>
+                        <h2 className="text-xl font-bold mb-2 text-slate-900 dark:text-white flex items-center"><Mail className="w-5 h-5 mr-2 text-primary" /> Inviter un Utilisateur</h2>
+                        <p className="text-xs text-slate-500 mb-6">Un email d'invitation sera envoyé avec un lien sécurisé pour qu'il définisse son mot de passe.</p>
 
-                            <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Email</label>
-                                <input type="email" required value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" /></div>
+                        <form onSubmit={handleCreateUser} className="space-y-5">
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nom Complet d'affichage</label>
+                                <input type="text" required value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all placeholder-slate-400" placeholder="ex: Jean Dupont" />
+                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rôle</label>
-                                    <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all">
-                                        <option value="CLIENT">Client</option>
-                                        <option value="ENERGY_MANAGER">Energy Manager</option>
-                                    </select></div>
-                                <div><label className="text-sm font-bold text-slate-700 dark:text-slate-300">Mot de passe</label>
-                                    <input type="text" required value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white text-xs text-slate-500" /></div>
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Adresse Email</label>
+                                <input type="email" required value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all placeholder-slate-400" placeholder="jean.dupont@entreprise.com" />
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <label className="text-sm font-bold text-slate-900 dark:text-white mb-3 block">Délégation de Droits & Rôle</label>
+                                <div className="space-y-3">
+                                    <label className="flex items-start cursor-pointer group">
+                                        <input type="radio" name="role" value="CLIENT" checked={newUser.role === 'CLIENT'} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="mt-1 mr-3 text-primary focus:ring-primary" />
+                                        <div>
+                                            <span className="text-sm font-bold text-slate-900 dark:text-white block group-hover:text-primary transition-colors">Client Standard</span>
+                                            <span className="text-xs text-slate-500">Peut consulter les tableaux de bord et recevoir des alertes pour ses propres sites. Ne peut pas modifier ou inviter d'autres personnes.</span>
+                                        </div>
+                                    </label>
+                                    <label className="flex items-start cursor-pointer group">
+                                        <input type="radio" name="role" value="ENERGY_MANAGER" checked={newUser.role === 'ENERGY_MANAGER'} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="mt-1 mr-3 text-orange-500 focus:ring-orange-500" />
+                                        <div>
+                                            <span className="text-sm font-bold text-slate-900 dark:text-white block group-hover:text-orange-500 transition-colors">Energy Manager (Admin)</span>
+                                            <span className="text-xs text-slate-500">Droits étendus : création de sites, ajout de zones, paramétrage CVC, et invitation d'autres utilisateurs.</span>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
 
                             <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] flex justify-center items-center">
-                                Ajouter à {client.name}
+                                Envoyer l'invitation à {client.name}
                             </button>
                         </form>
                     </div>
