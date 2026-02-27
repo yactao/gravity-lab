@@ -1,7 +1,7 @@
 ==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
 From https://github.com/yactao/gravity-lab
-   62f0d62..57ae076  main       -> origin/main
-HEAD is now at 57ae076 fix(ui): update hardcoded billing dates from 2023 to 2026
+   e7c1e15..6787b18  main       -> origin/main
+HEAD is now at 6787b18 feat(ai): build glassmorphic floating copilot chat widget with human-in-the-loop permission UI
 Already up to date.
 \n==== RECOMPILATION FRONTEND ====
 npm warn EBADENGINE Unsupported engine {
@@ -36,14 +36,14 @@ Run `npm audit` for details.
 - Environments: .env.production
 
   Creating an optimized production build ...
-✓ Compiled successfully in 15.7s
+✓ Compiled successfully in 22.4s
   Running TypeScript ...
   Collecting page data using 1 worker ...
   Generating static pages using 1 worker (0/19) ...
   Generating static pages using 1 worker (4/19) 
   Generating static pages using 1 worker (9/19) 
   Generating static pages using 1 worker (14/19) 
-✓ Generating static pages using 1 worker (19/19) in 416.3ms
+✓ Generating static pages using 1 worker (19/19) in 449.9ms
   Finalizing page optimization ...
 
 Route (app)

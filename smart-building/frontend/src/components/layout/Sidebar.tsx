@@ -78,7 +78,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                             UBBEE
                         </span>
                         <span className="text-[8px] font-bold text-primary tracking-[0.2em] mt-1">
-                            BOS PLATFORM
+                            BY IOT-EVE
                         </span>
                     </div>
                 )}
