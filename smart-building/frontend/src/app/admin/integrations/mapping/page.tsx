@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { Activity, Database, GripVertical, Save, Wifi, Settings2, QrCode, MapPin, Building2, Hexagon, Layers, Search, Cpu } from "lucide-react";
 import { useTenant } from "@/lib/TenantContext";
@@ -40,7 +40,12 @@ function DroppableTargetField({ id, label, mappedKey }: { id: string, label: str
 }
 
 // --- SHARED COMPONENTS ---
-const LocationSelector = () => (
+const LocationSelector = ({
+    organizations,
+    selectedOrgId, setSelectedOrgId,
+    sites, selectedSiteId, setSelectedSiteId,
+    zones, selectedZoneId, setSelectedZoneId
+}: any) => (
     <div className="bg-white dark:bg-black/20 p-6 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
         <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center mb-6 relative z-10">
@@ -49,27 +54,43 @@ const LocationSelector = () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
             <div>
                 <label className="text-xs font-bold text-slate-500 mb-2 flex items-center uppercase tracking-wider"><Building2 className="w-3 h-3 mr-1" /> Client / Organisation</label>
-                <select className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
-                    <option value="">Sélectionnez un client...</option>
-                    <option value="1">Acme Corp</option>
-                    <option value="2">Global Santé</option>
+                <select
+                    value={selectedOrgId}
+                    onChange={e => { setSelectedOrgId(e.target.value); setSelectedSiteId(""); setSelectedZoneId(""); }}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer"
+                >
+                    <option value="" className="text-slate-900 dark:text-white">Sélectionnez un client...</option>
+                    {organizations.map((org: any) => (
+                        <option key={org.id} value={org.id} className="text-slate-900 dark:text-white">{org.name}</option>
+                    ))}
                 </select>
             </div>
             <div>
                 <label className="text-xs font-bold text-slate-500 mb-2 flex items-center uppercase tracking-wider"><Hexagon className="w-3 h-3 mr-1" /> Bâtiment / Site</label>
-                <select className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
-                    <option value="">Sélectionnez un site...</option>
-                    <option value="1">Siège Paris (75008)</option>
-                    <option value="2">Plateforme Logistique Lyon</option>
+                <select
+                    value={selectedSiteId}
+                    onChange={e => { setSelectedSiteId(e.target.value); setSelectedZoneId(""); }}
+                    disabled={!selectedOrgId}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
+                >
+                    <option value="" className="text-slate-900 dark:text-white">Sélectionnez un site...</option>
+                    {sites?.map((site: any) => (
+                        <option key={site.id} value={site.id} className="text-slate-900 dark:text-white">{site.name}</option>
+                    ))}
                 </select>
             </div>
             <div>
                 <label className="text-xs font-bold text-slate-500 mb-2 flex items-center uppercase tracking-wider"><Layers className="w-3 h-3 mr-1" /> Espace / Zone</label>
-                <select className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
-                    <option value="">Sélectionnez une zone...</option>
-                    <option value="1">Open Space RDC</option>
-                    <option value="2">Salle de Réunion 1</option>
-                    <option value="3">Local Technique CVC</option>
+                <select
+                    value={selectedZoneId}
+                    onChange={e => setSelectedZoneId(e.target.value)}
+                    disabled={!selectedSiteId}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
+                >
+                    <option value="" className="text-slate-900 dark:text-white">Sélectionnez une zone...</option>
+                    {zones?.map((zone: any) => (
+                        <option key={zone.id} value={zone.id} className="text-slate-900 dark:text-white">{zone.name}</option>
+                    ))}
                 </select>
             </div>
         </div>
@@ -81,6 +102,32 @@ export default function MappingPage() {
     const { authFetch } = useTenant();
 
     const [activeTab, setActiveTab] = useState<"simple" | "advanced">("simple");
+
+    // Dynamic Location States
+    const [organizations, setOrganizations] = useState<any[]>([]);
+    const [selectedOrgId, setSelectedOrgId] = useState("");
+    const [selectedSiteId, setSelectedSiteId] = useState("");
+    const [selectedZoneId, setSelectedZoneId] = useState("");
+
+    useEffect(() => {
+        const fetchOrgs = async () => {
+            try {
+                const res = await authFetch("http://localhost:3001/api/organizations");
+                if (res.ok) {
+                    const data = await res.json();
+                    setOrganizations(data);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchOrgs();
+    }, [authFetch]);
+
+    const activeOrg = organizations.find((o: any) => o.id === selectedOrgId);
+    const sites = activeOrg?.sites || [];
+    const activeSite = sites.find((s: any) => s.id === selectedSiteId);
+    const zones = activeSite?.zones || [];
 
     // States Avancés
     const [templateName, setTemplateName] = useState("Sonde Multi-paramètres (Custom MQTT)");
@@ -212,14 +259,22 @@ export default function MappingPage() {
                         </div>
                     </div>
 
-                    <LocationSelector />
+                    <LocationSelector
+                        organizations={organizations} selectedOrgId={selectedOrgId} setSelectedOrgId={setSelectedOrgId}
+                        sites={sites} selectedSiteId={selectedSiteId} setSelectedSiteId={setSelectedSiteId}
+                        zones={zones} selectedZoneId={selectedZoneId} setSelectedZoneId={setSelectedZoneId}
+                    />
                 </div>
             )}
 
             {/* TAB: ADVANCED */}
             {activeTab === "advanced" && (
                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                    <LocationSelector />
+                    <LocationSelector
+                        organizations={organizations} selectedOrgId={selectedOrgId} setSelectedOrgId={setSelectedOrgId}
+                        sites={sites} selectedSiteId={selectedSiteId} setSelectedSiteId={setSelectedSiteId}
+                        zones={zones} selectedZoneId={selectedZoneId} setSelectedZoneId={setSelectedZoneId}
+                    />
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-indigo-50 dark:bg-indigo-950/20 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
                         <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-1">
