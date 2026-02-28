@@ -366,19 +366,19 @@ export default function RulesPage() {
                 <div className="px-5 pb-2 pt-0 z-10 flex gap-2 overflow-x-auto custom-scrollbar">
                     <button
                         onClick={() => { setChatInput("Mets en place un Anti-gaspillage fenêtre pour les CVC"); handleSimulateAI(new Event('submit') as any); }}
-                        className="whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+                        className="shrink-0 whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
                     >
                         <Leaf className="w-3 h-3 mr-1.5" /> Anti-Gaspi Fenêtre
                     </button>
                     <button
                         onClick={() => { setChatInput("Configure l'extinction globale la nuit à 20h"); handleSimulateAI(new Event('submit') as any); }}
-                        className="whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+                        className="shrink-0 whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
                     >
                         <Moon className="w-3 h-3 mr-1.5" /> Veille Nocturne
                     </button>
                     <button
                         onClick={() => { setChatInput("Optimise le CVC en fonction de la présence (15min)"); handleSimulateAI(new Event('submit') as any); }}
-                        className="whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
+                        className="shrink-0 whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
                     >
                         <User className="w-3 h-3 mr-1.5" /> Eco Présence
                     </button>

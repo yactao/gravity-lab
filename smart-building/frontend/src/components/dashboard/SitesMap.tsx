@@ -89,6 +89,11 @@ export function SitesMap({ sites }: SitesMapProps) {
                             key={site.id}
                             position={[lat, lng] as [number, number]}
                             icon={customIcon}
+                            eventHandlers={{
+                                click: () => {
+                                    window.dispatchEvent(new CustomEvent('preview-site', { detail: site }));
+                                }
+                            }}
                         >
                             <Popup>
                                 <div className="text-sm">

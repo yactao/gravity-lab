@@ -53,10 +53,13 @@ export function WeatherWidget() {
                     });
 
                     if (!cityName) {
-                        // Tenter de reverse geocode au moins la ville (avec l'API open-meteo)
-                        const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
-                        const revData = await revRes.json();
-                        setCityInfo(revData.address?.city || revData.address?.town || revData.address?.village || "Positions");
+                        try {
+                            const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
+                            const revData = await revRes.json();
+                            setCityInfo(revData.address?.city || revData.address?.town || revData.address?.village || "Positions");
+                        } catch (e) {
+                            setCityInfo("Position");
+                        }
                     } else {
                         setCityInfo(cityName);
                     }
@@ -109,6 +112,27 @@ export function WeatherWidget() {
         };
 
         initWeather();
+
+        // Écouter si l'utilisateur sélectionne un site manuellement sur la carte globale
+        const handlePreviewSite = async (event: any) => {
+            const site = event.detail;
+            if (site && site.city) {
+                setLoading(true);
+                try {
+                    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(site.city)}&count=1&language=fr&format=json`);
+                    const geoData = await geoRes.json();
+                    if (geoData.results && geoData.results.length > 0) {
+                        const location = geoData.results[0];
+                        fetchWeather(location.latitude, location.longitude, site.city);
+                    }
+                } catch (e) {
+                    console.error('Erreur géocodage manuelle', e);
+                }
+            }
+        };
+
+        window.addEventListener('preview-site', handlePreviewSite);
+        return () => window.removeEventListener('preview-site', handlePreviewSite);
     }, [siteId, authFetch]);
 
     if (loading) {
