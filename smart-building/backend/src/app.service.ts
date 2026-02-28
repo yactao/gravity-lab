@@ -228,6 +228,41 @@ export class AppService implements OnModuleInit {
     });
   }
 
+  private async geocodeAddress(siteData: any) {
+    if (siteData.latitude && siteData.longitude) return;
+
+    const queriesToTry = [];
+    if (siteData.address) {
+      queriesToTry.push(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
+    }
+    if (siteData.postalCode && siteData.city) {
+      queriesToTry.push(`${siteData.postalCode} ${siteData.city}`);
+    }
+    if (siteData.city) {
+      queriesToTry.push(siteData.city);
+    }
+
+    for (const query of queriesToTry) {
+      if (!query) continue;
+      try {
+        const encodedQuery = encodeURIComponent(query);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}`, {
+          headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
+        });
+        const data = await response.json();
+        if (data && data.length > 0) {
+          siteData.latitude = parseFloat(data[0].lat);
+          siteData.longitude = parseFloat(data[0].lon);
+          console.log(`Geocoded '${query}' to ${siteData.latitude}, ${siteData.longitude}`);
+          return; // Success, stop trying other queries
+        }
+      } catch (err) {
+        console.error(`Geocoding failed for query '${query}':`, err);
+      }
+    }
+    console.warn(`Could not geocode any of the queries for site: ${siteData.name}`);
+  }
+
   async createOrganization(orgData: any) {
     const newOrg = this.orgRepo.create(orgData);
     return this.orgRepo.save(newOrg);
@@ -246,22 +281,8 @@ export class AppService implements OnModuleInit {
     const org = await this.orgRepo.findOne({ where: { id: orgId } });
     if (!org) throw new Error("Organization not found");
 
-    if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
-      try {
-        const query = encodeURIComponent(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
-        // Add User-Agent header as required by Nominatim usage policy
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
-          headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
-        });
-        const data = await response.json();
-        if (data && data.length > 0) {
-          siteData.latitude = parseFloat(data[0].lat);
-          siteData.longitude = parseFloat(data[0].lon);
-          console.log(`Geocoded ${siteData.address} to ${siteData.latitude}, ${siteData.longitude}`);
-        }
-      } catch (err) {
-        console.error('Geocoding failed:', err);
-      }
+    if (!siteData.latitude || !siteData.longitude) {
+      await this.geocodeAddress(siteData);
     }
 
     const newSite = this.siteRepo.create({
@@ -272,21 +293,8 @@ export class AppService implements OnModuleInit {
   }
 
   async updateSite(id: string, siteData: any) {
-    if (siteData.address && (!siteData.latitude || !siteData.longitude)) {
-      try {
-        const query = encodeURIComponent(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`, {
-          headers: { 'User-Agent': 'SmartBuildingApp/1.0' }
-        });
-        const data = await response.json();
-        if (data && data.length > 0) {
-          siteData.latitude = parseFloat(data[0].lat);
-          siteData.longitude = parseFloat(data[0].lon);
-          console.log(`Geocoded ${siteData.address} to ${siteData.latitude}, ${siteData.longitude}`);
-        }
-      } catch (err) {
-        console.error('Geocoding failed:', err);
-      }
+    if (!siteData.latitude || !siteData.longitude) {
+      await this.geocodeAddress(siteData);
     }
 
     await this.siteRepo.update(id, siteData);
