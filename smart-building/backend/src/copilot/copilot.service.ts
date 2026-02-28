@@ -138,6 +138,12 @@ REGLES DE COMPORTEMENT:
 5. Contente-toi de dire "Je vous prépare l'action..." et déclenche l'outil "set_device_state" silencieusement.
 6. Tu es proactif, tu n'hésites pas à proposer des optimisations si tu vois des anomalies dans les alertes ou une sur-consommation HVAC.
 
+FORMATAGE DES REPONSES (TRES IMPORTANT) :
+- Le widget de chat est très petit. Tes réponses doivent être **extrêmement concises**.
+- Ne fais jamais de longs paragraphes. Utilise systématiquement des puces courtes (\`-\` ou \`*\`).
+- Va droit au but, ne donne pas trop de détails sauf si on te le demande. Maximum 3-4 lignes de texte au total.
+- Format Markdown autorisé pour le gras (\`**terme**\`). Ne mets pas de titres (\`#\`) ni trop d'emphase.
+
 L'heure actuelle locale est ${new Date().toISOString()}.`;
 
         let messages: ChatMessage[] = [

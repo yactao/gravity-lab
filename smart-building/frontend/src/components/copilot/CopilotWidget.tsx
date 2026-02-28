@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, Send, Bot, User, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { useTenant } from "@/lib/TenantContext";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
     id: string;
@@ -151,11 +152,21 @@ export function CopilotWidget() {
                                     {/* Message Bubble */}
                                     <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                                         <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm ${msg.isSystemAction ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 italic border border-slate-200 dark:border-white/5' :
-                                                msg.role === 'user'
-                                                    ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-br-sm'
-                                                    : 'bg-white dark:bg-[#1A2235] text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-white/5 rounded-bl-sm'
+                                            msg.role === 'user'
+                                                ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-br-sm'
+                                                : 'bg-white dark:bg-[#1A2235] text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-white/5 rounded-bl-sm'
                                             }`}>
-                                            {msg.content}
+                                            <ReactMarkdown
+                                                components={{
+                                                    p: ({ node, ...props }) => <p className="mb-1 last:mb-0" {...props} />,
+                                                    ul: ({ node, ...props }) => <ul className="list-disc pl-4 my-1 space-y-0.5" {...props} />,
+                                                    ol: ({ node, ...props }) => <ol className="list-decimal pl-4 my-1 space-y-0.5" {...props} />,
+                                                    li: ({ node, ...props }) => <li className="" {...props} />,
+                                                    strong: ({ node, ...props }) => <strong className="font-bold text-violet-700 dark:text-violet-400" {...props} />
+                                                }}
+                                            >
+                                                {msg.content}
+                                            </ReactMarkdown>
                                         </div>
 
                                         {/* Execution Confirmation card (Human in the loop) */}
