@@ -18,7 +18,8 @@ export default function ClientsPage() {
         name: "",
         type: "Corporate",
         country: "France",
-        region: "",
+        contactFirstName: "",
+        contactLastName: "",
         city: "",
         address: "",
         postalCode: "",
@@ -68,7 +69,7 @@ export default function ClientsPage() {
             });
             if (res.ok) {
                 setIsAddClientOpen(false);
-                setNewClient({ name: "", type: "Corporate", country: "France", region: "", city: "", postalCode: "", address: "", phone: "", email: "", establishmentDate: "", legalForm: "SAS" });
+                setNewClient({ name: "", type: "Corporate", country: "France", contactFirstName: "", contactLastName: "", city: "", postalCode: "", address: "", phone: "", email: "", establishmentDate: "", legalForm: "SAS" });
                 await fetchOrganizations();
             }
         } catch (e) {
@@ -80,10 +81,10 @@ export default function ClientsPage() {
         e.preventDefault();
         if (!editClient) return;
         try {
-            const { name, type, country, region, city, address, postalCode, phone, email, establishmentDate, legalForm } = editClient;
+            const { name, type, country, contactFirstName, contactLastName, city, address, postalCode, phone, email, establishmentDate, legalForm } = editClient;
             const res = await authFetch(`http://localhost:3001/api/organizations/${editClient.id}`, {
                 method: "PUT",
-                body: JSON.stringify({ name, type, country, region, city, address, postalCode, phone, email, establishmentDate, legalForm })
+                body: JSON.stringify({ name, type, country, contactFirstName, contactLastName, city, address, postalCode, phone, email, establishmentDate, legalForm })
             });
             if (res.ok) {
                 setIsEditClientOpen(false);
@@ -409,25 +410,39 @@ export default function ClientsPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Région</label>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Pays</label>
                                         <input
                                             type="text"
-                                            value={newClient.region}
-                                            onChange={e => setNewClient({ ...newClient, region: e.target.value })}
+                                            value={newClient.country}
+                                            onChange={e => setNewClient({ ...newClient, country: e.target.value })}
                                             className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
-                                            placeholder="ex: Île-de-France"
+                                            placeholder="ex: France"
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Pays</label>
-                                    <input
-                                        type="text"
-                                        value={newClient.country}
-                                        onChange={e => setNewClient({ ...newClient, country: e.target.value })}
-                                        className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
-                                        placeholder="ex: France"
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Prénom du contact *</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={newClient.contactFirstName}
+                                            onChange={e => setNewClient({ ...newClient, contactFirstName: e.target.value })}
+                                            className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="ex: Jean"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Nom du contact *</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={newClient.contactLastName}
+                                            onChange={e => setNewClient({ ...newClient, contactLastName: e.target.value })}
+                                            className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="ex: Dupont"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -563,23 +578,34 @@ export default function ClientsPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Région</label>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Pays</label>
                                         <input
                                             type="text"
-                                            value={editClient.region || ""}
-                                            onChange={e => setEditClient({ ...editClient, region: e.target.value })}
+                                            value={editClient.country || ""}
+                                            onChange={e => setEditClient({ ...editClient, country: e.target.value })}
                                             className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Pays</label>
-                                    <input
-                                        type="text"
-                                        value={editClient.country || ""}
-                                        onChange={e => setEditClient({ ...editClient, country: e.target.value })}
-                                        className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Prénom du contact</label>
+                                        <input
+                                            type="text"
+                                            value={editClient.contactFirstName || ""}
+                                            onChange={e => setEditClient({ ...editClient, contactFirstName: e.target.value })}
+                                            className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Nom du contact</label>
+                                        <input
+                                            type="text"
+                                            value={editClient.contactLastName || ""}
+                                            onChange={e => setEditClient({ ...editClient, contactLastName: e.target.value })}
+                                            className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        />
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>

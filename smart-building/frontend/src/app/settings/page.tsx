@@ -249,6 +249,37 @@ export default function SettingsPage() {
                                     <span className="font-bold text-orange-600/70 dark:text-orange-400/70 text-sm">Mode ÉCO Continu H24</span>
                                 </div>
                             </div>
+
+                            <div className="pt-8 border-t border-slate-200 dark:border-white/10">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center">
+                                        Exceptions & Jours Fériés
+                                    </h3>
+                                    <button className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-bold text-xs transition-colors border border-primary/20">
+                                        <Plus className="w-4 h-4" /> Ajouter une date
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center p-4 bg-red-500/5 border border-red-500/20 shadow-sm rounded-xl">
+                                        <div>
+                                            <div className="font-bold text-red-600 dark:text-red-400 text-sm">1er Mai 2026</div>
+                                            <div className="text-xs text-red-600/70 dark:text-red-400/70 mt-0.5">Fête du Travail</div>
+                                        </div>
+                                        <span className="font-bold text-red-600 dark:text-red-400 text-xs px-3 py-1 bg-red-500/10 rounded-lg border border-red-500/20">Fermeture Totale / H24 ÉCO</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-4 bg-blue-500/5 border border-blue-500/20 shadow-sm rounded-xl">
+                                        <div>
+                                            <div className="font-bold text-blue-600 dark:text-blue-400 text-sm">Dimanche 24 Décembre 2026</div>
+                                            <div className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-0.5">Ouverture exceptionnelle (Noël)</div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-black/30 px-2 py-1 border border-blue-500/20 rounded-md">09:00</span>
+                                            <span className="text-blue-400">-</span>
+                                            <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-black/30 px-2 py-1 border border-blue-500/20 rounded-md">17:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 

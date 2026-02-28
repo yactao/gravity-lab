@@ -17,7 +17,10 @@ export class Organization {
     country: string;
 
     @Column({ nullable: true })
-    region: string;
+    contactFirstName: string;
+
+    @Column({ nullable: true })
+    contactLastName: string;
 
     @Column({ nullable: true })
     city: string;
