@@ -32,7 +32,7 @@ export default function SitesListPage() {
 
     // Modal state
     const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
-    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", postalCode: "", city: "", country: "France" });
 
     const isAdmin = currentTenant?.role === "ENERGY_MANAGER" || currentTenant?.role === "SUPER_ADMIN";
 
@@ -65,7 +65,7 @@ export default function SitesListPage() {
             });
             if (res.ok) {
                 setIsAddSiteOpen(false);
-                setNewSite({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+                setNewSite({ name: "", type: "Bureaux", address: "", postalCode: "", city: "", country: "France" });
                 fetchSites();
             } else {
                 alert("Erreur lors de la création du site.");
@@ -100,6 +100,7 @@ export default function SitesListPage() {
                         postalCode: row[2].trim(),
                         city: row[3].trim(),
                         type: row[4]?.trim() || 'Bureaux',
+                        country: row[5]?.trim() || 'France',
                         status: 'active'
                     };
 
@@ -331,6 +332,10 @@ export default function SitesListPage() {
                                             <label className="text-xs text-slate-500 dark:text-slate-400">Ville *</label>
                                             <input type="text" required value={newSite.city} onChange={e => setNewSite({ ...newSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" />
                                         </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-slate-500 dark:text-slate-400">Pays</label>
+                                        <input type="text" value={newSite.country} onChange={e => setNewSite({ ...newSite, country: e.target.value })} className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" />
                                     </div>
                                 </div>
                             </div>

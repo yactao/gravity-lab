@@ -19,9 +19,9 @@ export default function ClientDetailsPage() {
 
     // Add Site states
     const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
-    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", postalCode: "", city: "", country: "" });
     const [isEditSiteOpen, setIsEditSiteOpen] = useState(false);
-    const [editingSite, setEditingSite] = useState<any>({ id: "", name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+    const [editingSite, setEditingSite] = useState<any>({ id: "", name: "", type: "Bureaux", address: "", postalCode: "", city: "", country: "" });
 
     // Add User states
     const [usersList, setUsersList] = useState<any[]>([]);
@@ -73,7 +73,7 @@ export default function ClientDetailsPage() {
             });
             if (res.ok) {
                 setIsAddSiteOpen(false);
-                setNewSite({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+                setNewSite({ name: "", type: "Bureaux", address: "", postalCode: "", city: "", country: "" });
                 await fetchClientDetails(); // Reload to get the new site
             }
         } catch (e) {
@@ -84,10 +84,10 @@ export default function ClientDetailsPage() {
     const handleUpdateSite = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const { name, type, address, postalCode, city } = editingSite;
+            const { name, type, address, postalCode, city, country } = editingSite;
             const res = await authFetch(`http://localhost:3001/api/sites/${editingSite.id}`, {
                 method: "PUT",
-                body: JSON.stringify({ name, type, address, postalCode, city })
+                body: JSON.stringify({ name, type, address, postalCode, city, country })
             });
             if (res.ok) {
                 setIsEditSiteOpen(false);
@@ -258,7 +258,7 @@ export default function ClientDetailsPage() {
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">Sites rattachés (Gestion Parc)</h3>
                                     {isAdmin && (
-                                        <button onClick={() => setIsAddSiteOpen(true)} className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-bold transition-all flex items-center">
+                                        <button onClick={() => { setNewSite({ ...newSite, country: client?.country || "France" }); setIsAddSiteOpen(true); }} className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-bold transition-all flex items-center">
                                             <Plus className="h-3 w-3 mr-1" />
                                             Nouveau Site
                                         </button>
@@ -472,8 +472,12 @@ export default function ClientDetailsPage() {
                                 <div><label className="text-sm text-slate-500 dark:text-slate-400">Code postal</label>
                                     <input type="text" required value={newSite.postalCode} onChange={e => setNewSite({ ...newSite, postalCode: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" placeholder="ex: 75000" /></div>
                             </div>
-                            <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
-                                <input type="text" required value={newSite.city} onChange={e => setNewSite({ ...newSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
+                                    <input type="text" required value={newSite.city} onChange={e => setNewSite({ ...newSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Pays</label>
+                                    <input type="text" required value={newSite.country} onChange={e => setNewSite({ ...newSite, country: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" placeholder="ex: France" /></div>
+                            </div>
 
                             <button type="submit" className="w-full py-3 mt-4 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">Créer le Bâtiment</button>
                         </form>
@@ -502,8 +506,12 @@ export default function ClientDetailsPage() {
                                 <div><label className="text-sm text-slate-500 dark:text-slate-400">Code postal</label>
                                     <input type="text" value={editingSite.postalCode || ""} onChange={e => setEditingSite({ ...editingSite, postalCode: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
                             </div>
-                            <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
-                                <input type="text" value={editingSite.city || ""} onChange={e => setEditingSite({ ...editingSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Ville</label>
+                                    <input type="text" value={editingSite.city || ""} onChange={e => setEditingSite({ ...editingSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                                <div><label className="text-sm text-slate-500 dark:text-slate-400">Pays</label>
+                                    <input type="text" value={editingSite.country || ""} onChange={e => setEditingSite({ ...editingSite, country: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white" /></div>
+                            </div>
 
                             <button type="submit" className="w-full py-3 mt-4 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">Enregistrer</button>
                         </form>
