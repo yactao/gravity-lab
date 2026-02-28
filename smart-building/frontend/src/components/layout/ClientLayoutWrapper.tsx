@@ -8,12 +8,12 @@ import { CopilotWidget } from "@/components/copilot/CopilotWidget";
 
 export function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isLoginPage = pathname === "/login";
+    const isPublicPage = pathname === "/login" || pathname === "/welcome";
 
     // Manage sidebar state globally for the layout
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    if (isLoginPage) {
+    if (isPublicPage) {
         return <>{children}</>;
     }
 
