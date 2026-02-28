@@ -25,6 +25,14 @@ export default function SettingsPage() {
     const [workStart, setWorkStart] = useState("08:00");
     const [workEnd, setWorkEnd] = useState("19:00");
 
+    // Exceptions states
+    const [isAddExceptionModalOpen, setIsAddExceptionModalOpen] = useState(false);
+    const [newException, setNewException] = useState({ date: "", name: "", type: "closed", startTime: "08:00", endTime: "19:00" });
+    const [exceptionsList, setExceptionsList] = useState([
+        { id: 1, date: "2026-05-01", name: "Fête du Travail", type: "closed" },
+        { id: 2, date: "2026-12-24", name: "Ouverture exceptionnelle (Noël)", type: "open", startTime: "09:00", endTime: "17:00" },
+    ]);
+
     // Users states
     const [usersList, setUsersList] = useState<any[]>([]);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -71,6 +79,14 @@ export default function SettingsPage() {
             const res = await authFetch(`http://localhost:3001/api/users/${id}`, { method: "DELETE" });
             if (res.ok) await fetchUsers();
         } catch (e) { console.error(e); }
+    };
+
+    const handleAddException = (e: React.FormEvent) => {
+        e.preventDefault();
+        const newId = Math.max(...exceptionsList.map(ex => ex.id), 0) + 1;
+        setExceptionsList([...exceptionsList, { ...newException, id: newId }]);
+        setIsAddExceptionModalOpen(false);
+        setNewException({ date: "", name: "", type: "closed", startTime: "08:00", endTime: "19:00" });
     };
 
     const tabs = [
@@ -255,29 +271,28 @@ export default function SettingsPage() {
                                     <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center">
                                         Exceptions & Jours Fériés
                                     </h3>
-                                    <button className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-bold text-xs transition-colors border border-primary/20">
+                                    <button onClick={() => setIsAddExceptionModalOpen(true)} className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg font-bold text-xs transition-colors border border-primary/20">
                                         <Plus className="w-4 h-4" /> Ajouter une date
                                     </button>
                                 </div>
                                 <div className="space-y-3">
-                                    <div className="flex justify-between items-center p-4 bg-red-500/5 border border-red-500/20 shadow-sm rounded-xl">
-                                        <div>
-                                            <div className="font-bold text-red-600 dark:text-red-400 text-sm">1er Mai 2026</div>
-                                            <div className="text-xs text-red-600/70 dark:text-red-400/70 mt-0.5">Fête du Travail</div>
+                                    {exceptionsList.map(exc => (
+                                        <div key={exc.id} className={`flex justify-between items-center p-4 ${exc.type === 'closed' ? 'bg-red-500/5 border-red-500/20' : 'bg-blue-500/5 border-blue-500/20'} border shadow-sm rounded-xl`}>
+                                            <div>
+                                                <div className={`font-bold ${exc.type === 'closed' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'} text-sm`}>{new Date(exc.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                                                <div className={`text-xs ${exc.type === 'closed' ? 'text-red-600/70 dark:text-red-400/70' : 'text-blue-600/70 dark:text-blue-400/70'} mt-0.5`}>{exc.name}</div>
+                                            </div>
+                                            {exc.type === 'closed' ? (
+                                                <span className="font-bold text-red-600 dark:text-red-400 text-xs px-3 py-1 bg-red-500/10 rounded-lg border border-red-500/20">Fermeture Totale / H24 ÉCO</span>
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-black/30 px-2 py-1 border border-blue-500/20 rounded-md`}>{exc.startTime}</span>
+                                                    <span className="text-blue-400">-</span>
+                                                    <span className={`font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-black/30 px-2 py-1 border border-blue-500/20 rounded-md`}>{exc.endTime}</span>
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="font-bold text-red-600 dark:text-red-400 text-xs px-3 py-1 bg-red-500/10 rounded-lg border border-red-500/20">Fermeture Totale / H24 ÉCO</span>
-                                    </div>
-                                    <div className="flex justify-between items-center p-4 bg-blue-500/5 border border-blue-500/20 shadow-sm rounded-xl">
-                                        <div>
-                                            <div className="font-bold text-blue-600 dark:text-blue-400 text-sm">Dimanche 24 Décembre 2026</div>
-                                            <div className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-0.5">Ouverture exceptionnelle (Noël)</div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-black/30 px-2 py-1 border border-blue-500/20 rounded-md">09:00</span>
-                                            <span className="text-blue-400">-</span>
-                                            <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-black/30 px-2 py-1 border border-blue-500/20 rounded-md">17:00</span>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -460,6 +475,66 @@ export default function SettingsPage() {
 
                             <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/30 flex justify-center items-center">
                                 Envoyer l'invitation globale
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Add Exception */}
+            {isAddExceptionModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl relative">
+                        <button onClick={() => setIsAddExceptionModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="h-5 w-5" /></button>
+                        <h2 className="text-xl font-bold mb-2 text-slate-900 dark:text-white flex items-center">Ajouter une Exception</h2>
+                        <p className="text-xs text-slate-500 mb-6">Définissez une ouverture exceptionnelle ou un jour de fermeture (férié).</p>
+
+                        <form onSubmit={handleAddException} className="space-y-4">
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Intitulé</label>
+                                <input type="text" required value={newException.name} onChange={e => setNewException({ ...newException, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all placeholder-slate-400" placeholder="ex: 14 Juillet, Ouverture Black Friday" />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Date</label>
+                                <input type="date" required value={newException.date} onChange={e => setNewException({ ...newException, date: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:border-primary outline-none transition-all" />
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10">
+                                <label className="text-sm font-bold text-slate-900 dark:text-white mb-3 block">Type d'exception</label>
+                                <div className="space-y-3">
+                                    <label className="flex items-start cursor-pointer group">
+                                        <input type="radio" name="extype" value="closed" checked={newException.type === 'closed'} onChange={e => setNewException({ ...newException, type: e.target.value })} className="mt-1 mr-3 text-red-500 focus:ring-red-500" />
+                                        <div>
+                                            <span className="text-sm font-bold text-red-600 dark:text-red-400 block transition-colors">Fermé (Jour férié / Chômé)</span>
+                                            <span className="text-xs text-slate-500">Le bâtiment passe en mode ÉCO pour la journée entière.</span>
+                                        </div>
+                                    </label>
+                                    <label className="flex items-start cursor-pointer group">
+                                        <input type="radio" name="extype" value="open" checked={newException.type === 'open'} onChange={e => setNewException({ ...newException, type: e.target.value })} className="mt-1 mr-3 text-blue-500 focus:ring-blue-500" />
+                                        <div>
+                                            <span className="text-sm font-bold text-blue-600 dark:text-blue-400 block transition-colors">Ouverture exceptionnelle</span>
+                                            <span className="text-xs text-slate-500">Le bâtiment sera chauffé/ventilé même si c'est normalement fermé.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {newException.type === 'open' && (
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1">
+                                        <label className="text-[10px] text-slate-500 uppercase font-bold">Ouverture</label>
+                                        <input type="time" required value={newException.startTime} onChange={e => setNewException({ ...newException, startTime: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-sm font-bold text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="text-[10px] text-slate-500 uppercase font-bold">Fermeture</label>
+                                        <input type="time" required value={newException.endTime} onChange={e => setNewException({ ...newException, endTime: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-sm font-bold text-slate-900 dark:text-white" />
+                                    </div>
+                                </div>
+                            )}
+
+                            <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all flex justify-center items-center shadow-lg shadow-primary/30">
+                                Enregistrer la date
                             </button>
                         </form>
                     </div>
