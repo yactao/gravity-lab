@@ -30,6 +30,10 @@ export default function SitesListPage() {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Modal state
+    const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
+    const [newSite, setNewSite] = useState({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+
     const isAdmin = currentTenant?.role === "ENERGY_MANAGER" || currentTenant?.role === "SUPER_ADMIN";
 
     const fetchSites = async () => {
@@ -48,6 +52,26 @@ export default function SitesListPage() {
             console.error("Failed to fetch sites", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreateSite = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await authFetch("http://localhost:3001/api/sites", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newSite)
+            });
+            if (res.ok) {
+                setIsAddSiteOpen(false);
+                setNewSite({ name: "", type: "Bureaux", address: "", postalCode: "", city: "" });
+                fetchSites();
+            } else {
+                alert("Erreur lors de la création du site.");
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -104,8 +128,9 @@ export default function SitesListPage() {
     }, [authFetch, currentTenant?.id]);
 
     const filteredSites = sites.filter(site => {
-        const matchesSearch = site.name.toLowerCase().includes(search.toLowerCase()) ||
-            site.city.toLowerCase().includes(search.toLowerCase());
+        const matchName = (site.name || "").toLowerCase().includes(search.toLowerCase());
+        const matchCity = (site.city || "").toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = matchName || matchCity;
 
         if (filterParam === 'out_of_target') {
             return matchesSearch && (site.statusColor === 'red' || site.statusColor === 'orange');
@@ -148,7 +173,7 @@ export default function SitesListPage() {
                                 ref={fileInputRef}
                             />
                         </label>
-                        <button onClick={() => router.push('/clients')} className="bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center transition-all">
+                        <button onClick={() => setIsAddSiteOpen(true)} className="bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center transition-all">
                             <Plus className="w-5 h-5 mr-2" />
                             Créer un Site
                         </button>
@@ -254,6 +279,62 @@ export default function SitesListPage() {
                     </table>
                 </div>
             </div>
+
+            {/* Modal: Add Site */}
+            {isAddSiteOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="w-full max-w-md bg-white dark:bg-[#0B1120] rounded-2xl border border-slate-200 dark:border-white/10 p-6 shadow-2xl relative">
+                        <button onClick={() => setIsAddSiteOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                            <Plus className="h-5 w-5 rotate-45" />
+                        </button>
+                        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-white flex items-center">
+                            <Plus className="w-5 h-5 mr-2 text-primary" />
+                            Créer un Nouveau Site
+                        </h2>
+                        <form onSubmit={handleCreateSite} className="space-y-4">
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nom du bâtiment *</label>
+                                <input type="text" required value={newSite.name} onChange={e => setNewSite({ ...newSite, name: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" placeholder="Ex: Tour Alpha" />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Type de bâtiment *</label>
+                                <select value={newSite.type} onChange={e => setNewSite({ ...newSite, type: e.target.value })} className="w-full p-2.5 mt-1 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors">
+                                    <option value="Bureaux">Bureaux / Tertiaire</option>
+                                    <option value="Magasin">Magasin / Retail</option>
+                                    <option value="Usine">Usine / Industriel</option>
+                                    <option value="Logistique">Logistique / Entrepôt</option>
+                                </select>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-200 dark:border-white/10 mt-4">
+                                <label className="text-sm font-bold text-slate-900 dark:text-white mb-2 block">Localisation</label>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-xs text-slate-500 dark:text-slate-400">Adresse</label>
+                                        <input type="text" value={newSite.address} onChange={e => setNewSite({ ...newSite, address: e.target.value })} className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs text-slate-500 dark:text-slate-400">Code postal</label>
+                                            <input type="text" value={newSite.postalCode} onChange={e => setNewSite({ ...newSite, postalCode: e.target.value })} className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" placeholder="ex: 75000" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-500 dark:text-slate-400">Ville *</label>
+                                            <input type="text" required value={newSite.city} onChange={e => setNewSite({ ...newSite, city: e.target.value })} className="w-full p-2.5 mt-1 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" className="w-full py-3 mt-6 bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                Créer le Site
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
