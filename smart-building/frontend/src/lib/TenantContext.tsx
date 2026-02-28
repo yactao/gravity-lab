@@ -41,7 +41,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
                 setToken(savedToken);
                 setCurrentTenantState(JSON.parse(savedTenant));
             } catch (e) { }
-        } else if (pathname !== '/login') {
+        } else if (pathname !== '/login' && pathname !== '/welcome') {
             router.push('/login');
         }
         setMounted(true);
@@ -114,7 +114,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     if (!mounted) return null; // Avoid hydration mismatch
 
     // Prevent rendering protected pages if completely unauthenticated
-    if (pathname !== '/login' && (!currentTenant || !token)) {
+    if (pathname !== '/login' && pathname !== '/welcome' && (!currentTenant || !token)) {
         return null;
     }
 
