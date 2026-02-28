@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Play, Server, Zap, Globe, Cpu, Cog, BarChart4, ShieldCheck } from "lucide-react";
+import { ArrowRight, Play, Globe, Cpu, Cog, ShieldCheck, Hexagon } from "lucide-react";
 
 export default function WelcomePage() {
     return (
@@ -17,11 +17,17 @@ export default function WelcomePage() {
 
             {/* HEADER */}
             <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 md:px-12 backdrop-blur-sm bg-[#0B1120]/50 border-b border-white/5">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.4)]">
-                        <Zap className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3">
+                    <div className="relative w-10 h-10 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"></div>
+                        <Hexagon className="absolute w-8 h-8 text-emerald-500/40" />
+                        <Hexagon className="absolute w-6 h-6 text-emerald-400" />
+                        <Hexagon className="absolute w-8 h-8 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" strokeWidth={2} />
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-white uppercase">UBBEE</span>
+                    <div className="flex flex-col">
+                        <span className="text-xl font-bold tracking-tight text-white uppercase leading-none">UBBEE</span>
+                        <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-0.5">by ioteva</span>
+                    </div>
                 </div>
                 <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
                     <a href="#features" className="hover:text-cyan-400 transition-colors">Fonctionnalités</a>
