@@ -5,12 +5,15 @@ import { ArrowRight, Play, Server, Zap, Globe, Cpu, Cog, BarChart4, ShieldCheck 
 
 export default function WelcomePage() {
     return (
-        <div className="min-h-screen bg-[#0B1120] text-slate-300 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
+        <div className="min-h-screen bg-[#060913] text-slate-300 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
 
-            {/* Background Glows */}
-            <div className="absolute top-0 inset-x-0 h-[500px] pointer-events-none opacity-40 mix-blend-screen"
-                style={{ background: "radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.4), transparent 70%)" }} />
-            <div className="absolute top-[40%] right-[-10%] w-[800px] h-[800px] rounded-full pointer-events-none opacity-20 blur-[120px] bg-indigo-600 mix-blend-screen" />
+            {/* Premium Animated Background Glows */}
+            <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none opacity-50 mix-blend-screen"
+                style={{ background: "radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.25), transparent 70%)" }} />
+            <div className="absolute top-0 inset-x-0 h-[800px] pointer-events-none opacity-30 mix-blend-screen"
+                style={{ background: "radial-gradient(circle at 50% -20%, rgba(79, 70, 229, 0.4), transparent 80%)" }} />
+            <div className="absolute top-[30%] right-[-10%] w-[1000px] h-[1000px] rounded-full pointer-events-none opacity-10 blur-[150px] bg-indigo-500 mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[800px] h-[800px] rounded-full pointer-events-none opacity-10 blur-[120px] bg-cyan-500 mix-blend-screen animate-pulse" style={{ animationDuration: '10s' }} />
 
             {/* HEADER */}
             <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 md:px-12 backdrop-blur-sm bg-[#0B1120]/50 border-b border-white/5">
@@ -41,11 +44,11 @@ export default function WelcomePage() {
                         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                         V1.0 disponible en Accès Sécurisé
                     </div>
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight max-w-4xl leading-tight mb-8">
-                        La GTB 3.0 qui ne nécessite ni <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">câble</span>, ni <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">informaticiens</span>.
+                    <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] mt-4 font-black text-white tracking-tighter max-w-5xl leading-[1.1] mb-8 drop-shadow-2xl">
+                        La GTB 3.0 qui ne nécessite ni <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400">câbles</span>, ni <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">informaticiens</span>.
                     </h1>
-                    <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-12 font-light leading-relaxed">
-                        Visualisez, pilotez et réduisez la facture énergétique de vos bâtiments tertiaires grâce à l'Intelligence Artificielle et à un Hub Universel de déploiement en 15 minutes.
+                    <p className="text-lg md:text-2xl text-slate-400 max-w-3xl mb-12 font-light leading-relaxed">
+                        Visualisez, pilotez et réduisez la facture énergétique de vos bâtiments tertiaires avec un seul tableau de bord unifié propulsé par l'IA.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center gap-6">
                         <Link href="/login" className="px-8 py-4 rounded-full bg-white text-slate-900 font-bold hover:bg-slate-200 transition-colors flex items-center gap-2">
@@ -56,11 +59,12 @@ export default function WelcomePage() {
                         </button>
                     </div>
 
-                    {/* REAL HERO DASHBOARD UI */}
-                    <div className="mt-20 w-full max-w-5xl rounded-2xl border border-white/10 bg-black/40 p-2 md:p-4 backdrop-blur-xl shadow-2xl relative">
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-transparent z-10 rounded-2xl md:h-[120%]" />
-                        <div className="rounded-xl border border-white/5 bg-[#111827] overflow-hidden aspect-video relative flex items-center justify-center group">
-                            <img src="/marketing/hero_isometric.png" alt="UBBEE Jumeau numerique 3D" className="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-1000" />
+                    {/* REAL HERO DASHBOARD UI (Macbook Pro Style) */}
+                    <div className="mt-20 w-full max-w-6xl rounded-[2rem] border border-white/10 bg-black/40 p-4 drop-shadow-[0_0_50px_rgba(6,182,212,0.15)] relative overflow-hidden group">
+                        <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#060913] via-[#060913]/80 to-transparent z-10 rounded-2xl md:h-[130%]" />
+                        <div className="rounded-[1.5rem] border border-white/5 bg-[#0a0f1c] overflow-hidden aspect-video relative flex items-center justify-center shadow-2xl">
+                            <img src="/marketing/hero_isometric.png" alt="UBBEE Jumeau numerique 3D" className="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-[2000ms] ease-out pt-6" />
                         </div>
                     </div>
                 </section>
