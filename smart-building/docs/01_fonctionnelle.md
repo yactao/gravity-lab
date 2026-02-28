@@ -44,3 +44,8 @@ Le système est pensé pour gérer de multiples sociétés (Tenants). Il support
 - **Plages Horaires :** Définition des modes "Ouvert / Fermé" pour le pilotage automatique ÉCO.
 - **Marque Blanche :** Personnalisation des couleurs de l'espace au logo de l'entreprise B2B (Mise en place de tokens UI).
 - **Intégrations :** Webhooks sortants et lecture de Clés API pour intégration avec PowerBI ou un ERP tiers.
+
+### F. Appairage & Hub IoT (No-Code)
+- **Provisionnement Rapide :** Auto-découverte et association (Plug & Play) d'équipements certifiés UBBEE sur les ondes via identifiant matériel.
+- **Interopérabilité Avancée :** Interface visuelle (Glisser-Déposer) permettant aux intégrateurs de "mapper" n'importe quelle trame de données brutes d'un capteur ancien ou tiers vers les modèles de données standards UBBEE.
+- **Positionnement Physique :** Placement du nouveau capteur dans l'arborescence (Client > Site > Zone) pour activation des jumeaux numériques.

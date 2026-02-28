@@ -24,6 +24,9 @@ Ce répertoire contient tous les documents de référence pour comprendre, dépl
 6. **[Copilote IA UBBEE](./06_copilot_ia.md)**
    Fonctionnalités avancées du module IA, orchestration du Function Calling LLM, et sécurisation du contrôle des équipements (Human-in-the-Loop).
 
+7. **[Appairage IoT (Guide Energy Manager)](./06_appairage_iot.md)**
+   Procédure détaillée pour l'intégration de capteurs sur la plateforme, incluant le provisionnement rapide (Plug & Play) et le mapping MQTT avancé (drag & drop).
+
 ---
 
 *Généré pour la livraison de la Version 1 (V1) du produit.*
