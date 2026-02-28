@@ -77,6 +77,50 @@ export class CopilotService {
                         }
                     }
                 }
+            },
+            {
+                type: 'function',
+                function: {
+                    name: 'get_dashboard_kpis',
+                    description: 'Get global KPIs for the current organization including health score, total energy, and active sites. Use this to analyze the general state of the platform.',
+                    parameters: {
+                        type: 'object',
+                        properties: {}
+                    }
+                }
+            },
+            {
+                type: 'function',
+                function: {
+                    name: 'get_alerts',
+                    description: 'Get a list of current anomalies, inactive sensors, and threshold overruns.',
+                    parameters: {
+                        type: 'object',
+                        properties: {}
+                    }
+                }
+            },
+            {
+                type: 'function',
+                function: {
+                    name: 'get_hvac_performance',
+                    description: 'Get HVAC (Heating, Ventilation, Air Conditioning) performance metrics and optimization suggestions.',
+                    parameters: {
+                        type: 'object',
+                        properties: {}
+                    }
+                }
+            },
+            {
+                type: 'function',
+                function: {
+                    name: 'get_global_energy',
+                    description: 'Get the global energy consumption of the buildings compared to the previous month.',
+                    parameters: {
+                        type: 'object',
+                        properties: {}
+                    }
+                }
             }
         ];
     }
@@ -87,10 +131,13 @@ export class CopilotService {
 IMPORTANT: L'utilisateur actuel a le rôle "${userRole}" sur le tenant "${tenantId}".
 
 REGLES DE COMPORTEMENT:
-1. Si l'utilisateur demande une action sur un équipement dont tu ne connais pas le ID, appelle systématiquement "list_my_available_devices" en premier.
-2. Une fois l'ID trouvé, APPELLE IMMÉDIATEMENT la fonction "set_device_state".
-3. NE DEMANDE JAMAIS UNE CONFIRMATION TEXTUELLE ("Voulez-vous que je le fasse ?"). L'appel de "set_device_state" ne fait que générer la carte de validation graphique sur l'écran du client ! C'est le client qui cliquera.
-4. Contente-toi de dire "Je vous prépare l'action..." et déclenche l'outil "set_device_state" silencieusement.
+1. Tu dois AUSSI répondre aux questions d'analyse globale de la plateforme (consommation globale, alertes, performances CVC, Score ESG). Utilise les outils fournis (\`get_dashboard_kpis\`, \`get_alerts\`, etc.) pour récupérer le contexte avant de répondre qualitativement.
+2. Si l'utilisateur demande une action sur un équipement dont tu ne connais pas le ID, appelle systématiquement "list_my_available_devices" en premier.
+3. Une fois l'ID trouvé, APPELLE IMMÉDIATEMENT la fonction "set_device_state".
+4. NE DEMANDE JAMAIS UNE CONFIRMATION TEXTUELLE ("Voulez-vous que je le fasse ?"). L'appel de "set_device_state" ne fait que générer la carte de validation graphique sur l'écran du client ! C'est le client qui cliquera.
+5. Contente-toi de dire "Je vous prépare l'action..." et déclenche l'outil "set_device_state" silencieusement.
+6. Tu es proactif, tu n'hésites pas à proposer des optimisations si tu vois des anomalies dans les alertes ou une sur-consommation HVAC.
+
 L'heure actuelle locale est ${new Date().toISOString()}.`;
 
         let messages: ChatMessage[] = [
@@ -203,6 +250,25 @@ L'heure actuelle locale est ${new Date().toISOString()}.`;
                             { timestamp: '2026-02-27T12:00:00Z', value: 23.5 },
                         ]
                     };
+                }
+                else if (toolName === 'get_dashboard_kpis') {
+                    const data = await this.appService.getDashboardKpis(tenantId, userRole);
+                    toolResultObj = { status: 'success', data };
+                }
+                else if (toolName === 'get_alerts') {
+                    const orgContext = (userRole === 'SUPER_ADMIN' && tenantId === '11111111-1111-1111-1111-111111111111') ? undefined : tenantId;
+                    const data = await this.appService.getAlerts(orgContext);
+                    toolResultObj = { status: 'success', data };
+                }
+                else if (toolName === 'get_hvac_performance') {
+                    const orgContext = (userRole === 'SUPER_ADMIN' && tenantId === '11111111-1111-1111-1111-111111111111') ? undefined : tenantId;
+                    const data = await this.appService.getHvacPerformance(orgContext);
+                    toolResultObj = { status: 'success', data };
+                }
+                else if (toolName === 'get_global_energy') {
+                    const orgContext = (userRole === 'SUPER_ADMIN' && tenantId === '11111111-1111-1111-1111-111111111111') ? undefined : tenantId;
+                    const data = await this.appService.getGlobalEnergy(orgContext);
+                    toolResultObj = { status: 'success', data };
                 }
                 else if (toolName === 'set_device_state') {
                     // RBAC check: Does user have rights to modify?
