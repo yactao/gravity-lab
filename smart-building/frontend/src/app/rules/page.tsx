@@ -376,13 +376,6 @@ export default function RulesPage() {
                     >
                         <Moon className="w-3 h-3 mr-1.5" /> Veille Nocturne
                     </button>
-                    <button
-                        onClick={() => { setChatInput("Optimise le CVC en fonction de la présence (15min)"); handleSimulateAI(new Event('submit') as any); }}
-                        className="shrink-0 whitespace-nowrap flex items-center bg-slate-200/50 dark:bg-white/10 hover:bg-primary hover:text-slate-900 border border-slate-300 dark:border-white/20 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
-                    >
-                        <User className="w-3 h-3 mr-1.5" /> Eco Présence
-                    </button>
-                    <div className="w-4 shrink-0" aria-hidden="true"></div>
                 </div>
 
                 {/* Chat Input */}
