@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Cloud, CloudFog, CloudLightning, CloudRain, CloudSnow, Loader2, Sun, ThermometerSun, Wind } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useParams } from "next/navigation";
+import { useTenant } from "@/lib/TenantContext";
 
 // Mapping Open-Meteo WMO codes to Lucide icons
 const getWeatherIcon = (code: number) => {
@@ -29,6 +31,10 @@ const getWeatherLabel = (code: number) => {
 };
 
 export function WeatherWidget() {
+    const params = useParams();
+    const siteId = params?.id as string;
+    const { authFetch } = useTenant();
+
     const [weather, setWeather] = useState<{ temp: number; code: number; wind: number } | null>(null);
     const [cityInfo, setCityInfo] = useState<string>("Localisation...");
     const [loading, setLoading] = useState(true);
@@ -61,24 +67,49 @@ export function WeatherWidget() {
                 setLoading(false);
             }
         };
+        const initWeather = async () => {
+            // Si on est sur une page de site précis, récupérer la ville du site
+            if (siteId) {
+                try {
+                    const res = await authFetch(`http://localhost:3001/api/sites/${siteId}`);
+                    if (res.ok) {
+                        const siteData = await res.json();
+                        if (siteData.city) {
+                            // Geocoding de la ville
+                            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(siteData.city)}&count=1&language=fr&format=json`);
+                            const geoData = await geoRes.json();
+                            if (geoData.results && geoData.results.length > 0) {
+                                const location = geoData.results[0];
+                                fetchWeather(location.latitude, location.longitude, siteData.city);
+                                return; // On arrête là, on a trouvé pour le site
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("Erreur récupération ville du site pour la météo", err);
+                }
+            }
 
-        // Essayer d'utiliser la géolocalisation du navigateur
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    fetchWeather(position.coords.latitude, position.coords.longitude);
-                },
-                (error) => {
-                    // Si l'utilisateur refuse la localisation, on se rabat sur Paris par défaut
-                    console.warn("Geoloc refusée, fallback sur Paris");
-                    fetchWeather(48.8566, 2.3522, "Paris");
-                },
-                { timeout: 5000 }
-            );
-        } else {
-            fetchWeather(48.8566, 2.3522, "Paris");
-        }
-    }, []);
+            // Essayer d'utiliser la géolocalisation du navigateur
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        fetchWeather(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        // Si l'utilisateur refuse la localisation, on se rabat sur Paris par défaut
+                        console.warn("Geoloc refusée, fallback sur Paris");
+                        fetchWeather(48.8566, 2.3522, "Paris");
+                    },
+                    { timeout: 5000 }
+                );
+            } else {
+                fetchWeather(48.8566, 2.3522, "Paris");
+            }
+        };
+
+        initWeather();
+    }, [siteId, authFetch]);
 
     if (loading) {
         return (
