@@ -382,6 +382,7 @@ export default function RulesPage() {
                     >
                         <User className="w-3 h-3 mr-1.5" /> Eco Présence
                     </button>
+                    <div className="w-4 shrink-0" aria-hidden="true"></div>
                 </div>
 
                 {/* Chat Input */}

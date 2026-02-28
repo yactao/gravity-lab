@@ -66,7 +66,16 @@ export default function MapPage() {
                 <div className="flex items-center gap-2">
                     <select
                         value={selectedSiteFilter}
-                        onChange={e => setSelectedSiteFilter(e.target.value)}
+                        onChange={e => {
+                            const val = e.target.value;
+                            setSelectedSiteFilter(val);
+                            if (val) {
+                                const siteToPreview = sites.find(s => s.id === val);
+                                if (siteToPreview) {
+                                    window.dispatchEvent(new CustomEvent('preview-site', { detail: siteToPreview }));
+                                }
+                            }
+                        }}
                         className="bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl p-2.5 outline-none focus:ring-1 focus:ring-primary backdrop-blur-md"
                     >
                         <option value="">Tous les sites</option>
