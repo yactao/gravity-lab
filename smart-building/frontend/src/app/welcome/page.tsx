@@ -56,26 +56,11 @@ export default function WelcomePage() {
                         </button>
                     </div>
 
-                    {/* FAKE HERO DASHBOARD UI */}
+                    {/* REAL HERO DASHBOARD UI */}
                     <div className="mt-20 w-full max-w-5xl rounded-2xl border border-white/10 bg-black/40 p-2 md:p-4 backdrop-blur-xl shadow-2xl relative">
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-transparent z-10 rounded-2xl md:h-[120%]" />
-                        <div className="rounded-xl border border-white/5 bg-[#111827] overflow-hidden aspect-video relative flex items-center justify-center">
-                            {/* Fake UI content inside the macbook-like window */}
-                            <div className="absolute top-0 left-0 right-0 h-10 border-b border-white/5 bg-white/5 flex items-center px-4 gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                                <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                                <div className="w-3 h-3 rounded-full bg-green-500/50" />
-                            </div>
-                            <div className="pt-10 w-full h-full p-6 flex flex-col gap-6 opacity-60">
-                                <div className="flex gap-4">
-                                    <div className="w-48 h-24 bg-white/5 rounded-lg border border-white/5" />
-                                    <div className="w-48 h-24 bg-white/5 rounded-lg border border-white/5" />
-                                    <div className="w-48 h-24 bg-white/5 rounded-lg border border-white/5" />
-                                </div>
-                                <div className="flex-1 bg-white/5 rounded-xl border border-white/5 flex items-center justify-center">
-                                    <Globe className="w-32 h-32 text-cyan-500/30" strokeWidth={1} />
-                                </div>
-                            </div>
+                        <div className="rounded-xl border border-white/5 bg-[#111827] overflow-hidden aspect-video relative flex items-center justify-center group">
+                            <img src="/marketing/hero_isometric.png" alt="UBBEE Jumeau numerique 3D" className="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-1000" />
                         </div>
                     </div>
                 </section>
@@ -110,12 +95,8 @@ export default function WelcomePage() {
                             </p>
                         </div>
                         <div className="flex-1 relative">
-                            <div className="aspect-square md:aspect-[4/3] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-6 flex items-center justify-center shadow-2xl relative overflow-hidden">
-                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-cyan-500/10 blur-3xl" />
-                                <div className="w-48 h-48 rounded-full border border-cyan-500/30 flex items-center justify-center relative">
-                                    <div className="absolute w-64 h-64 rounded-full border border-cyan-500/10 animate-ping opacity-20" />
-                                    <Globe className="w-24 h-24 text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
-                                </div>
+                            <div className="aspect-square md:aspect-[4/3] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden group">
+                                <img src="/marketing/globe_data.png" alt="UBBEE Hub Universel" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
                             </div>
                         </div>
                     </div>
@@ -132,12 +113,8 @@ export default function WelcomePage() {
                             </p>
                         </div>
                         <div className="flex-1 relative">
-                            <div className="aspect-square md:aspect-[4/3] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-6 flex flex-col items-center justify-center gap-8 shadow-2xl">
-                                <div className="flex items-center gap-4 w-full px-8">
-                                    <div className="flex-1 bg-white/5 border border-white/10 h-12 rounded-lg flex items-center px-4 font-mono text-xs text-indigo-300">{"{ payload: temp }"} </div>
-                                    <ArrowRight className="text-slate-500" />
-                                    <div className="flex-1 bg-indigo-500/20 border border-indigo-500/30 h-12 rounded-lg flex items-center px-4 font-medium text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]">Température (°C)</div>
-                                </div>
+                            <div className="aspect-square md:aspect-[4/3] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden group">
+                                <img src="/marketing/sensor_appairage.png" alt="UBBEE Appairage IoT Sensor" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
                             </div>
                         </div>
                     </div>
