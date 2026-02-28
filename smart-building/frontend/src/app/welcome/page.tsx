@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Play, Globe, Cpu, Cog, ShieldCheck, Hexagon } from "lucide-react";
+import { ArrowRight, Play, Globe, Cpu, Cog, ShieldCheck, Hexagon, Zap } from "lucide-react";
 
 export default function WelcomePage() {
     return (
