@@ -161,22 +161,30 @@ export default function SitesListPage() {
 
                 {isAdmin && (
                     <div className="flex items-center gap-3">
-                        <label className={`bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center transition-all cursor-pointer shadow-[0_0_15px_rgba(30,41,59,0.2)] hover:shadow-[0_0_20px_rgba(30,41,59,0.4)] ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            <Upload className="w-5 h-5 mr-2" />
-                            {isUploading ? "Importation..." : "Importer (CSV)"}
-                            <input
-                                type="file"
-                                accept=".csv"
-                                className="hidden"
-                                onChange={handleFileUpload}
-                                disabled={isUploading}
-                                ref={fileInputRef}
-                            />
-                        </label>
-                        <button onClick={() => setIsAddSiteOpen(true)} className="bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center transition-all">
-                            <Plus className="w-5 h-5 mr-2" />
-                            Créer un Site
-                        </button>
+                        {currentTenant?.id === '11111111-1111-1111-1111-111111111111' ? (
+                            <div className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-4 py-2.5 rounded-xl border border-dashed border-slate-300 dark:border-white/20">
+                                Pour créer un site, veuillez d'abord sélectionner un client spécifique.
+                            </div>
+                        ) : (
+                            <>
+                                <label className={`bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center transition-all cursor-pointer shadow-[0_0_15px_rgba(30,41,59,0.2)] hover:shadow-[0_0_20px_rgba(30,41,59,0.4)] ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                    <Upload className="w-5 h-5 mr-2" />
+                                    {isUploading ? "Importation..." : "Importer (CSV)"}
+                                    <input
+                                        type="file"
+                                        accept=".csv"
+                                        className="hidden"
+                                        onChange={handleFileUpload}
+                                        disabled={isUploading}
+                                        ref={fileInputRef}
+                                    />
+                                </label>
+                                <button onClick={() => setIsAddSiteOpen(true)} className="bg-primary hover:bg-emerald-400 text-slate-900 dark:text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center transition-all">
+                                    <Plus className="w-5 h-5 mr-2" />
+                                    Créer un Site
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
