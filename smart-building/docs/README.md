@@ -21,11 +21,17 @@ Ce répertoire contient tous les documents de référence pour comprendre, dépl
 5. **[Hébergement, Réseau & Infrastructure](./05_hebergement_et_reseau.md)**
    Topologie Serveur sur le VPS (DigitalOcean), sécurisation des ports, proxy frontal (NGINX), maintien en processus croisés via PM2 et stratégie de gestion de la BDD actuelle.
 
-6. **[Copilote IA UBBEE](./06_copilot_ia.md)**
+6. **[Appairage IoT (Guide Energy Manager)](./06_appairage_iot.md)**
+   Procédure détaillée pour l'intégration de capteurs sur la plateforme, incluant le provisionnement rapide (Plug & Play) et le mapping JSON avancé (drag & drop).
+
+7. **[Copilote IA UBBEE](./07_copilot_ia.md)**
    Fonctionnalités avancées du module IA, orchestration du Function Calling LLM, et sécurisation du contrôle des équipements (Human-in-the-Loop).
 
-7. **[Appairage IoT (Guide Energy Manager)](./06_appairage_iot.md)**
-   Procédure détaillée pour l'intégration de capteurs sur la plateforme, incluant le provisionnement rapide (Plug & Play) et le mapping MQTT avancé (drag & drop).
+8. **[Protocole de Connexion U-Bot](./08_connexion_ubot.md)**
+   Guide détaillé sur la procédure de provisionnement et l'installation Plug & Play de la première passerelle physique sur un site Bâtiment.
+
+9. **[Sécurité & Conformité (RGPD)](./09_securite_conformite.md)**
+   Mesures techniques et organisationnelles (Security by Design), politique de chiffrement, prévention des failles applicatives (OWASP) et règles de minimisation des données personnelles (RGPD).
 
 ---
 

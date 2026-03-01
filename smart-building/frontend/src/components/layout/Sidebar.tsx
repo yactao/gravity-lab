@@ -187,8 +187,9 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                             isActive = true;
                         } else if (item.href !== "/" && pathname.startsWith(item.href + "/")) {
                             // Verify there is no more specific match in the nav items
+                            const itemHrefLength = item.href.length;
                             const hasMoreSpecific = filteredNavItems.some(
-                                other => other.href && other.href !== item.href && pathname.startsWith(other.href) && other.href.length > item.href!.length
+                                other => other.href && other.href !== item.href && pathname.startsWith(other.href) && other.href.length > itemHrefLength
                             );
                             if (!hasMoreSpecific) {
                                 isActive = true;
