@@ -11,10 +11,12 @@ L'architecture de base repose sur un schéma entité-relation rigide permettant 
 
 ## Architecture Matérielle / Flux de Données (IoT)
 
-### 1. Ingestion de Données (Acquisition)
-Les *gateways* ou concentrateurs IoT situés dans les bâtiments des clients émettent des données agrégées (Température, Consommation CVC, CO2).
-- **Protocole Nominal:** MQTT ou HTTP POST vers le Backend UBBEE (Node.js/Express `api/energy` etc.).
-- **Worker de Simulation:** Actuellement, un service de simulation interne (voir `/backend/index.js` `simulateData()`) crache aléatoirement de la donnée sur le Socket IO.
+### 1. Ingestion de Données (Acquisition & Connectivité)
+Les *gateways U-Bots* ou concentrateurs IoT situés dans les bâtiments des clients émettent des données agrégées (Température, Consommation CVC, CO2).
+- **Inventaire (Gateways) :** L'interface d'Inventaire Matériel permet de provisionner et "pré-assigner" une gateway (par adresse MAC) à un Site avant même sa mise sous tension.
+- **Protocole Nominal:** MQTT pour les U-Bots ou HTTP POST vers le Backend UBBEE.
+- **Worker de Simulation & Console Live:** La `Console IoT (Live)` (Frontend) permet à un opérateur réseau d'intercepter et visualiser en temps réel les payloads JSON transmis par un capteur sur ce flux MQTT, facilitant énormément le débogage (format, batterie, pertes de connexion).
+- Un service de simulation interne (voir `/backend/index.js` `simulateData()`) crache aléatoirement de la donnée sur le Socket IO et la Console Live pour simuler la charge en développement.
 
 ### 2. Traitement (Processing & Rule Engine)
 Le Backend reçoit la trame IoT:
@@ -29,11 +31,12 @@ Le Backend reçoit la trame IoT:
 
 ```mermaid
 graph TD
-    A[Capteurs IoT / Ubots] -->|MQTT / API REST| B(Backend UBBEE - Node.js)
+    A[Capteurs IoT / U-Bots] -->|MQTT / API REST| B(Backend UBBEE - Node.js)
     B -->|TypeORM / Insert| C[(Base TypeDB SQLite/Postgres)]
     B -->|Check Sécurité / IFTTT| D{Moteur de Règles}
     D -->|Si Dépassement| E[Génération Alertes / Webhooks Externes]
     B -->|WebSocket Pub/Sub| F[Frontend Next.js React]
+    B -.->|Interception Brute| H[Console IoT Live / Debug]
     F <-->|Demande Info Client (JWT)| B
     F --> G[Render Dashboard HTML/3D Jumeau]
 ```

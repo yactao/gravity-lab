@@ -39,10 +39,10 @@ Cette méthode permet à un technicien ou un intégrateur d'adapter n'importe qu
 3. **Configuration du Flux Source :**
     *   **Nom du Flux :** Donner un nom explicite à cette configuration (ex: "Anciennes sondes Chaufferie").
     *   **Topic MQTT :** Renseigner le topic MQTT exact sur lequel le capteur externe publie ses données brutes (ex: `zigbee2mqtt/0x00158d00045ab`). La plateforme se met à l'écoute de ce topic.
-4. **Le Mapping Visuel (Drag & Drop) :**
-    *   **Colonne Source (Gauche) :** Une fois le Topic connecté, la plateforme intercepte un message test ("LIVE Payload") et extrait automatiquement toutes les clés (propriétés) du fichier JSON envoyé par le capteur (ex: `temperature`, `humidity`, `battery`, `linkquality`). Ces clés apparaissent sous forme de blocs déplaçables.
-    *   **Colonne Cible (Droite) :** Cette colonne affiche la liste des "Champs Standards UBBEE" attendus par notre base de données (ex: `Température (°C)`, `Humidité (%)`, `Batterie Équipement (%)`).
-    *   **Action :** Avec la souris, l'Energy Manager doit "glisser-déposer" chaque bloc de la colonne Source vers son équivalent dans la colonne Cible. (Ex: Glisser la clé `{ temperature }` vers le champ "Température (°C)").
+4. **Le Mapping Visuel Automatique (Drag & Drop) :**
+    *   **Payload Brut Source :** L'utilisateur copie-colle un échantillon complet des données brutes du capteur (format JSON) capté via la *Console IoT*. Le composant va alors *parser dynamiquement* ce JSON et extraire chaque paramètre final (même imbriqué comme `parameters.data.temp`) sous forme de blocs draggables (Étiquettes Source).
+    *   **Colonne Cible (Droite) :** Cette colonne affiche la liste des "Modèles Cibles UBBEE", soit les champs standards attendus par notre base de données (ex: `Température (°C)`, `Humidité (%)`, `Batterie Équipement (%)`).
+    *   **Action :** Avec la souris, l'Energy Manager doit simplement "glisser-déposer" chaque bloc de la colonne Source vers son équivalent dans la colonne Cible. (Ex: Glisser la clé `{ payload.v_bat }` vers le champ "Batterie Équipement (%)").
 5. **Validation :**
     *   Un bloc correctement lié affiche un statut vert "Connecté : [nom_de_la_cle]".
     *   Enregistrer la configuration. Désormais, chaque donnée brute arrivant sur ce Topic sera traduite à la volée dans le format universel UBBEE et liée à la Zone définie.

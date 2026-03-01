@@ -10,7 +10,7 @@ Le système est pensé pour gérer de multiples sociétés (Tenants). Il support
 ### 1. Contexte Opérateur (Super Admin / UBBEE)
 - **Rôle :** `SUPER_ADMIN`
 - **Périmètre :** A la vision de **tous les clients** de la plateforme.
-- **Actions :** Peut créer/supprimer des clients, ajouter des sites, forcer des configurations réseau. C'est l'interface de "Gestion de Parc" globale.
+- **Actions :** Peut créer/supprimer des clients, ajouter des sites, forcer des configurations réseau. C'est l'interface de "Gestion de Parc" globale ainsi que la supervision de toute l'infrastructure (Inventaire Matériel global).
 
 ### 2. Contexte Client (B2B)
 - **Rôles :** `ENERGY_MANAGER` (Admin Client), `TECHNICIAN`, `CLIENT` (Lecteur/Invité).
@@ -45,7 +45,9 @@ Le système est pensé pour gérer de multiples sociétés (Tenants). Il support
 - **Marque Blanche :** Personnalisation des couleurs de l'espace au logo de l'entreprise B2B (Mise en place de tokens UI).
 - **Intégrations :** Webhooks sortants et lecture de Clés API pour intégration avec PowerBI ou un ERP tiers.
 
-### F. Appairage & Hub IoT (No-Code)
-- **Provisionnement Rapide :** Auto-découverte et association (Plug & Play) d'équipements certifiés UBBEE sur les ondes via identifiant matériel.
-- **Interopérabilité Avancée :** Interface visuelle (Glisser-Déposer) permettant aux intégrateurs de "mapper" n'importe quelle trame de données brutes d'un capteur ancien ou tiers vers les modèles de données standards UBBEE.
-- **Positionnement Physique :** Placement du nouveau capteur dans l'arborescence (Client > Site > Zone) pour activation des jumeaux numériques.
+### F. Infrastructure IoT & Connectivité
+- **Inventaire Matériel (Gateways) :** Gestion du stock des U-Bots (passerelles IoT). Maintien des états (En stock, pré-configuré, déployé) permettant le Plug & Play avant même l'envoi du matériel sur site.
+- **Console IoT (Live) :** Interface de débogage technique interceptant le flux brut (MQTT) en temps réel. Permet de filtrer et visualiser les payloads non traduits traversant le réseau.
+- **Appairage No-Code :**
+  - *Provisionnement Rapide :* Déclaration instantanée via ID/MAC des équipements standardisés.
+  - *Interopérabilité Avancée :* Le système écoute un topic spécifique et génère dynamiquement la modélisation JSON du payload. Via un Drag & Drop abstrait, un utilisateur mappe la donnée constructeur vers le dictionnaire standardisé du jumeau numérique, le tout de façon visuelle et sans code.
