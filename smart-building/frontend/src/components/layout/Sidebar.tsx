@@ -20,15 +20,23 @@ const navItems: NavItemType[] = [
     { name: "Gestion de Parc", href: "/clients", icon: Briefcase },
     { name: "Carte Globale", href: "/map", icon: Hexagon },
     { name: "Rapports Énergétiques", href: "/energy", icon: BarChart2 },
-    { name: "Network Monitoring", href: "/network", icon: Wifi },
-    { name: "Inventaire Matériel", href: "/network/inventory", icon: Package },
-    { name: "Appairage IoT (No-Code)", href: "/admin/integrations/mapping", icon: CloudUpload },
-    { name: "Console IoT (Live)", href: "/network/console", icon: Terminal },
-    { name: "Générateur de Règles", href: "/rules", icon: Sparkles },
-    { name: "Alertes & Maintenance", href: "/alerts", icon: AlertTriangle },
-    { name: "Paramétrage", href: "/settings", icon: Settings, hasSub: true },
-    { name: "Licence", href: "/license", icon: FileText, hasSub: true },
-    { name: "Facturation", href: "/billing", icon: Receipt },
+    { name: "Générateur d'IA", href: "/rules", icon: Sparkles },
+    { name: "Alertes & Maint.", href: "/alerts", icon: AlertTriangle },
+    {
+        name: "Infrastructure IoT", icon: Wifi, hasSub: true, subItems: [
+            { name: "Vue d'ensemble", href: "/network" },
+            { name: "Inventaire Matériel", href: "/network/inventory" },
+            { name: "Console IoT Live", href: "/network/console" },
+            { name: "Appairage (No-Code)", href: "/admin/integrations/mapping" }
+        ]
+    },
+    {
+        name: "Administration", icon: Settings, hasSub: true, subItems: [
+            { name: "Paramétrages", href: "/settings" },
+            { name: "Facturation", href: "/billing" },
+            { name: "Licence", href: "/license" }
+        ]
+    }
 ];
 
 interface SidebarProps {
@@ -54,9 +62,18 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             };
         }
         return item;
+    }).map((item) => {
+        if (currentTenant.role === "CLIENT" && item.subItems) {
+            return {
+                ...item,
+                subItems: item.subItems.filter(sub => !["/rules", "/network", "/settings", "/license", "/onboarding", "/admin/integrations/mapping", "/network/inventory", "/network/console"].includes(sub.href))
+            };
+        }
+        return item;
     }).filter((item) => {
         if (currentTenant.role === "CLIENT") {
-            if (item.href && ["/rules", "/network", "/settings", "/license", "/onboarding", "/admin/integrations/mapping"].includes(item.href)) {
+            if (item.subItems && item.subItems.length === 0) return false;
+            if (item.href && ["/rules", "/network", "/settings", "/license", "/onboarding", "/admin/integrations/mapping", "/network/inventory", "/network/console"].includes(item.href)) {
                 return false;
             }
         }
@@ -131,7 +148,18 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                 {!isCollapsed && isExpanded && (
                                     <div className="mt-1.5 ml-5 pl-4 border-l-2 border-slate-200 dark:border-slate-800 space-y-1">
                                         {item.subItems.map((subItem: any) => {
-                                            const isSubActive = pathname === subItem.href || (subItem.href !== "/" && pathname.startsWith(subItem.href));
+                                            let isSubActive = false;
+                                            if (pathname === subItem.href) {
+                                                isSubActive = true;
+                                            } else if (subItem.href !== "/" && pathname.startsWith(subItem.href + "/")) {
+                                                const hasMoreSpecific = item.subItems!.some(
+                                                    (other: any) => other.href !== subItem.href && pathname.startsWith(other.href) && other.href.length > subItem.href.length
+                                                );
+                                                if (!hasMoreSpecific) {
+                                                    isSubActive = true;
+                                                }
+                                            }
+
                                             return (
                                                 <Link
                                                     key={subItem.name}
@@ -139,7 +167,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                                     className={cn(
                                                         "flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium",
                                                         isSubActive
-                                                            ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                                            ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold"
                                                             : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                                                     )}
                                                 >
