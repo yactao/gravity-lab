@@ -27,7 +27,8 @@ const navItems: NavItemType[] = [
             { name: "Vue d'ensemble", href: "/network" },
             { name: "Inventaire Matériel", href: "/network/inventory" },
             { name: "Console IoT Live", href: "/network/console" },
-            { name: "Appairage (No-Code)", href: "/admin/integrations/mapping" }
+            { name: "Appairage (No-Code)", href: "/admin/integrations/mapping" },
+            { name: "Supervision Serveur", href: "/network/system-health" }
         ]
     },
     {

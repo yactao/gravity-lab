@@ -37,6 +37,32 @@ export class AppService implements OnModuleInit {
     private eventsGateway: EventsGateway,
   ) { }
 
+  async checkHealth() {
+    try {
+      // Basic query to verify the database connection is alive
+      await this.orgRepo.count();
+      const memoryUsage = process.memoryUsage();
+      return {
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: {
+          rss: `${Math.round(memoryUsage.rss / 1024 / 1024)} MB`,
+          heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)} MB`,
+          heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`,
+        },
+        database: 'Connected'
+      };
+    } catch (error) {
+      return {
+        status: 'ERROR',
+        timestamp: new Date().toISOString(),
+        database: 'Disconnected',
+        error: error instanceof Error ? error.message : 'Unknown'
+      };
+    }
+  }
+
   async onModuleInit() {
     const orgCount = await this.orgRepo.count();
 
@@ -232,14 +258,16 @@ export class AppService implements OnModuleInit {
     if (siteData.latitude && siteData.longitude) return;
 
     const queriesToTry = [];
+    const countrySuffix = siteData.country ? `, ${siteData.country}` : '';
+
     if (siteData.address) {
-      queriesToTry.push(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}`);
+      queriesToTry.push(`${siteData.address}${siteData.postalCode ? ' ' + siteData.postalCode : ''}${siteData.city ? ', ' + siteData.city : ''}${countrySuffix}`);
     }
     if (siteData.postalCode && siteData.city) {
-      queriesToTry.push(`${siteData.postalCode} ${siteData.city}`);
+      queriesToTry.push(`${siteData.postalCode} ${siteData.city}${countrySuffix}`);
     }
     if (siteData.city) {
-      queriesToTry.push(siteData.city);
+      queriesToTry.push(`${siteData.city}${countrySuffix}`);
     }
 
     for (const query of queriesToTry) {

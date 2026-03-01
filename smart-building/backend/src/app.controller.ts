@@ -15,6 +15,11 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('health')
+  async getHealth() {
+    return this.appService.checkHealth();
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('sites')
   getSites(@Headers('x-organization-id') orgId: string, @Headers('x-user-role') role?: string) {
