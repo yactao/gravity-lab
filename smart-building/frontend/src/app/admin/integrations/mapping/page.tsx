@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
-import { Activity, Database, GripVertical, Save, Wifi, Settings2, QrCode, MapPin, Building2, Hexagon, Layers, Search, Cpu } from "lucide-react";
+import { Activity, Database, GripVertical, Save, Wifi, Settings2, QrCode, MapPin, Building2, Hexagon, Layers, Search, Cpu, FileJson, Play } from "lucide-react";
 import { useTenant } from "@/lib/TenantContext";
 
 // --- DND COMPONENTS (Avancé) ---
@@ -135,7 +135,30 @@ export default function MappingPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [mappings, setMappings] = useState<Record<string, string>>({});
 
-    const incomingSourceKeys = ["temperature", "humidity", "battery", "linkquality", "occupancy", "illuminance", "voltage", "co2_level"];
+    const [jsonInput, setJsonInput] = useState('{\n  "temperature": 22.4,\n  "humidity": 45,\n  "battery": 98\n}');
+    const [incomingSourceKeys, setIncomingSourceKeys] = useState<string[]>(["temperature", "humidity", "battery"]);
+
+    // Analyser dynamiquement le JSON pour extraire les clés pointées (dot-notation)
+    useEffect(() => {
+        try {
+            const obj = JSON.parse(jsonInput);
+            const keys: string[] = [];
+            const extractKeys = (o: any, prefix = '') => {
+                for (const key in o) {
+                    if (o[key] !== null && typeof o[key] === 'object' && !Array.isArray(o[key])) {
+                        extractKeys(o[key], `${prefix}${key}.`);
+                    } else {
+                        keys.push(`${prefix}${key}`);
+                    }
+                }
+            };
+            extractKeys(obj);
+            setIncomingSourceKeys(keys);
+        } catch (e) {
+            // Invalid JSON, on ignore on garde les anciennes clés
+        }
+    }, [jsonInput]);
+
     const standardFields = [
         { id: "mesure_temperature_celsius", label: "Température (°C)" },
         { id: "mesure_humidite", label: "Humidité (%)" },
@@ -311,20 +334,31 @@ export default function MappingPage() {
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 bg-white dark:bg-[#0B1120] p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
 
                             {/* Colonne SOURCE (JSON entrant) */}
-                            <div className="md:col-span-5 bg-slate-50 dark:bg-black/30 p-6 rounded-2xl border border-slate-200 dark:border-white/5">
-                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-white/10">
+                            <div className="md:col-span-5 bg-slate-50 dark:bg-black/30 p-6 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col max-h-[600px]">
+                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-white/10 shrink-0">
                                     <div>
                                         <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center">
                                             Payload Brut (Source)
                                         </h3>
-                                        <p className="text-[10px] text-slate-500 mt-1">Données captées sur le réseau</p>
+                                        <p className="text-[10px] text-slate-500 mt-1">Collez ou captez le format JSON</p>
                                     </div>
-                                    <span className="flex items-center text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-1.5 rounded font-bold border border-red-500/20">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse"></span> LIVE
-                                    </span>
+                                    <button onClick={() => setJsonInput('{\n  "data": {\n    "temp_c": 21.5,\n    "hum_pct": 55\n  },\n  "v_bat": 3.7\n}')} className="flex items-center text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 px-3 py-1.5 rounded font-bold border border-red-500/20 transition-colors">
+                                        <Play className="w-3 h-3 mr-1.5 fill-current" /> Simuler un Flux Live
+                                    </button>
                                 </div>
 
-                                <div className="space-y-3">
+                                <div className="mb-6 shrink-0">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center"><FileJson className="w-3 h-3 mr-1" /> Payload JSON Échantillon</label>
+                                    <textarea
+                                        value={jsonInput}
+                                        onChange={(e) => setJsonInput(e.target.value)}
+                                        className="w-full h-32 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl font-mono text-xs text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 resize-none transition-colors"
+                                        spellCheck="false"
+                                    />
+                                </div>
+
+                                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0">Variables Extractées (Glissez vers la droite)</h4>
+                                <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                     {incomingSourceKeys.map(key => {
                                         const isMapped = Object.values(mappings).includes(key);
                                         return (
