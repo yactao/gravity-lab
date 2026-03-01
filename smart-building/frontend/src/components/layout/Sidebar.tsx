@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Briefcase, BarChart2, Wifi, CloudUpload, Settings, FileText, Receipt, Hexagon, ChevronDown, Sparkles, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Briefcase, BarChart2, Wifi, CloudUpload, Settings, FileText, Receipt, Hexagon, ChevronDown, Sparkles, AlertTriangle, ChevronLeft, ChevronRight, Terminal, Package } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -21,7 +21,9 @@ const navItems: NavItemType[] = [
     { name: "Carte Globale", href: "/map", icon: Hexagon },
     { name: "Rapports Énergétiques", href: "/energy", icon: BarChart2 },
     { name: "Network Monitoring", href: "/network", icon: Wifi },
+    { name: "Inventaire Matériel", href: "/network/inventory", icon: Package },
     { name: "Appairage IoT (No-Code)", href: "/admin/integrations/mapping", icon: CloudUpload },
+    { name: "Console IoT (Live)", href: "/network/console", icon: Terminal },
     { name: "Générateur de Règles", href: "/rules", icon: Sparkles },
     { name: "Alertes & Maintenance", href: "/alerts", icon: AlertTriangle },
     { name: "Paramétrage", href: "/settings", icon: Settings, hasSub: true },
