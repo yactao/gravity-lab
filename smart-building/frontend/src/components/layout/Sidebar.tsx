@@ -81,6 +81,32 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         return true;
     });
 
+    // --- Active State Calculation ---
+    // Finds the single most specific matching href to avoid overlapping active states
+    let bestActiveHref = "";
+    let maxMatchLength = 0;
+
+    filteredNavItems.forEach(group => {
+        if (group.href) {
+            if (pathname === group.href || (group.href !== "/" && pathname.startsWith(group.href + "/"))) {
+                if (group.href.length > maxMatchLength) {
+                    maxMatchLength = group.href.length;
+                    bestActiveHref = group.href;
+                }
+            }
+        }
+        if (group.subItems) {
+            group.subItems.forEach((sub: any) => {
+                if (pathname === sub.href || (sub.href !== "/" && pathname.startsWith(sub.href + "/"))) {
+                    if (sub.href.length > maxMatchLength) {
+                        maxMatchLength = sub.href.length;
+                        bestActiveHref = sub.href;
+                    }
+                }
+            });
+        }
+    });
+
     return (
         <aside
             className={cn(
@@ -109,7 +135,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 {filteredNavItems.map((item) => {
                     if (item.subItems) {
                         const isExpanded = actualExpandedMenu === item.name;
-                        const isChildActive = item.subItems.some((sub: any) => pathname === sub.href || (sub.href !== "/" && pathname.startsWith(sub.href)));
+                        const isChildActive = item.subItems.some((sub: any) => sub.href === bestActiveHref);
                         return (
                             <div key={item.name} className="flex flex-col space-y-1 relative group">
                                 <button
@@ -149,17 +175,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                 {!isCollapsed && isExpanded && (
                                     <div className="mt-1.5 ml-5 pl-4 border-l-2 border-slate-200 dark:border-slate-800 space-y-1">
                                         {item.subItems.map((subItem: any) => {
-                                            let isSubActive = false;
-                                            if (pathname === subItem.href) {
-                                                isSubActive = true;
-                                            } else if (subItem.href !== "/" && pathname.startsWith(subItem.href + "/")) {
-                                                const hasMoreSpecific = item.subItems!.some(
-                                                    (other: any) => other.href !== subItem.href && pathname.startsWith(other.href) && other.href.length > subItem.href.length
-                                                );
-                                                if (!hasMoreSpecific) {
-                                                    isSubActive = true;
-                                                }
-                                            }
+                                            const isSubActive = subItem.href === bestActiveHref;
 
                                             return (
                                                 <Link
@@ -183,19 +199,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     }
 
                     let isActive = false;
-                    if (item.href) {
-                        if (pathname === item.href) {
-                            isActive = true;
-                        } else if (item.href !== "/" && pathname.startsWith(item.href + "/")) {
-                            // Verify there is no more specific match in the nav items
-                            const itemHrefLength = item.href.length;
-                            const hasMoreSpecific = filteredNavItems.some(
-                                other => other.href && other.href !== item.href && pathname.startsWith(other.href) && other.href.length > itemHrefLength
-                            );
-                            if (!hasMoreSpecific) {
-                                isActive = true;
-                            }
-                        }
+                    if (item.href && item.href === bestActiveHref) {
+                        isActive = true;
                     }
 
                     return (
