@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Building2, Search, Plus, Filter, MapPin, Building, Activity, Upload } from "lucide-react";
+import { Building2, Search, Plus, Filter, MapPin, Building, Activity, Upload, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 
@@ -70,6 +70,22 @@ export default function SitesListPage() {
                 fetchSites();
             } else {
                 alert("Erreur lors de la création du site.");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteSite = async (id: string, name: string) => {
+        if (!confirm(`Voulez-vous vraiment supprimer définitivement le site "${name}" ?`)) return;
+        try {
+            const res = await authFetch(`http://localhost:3001/api/sites/${id}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                fetchSites();
+            } else {
+                alert("Erreur lors de la suppression du site.");
             }
         } catch (err) {
             console.error(err);
@@ -278,9 +294,16 @@ export default function SitesListPage() {
                                             })()}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <a href={`/sites/${site.id}`} className="px-4 py-2 text-xs font-bold text-slate-900 dark:text-white bg-primary hover:bg-emerald-400 rounded-lg transition-colors shadow-sm inline-block">
-                                                Accéder au site
-                                            </a>
+                                            <div className="flex justify-end gap-2">
+                                                <a href={`/sites/${site.id}`} className="px-4 py-2 text-xs font-bold text-slate-900 dark:text-white bg-primary hover:bg-emerald-400 rounded-lg transition-colors shadow-sm inline-block">
+                                                    Accéder au site
+                                                </a>
+                                                {currentTenant?.id === '11111111-1111-1111-1111-111111111111' && (
+                                                    <button onClick={() => handleDeleteSite(site.id, site.name)} className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors" title="Supprimer">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

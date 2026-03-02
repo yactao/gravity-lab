@@ -64,11 +64,10 @@ export default function ClientDetailsPage() {
     const handleCreateSite = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const payload = { ...newSite };
+            const payload = { ...newSite, organizationId: clientId };
 
             const res = await authFetch("http://localhost:3001/api/sites", {
                 method: "POST",
-                headers: { "x-organization-id": clientId },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
