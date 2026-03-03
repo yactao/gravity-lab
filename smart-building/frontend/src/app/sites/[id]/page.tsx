@@ -574,7 +574,7 @@ export default function SiteDashboardPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="text-sm">
-                                            {hasEquipments && (
+                                            {selectedZone.sensors && selectedZone.sensors.length > 0 && (
                                                 <tr
                                                     onClick={() => setExpandedRows(prev => ({ ...prev, [selectedZone.id]: !prev[selectedZone.id] }))}
                                                     className="border-b border-slate-100 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.04] cursor-pointer group"
