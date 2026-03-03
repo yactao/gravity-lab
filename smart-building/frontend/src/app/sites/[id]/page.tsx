@@ -36,6 +36,7 @@ interface Site {
     zones: Zone[];
     organizationId?: string;
     organization?: { id: string; name: string };
+    gateways?: any[];
 }
 
 export default function SiteDashboardPage() {
@@ -178,6 +179,8 @@ export default function SiteDashboardPage() {
         setExpandedFloors(prev => ({ ...prev, [floor]: !prev[floor] }));
     };
 
+    const hasEquipments = (site?.gateways?.length ?? 0) > 0 || site?.zones?.some((z: any) => (z.sensors?.length ?? 0) > 0) || false;
+
     return (
         <div className="space-y-6 max-w-[1400px] mx-auto pb-12 pt-4">
             {/* Header & Breadcrumb */}
@@ -236,10 +239,10 @@ export default function SiteDashboardPage() {
                 <>
                     {/* Metrics Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                        <StatsCard title="Conso. Globale (Live)" value="3,500 W" trend="+5%" trendUp={false} icon={Zap} color="cyan" />
-                        <StatsCard title="Conso. CVC (Live)" value="2,100 W" trend="-2%" trendUp={true} icon={ThermometerSun} color="orange" />
-                        <StatsCard title="Qualité Air Moyenne" value="480 ppm" trend="Excellent" trendUp={true} icon={Wind} color="green" />
-                        <StatsCard title="Zones Connectées" value={site.zones?.length?.toString() || "0"} trend="Global: OK" trendUp={true} icon={Activity} color="purple" />
+                        <StatsCard title="Conso. Globale (Live)" value={hasEquipments ? "3,500 W" : "0 W"} trend={hasEquipments ? "+5%" : "--"} trendUp={false} icon={Zap} color="cyan" />
+                        <StatsCard title="Conso. CVC (Live)" value={hasEquipments ? "2,100 W" : "0 W"} trend={hasEquipments ? "-2%" : "--"} trendUp={true} icon={ThermometerSun} color="orange" />
+                        <StatsCard title="Qualité Air Moyenne" value={hasEquipments ? "480 ppm" : "--"} trend={hasEquipments ? "Excellent" : "--"} trendUp={true} icon={Wind} color="green" />
+                        <StatsCard title="Zones Connectées" value={hasEquipments ? (site.zones?.length?.toString() || "0") : "0"} trend={hasEquipments ? "Global: OK" : "En attente"} trendUp={true} icon={Activity} color="purple" />
                     </div>
 
                     {/* Main Content Grid */}
@@ -258,7 +261,7 @@ export default function SiteDashboardPage() {
                                 </div>
                             </div>
                             <div className="flex-1 w-full bg-slate-50 dark:bg-black/20 rounded-xl p-4 flex flex-col border border-slate-100 dark:border-white/5 relative h-64">
-                                <EnergyChart data={siteEnergyData} />
+                                {hasEquipments ? <EnergyChart data={siteEnergyData} /> : <div className="flex-1 flex items-center justify-center text-sm text-slate-500">Aucune donnée de consommation disponible</div>}
                             </div>
                         </div>
 
@@ -271,12 +274,16 @@ export default function SiteDashboardPage() {
                                     Anomalies du site
                                 </h3>
                                 <div className="space-y-3 flex-1 overflow-y-auto">
-                                    {alerts.map(a => (
+                                    {hasEquipments && alerts.length > 0 ? alerts.map(a => (
                                         <div key={a.id} className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                                             <p className="text-xs font-bold text-slate-900 dark:text-white mb-1">{a.message}</p>
                                             <p className="text-[10px] text-slate-500">{a.time}</p>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                                            <p className="text-xs py-4">Aucune anomalie détectée</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -287,12 +294,16 @@ export default function SiteDashboardPage() {
                                     Historique des Règles
                                 </h3>
                                 <div className="space-y-3 flex-1 overflow-y-auto">
-                                    {rules.map(r => (
+                                    {hasEquipments && rules.length > 0 ? rules.map(r => (
                                         <div key={r.id} className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                                             <p className="text-xs font-bold text-slate-900 dark:text-white mb-1">{r.message}</p>
                                             <p className="text-[10px] text-slate-500">{r.time}</p>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                                            <p className="text-xs py-4">Aucune règle configurée</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -351,14 +362,22 @@ export default function SiteDashboardPage() {
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-2 mb-4">
-                                                            <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
-                                                                <span className="text-[9px] text-slate-500 uppercase mb-0.5">Climat</span>
-                                                                <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center"><Thermometer className="h-3 w-3 text-orange-400 mr-1" /> 22.5°C</span>
-                                                            </div>
-                                                            <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
-                                                                <span className="text-[9px] text-slate-500 uppercase mb-0.5">Présence</span>
-                                                                <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 flex items-center"><Users className="h-3 w-3 mr-1" /> Oui</span>
-                                                            </div>
+                                                            {hasEquipments ? (
+                                                                <>
+                                                                    <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
+                                                                        <span className="text-[9px] text-slate-500 uppercase mb-0.5">Climat</span>
+                                                                        <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center"><Thermometer className="h-3 w-3 text-orange-400 mr-1" /> 22.5°C</span>
+                                                                    </div>
+                                                                    <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
+                                                                        <span className="text-[9px] text-slate-500 uppercase mb-0.5">Présence</span>
+                                                                        <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 flex items-center"><Users className="h-3 w-3 mr-1" /> Oui</span>
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <div className="col-span-2 bg-white dark:bg-white/5 p-2 rounded-lg flex items-center justify-center border border-slate-100 dark:border-white/5 shadow-sm text-slate-400 text-[10px] uppercase font-bold tracking-widest">
+                                                                    Aucun capteur
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <button
                                                             onClick={() => {
@@ -397,115 +416,124 @@ export default function SiteDashboardPage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* CVC Control */}
-                            <div className="p-5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
-                                <div className="flex justify-between items-center mb-4">
-                                    <div className="flex items-center">
-                                        <div className={`p-2 rounded-lg mr-3 ${hvacState ? 'bg-orange-500/10 text-orange-500' : 'bg-white dark:bg-white/5 text-slate-400'}`}>
-                                            <ThermometerSun className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-sm text-slate-900 dark:text-white">Climatisation (CVC)</h4>
-                                            <span className={`text-[10px] font-bold uppercase ${hvacState ? 'text-emerald-500' : 'text-slate-500'}`}>{hvacState ? 'Allumé' : 'Éteint'}</span>
-                                        </div>
-                                    </div>
-                                    {/* Toggle UI */}
-                                    <button
-                                        onClick={() => {
-                                            const newState = !hvacState;
-                                            setHvacState(newState);
-                                            handleEquipmentAction("cvc-global", "toggle_hvac", newState);
-                                        }}
-                                        className={`w-12 h-6 rounded-full relative transition-colors ${hvacState ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
-                                    >
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${hvacState ? 'left-7' : 'left-1'}`} />
-                                    </button>
-                                </div>
-                                {hvacState && (
-                                    <div className="pt-4 border-t border-slate-200 dark:border-white/5">
-                                        <label className="text-xs font-bold text-slate-500 mb-2 block">Consigne Actuelle (Globale)</label>
-                                        <div className="flex justify-between items-center bg-white dark:bg-white/5 p-2 rounded-lg border border-slate-200 dark:border-white/5">
+                            {hasEquipments ? (
+                                <>
+                                    {/* CVC Control */}
+                                    <div className="p-5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <div className="flex items-center">
+                                                <div className={`p-2 rounded-lg mr-3 ${hvacState ? 'bg-orange-500/10 text-orange-500' : 'bg-white dark:bg-white/5 text-slate-400'}`}>
+                                                    <ThermometerSun className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">Climatisation (CVC)</h4>
+                                                    <span className={`text-[10px] font-bold uppercase ${hvacState ? 'text-emerald-500' : 'text-slate-500'}`}>{hvacState ? 'Allumé' : 'Éteint'}</span>
+                                                </div>
+                                            </div>
+                                            {/* Toggle UI */}
                                             <button
                                                 onClick={() => {
-                                                    const newT = Math.max(16, hvacTemp - 0.5);
-                                                    setHvacTemp(newT);
-                                                    handleEquipmentAction("cvc-global", "set_temp", newT);
+                                                    const newState = !hvacState;
+                                                    setHvacState(newState);
+                                                    handleEquipmentAction("cvc-global", "toggle_hvac", newState);
                                                 }}
-                                                className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                                                className={`w-12 h-6 rounded-full relative transition-colors ${hvacState ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
                                             >
-                                                -
+                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${hvacState ? 'left-7' : 'left-1'}`} />
                                             </button>
-                                            <span className="text-lg font-bold text-slate-900 dark:text-white">{hvacTemp.toFixed(1)}°C</span>
+                                        </div>
+                                        {hvacState && (
+                                            <div className="pt-4 border-t border-slate-200 dark:border-white/5">
+                                                <label className="text-xs font-bold text-slate-500 mb-2 block">Consigne Actuelle (Globale)</label>
+                                                <div className="flex justify-between items-center bg-white dark:bg-white/5 p-2 rounded-lg border border-slate-200 dark:border-white/5">
+                                                    <button
+                                                        onClick={() => {
+                                                            const newT = Math.max(16, hvacTemp - 0.5);
+                                                            setHvacTemp(newT);
+                                                            handleEquipmentAction("cvc-global", "set_temp", newT);
+                                                        }}
+                                                        className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="text-lg font-bold text-slate-900 dark:text-white">{hvacTemp.toFixed(1)}°C</span>
+                                                    <button
+                                                        onClick={() => {
+                                                            const newT = Math.min(30, hvacTemp + 0.5);
+                                                            setHvacTemp(newT);
+                                                            handleEquipmentAction("cvc-global", "set_temp", newT);
+                                                        }}
+                                                        className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Lights Control */}
+                                    <div className="p-5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="flex items-center">
+                                                <div className={`p-2 rounded-lg mr-3 ${lightsState ? 'bg-yellow-400/10 text-yellow-500' : 'bg-white dark:bg-white/5 text-slate-400'}`}>
+                                                    <Lightbulb className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">Éclairage</h4>
+                                                    <span className={`text-[10px] font-bold uppercase ${lightsState ? 'text-yellow-500' : 'text-slate-500'}`}>{lightsState ? 'Allumé (100%)' : 'Éteint'}</span>
+                                                </div>
+                                            </div>
                                             <button
                                                 onClick={() => {
-                                                    const newT = Math.min(30, hvacTemp + 0.5);
-                                                    setHvacTemp(newT);
-                                                    handleEquipmentAction("cvc-global", "set_temp", newT);
+                                                    const newState = !lightsState;
+                                                    setLightsState(newState);
+                                                    handleEquipmentAction("lights-global", "toggle_lights", newState);
                                                 }}
-                                                className="h-8 w-8 rounded flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                                                className={`w-12 h-6 rounded-full relative transition-colors ${lightsState ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
                                             >
-                                                +
+                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${lightsState ? 'left-7' : 'left-1'}`} />
                                             </button>
                                         </div>
                                     </div>
-                                )}
-                            </div>
 
-                            {/* Lights Control */}
-                            <div className="p-5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
-                                <div className="flex justify-between items-center mb-2">
-                                    <div className="flex items-center">
-                                        <div className={`p-2 rounded-lg mr-3 ${lightsState ? 'bg-yellow-400/10 text-yellow-500' : 'bg-white dark:bg-white/5 text-slate-400'}`}>
-                                            <Lightbulb className="w-5 h-5" />
+                                    {/* Camera Stream Placeholder */}
+                                    <div className="p-5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
+                                        <div className="flex items-center mb-4">
+                                            <div className="p-2 rounded-lg mr-3 bg-red-500/10 text-red-500">
+                                                <Video className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-sm text-slate-900 dark:text-white">Caméra Thermique</h4>
+                                                <span className="text-[10px] font-bold uppercase text-red-500 flex items-center">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1 animate-pulse" /> Live
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-sm text-slate-900 dark:text-white">Éclairage</h4>
-                                            <span className={`text-[10px] font-bold uppercase ${lightsState ? 'text-yellow-500' : 'text-slate-500'}`}>{lightsState ? 'Allumé (100%)' : 'Éteint'}</span>
+                                        <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative group border border-slate-800">
+                                            <video
+                                                src="https://cdn.pixabay.com/video/2019/04/10/22818-331295328_large.mp4"
+                                                autoPlay
+                                                loop
+                                                muted
+                                                playsInline
+                                                className="opacity-70 group-hover:opacity-100 transition-opacity w-full h-full object-cover filter sepia hue-rotate-[180deg] saturate-200 contrast-125"
+                                            />
+                                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8">
+                                                <p className="text-[9px] text-white/70 font-mono tracking-widest flex justify-between">
+                                                    <span>HALL — CAM 01</span>
+                                                    <span className="text-red-500 animate-pulse">REC</span>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => {
-                                            const newState = !lightsState;
-                                            setLightsState(newState);
-                                            handleEquipmentAction("lights-global", "toggle_lights", newState);
-                                        }}
-                                        className={`w-12 h-6 rounded-full relative transition-colors ${lightsState ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
-                                    >
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${lightsState ? 'left-7' : 'left-1'}`} />
-                                    </button>
+                                </>
+                            ) : (
+                                <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 text-slate-500 flex flex-col items-center">
+                                    <Power className="h-10 w-10 mb-3 opacity-20" />
+                                    <p className="text-sm">Aucun équipement ou système pilotable dans ce bâtiment.</p>
                                 </div>
-                            </div>
-
-                            {/* Camera Stream Placeholder */}
-                            <div className="p-5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
-                                <div className="flex items-center mb-4">
-                                    <div className="p-2 rounded-lg mr-3 bg-red-500/10 text-red-500">
-                                        <Video className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">Caméra Thermique</h4>
-                                        <span className="text-[10px] font-bold uppercase text-red-500 flex items-center">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1 animate-pulse" /> Live
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative group border border-slate-800">
-                                    <video
-                                        src="https://cdn.pixabay.com/video/2019/04/10/22818-331295328_large.mp4"
-                                        autoPlay
-                                        loop
-                                        muted
-                                        playsInline
-                                        className="opacity-70 group-hover:opacity-100 transition-opacity w-full h-full object-cover filter sepia hue-rotate-[180deg] saturate-200 contrast-125"
-                                    />
-                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8">
-                                        <p className="text-[9px] text-white/70 font-mono tracking-widest flex justify-between">
-                                            <span>HALL — CAM 01</span>
-                                            <span className="text-red-500 animate-pulse">REC</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -546,20 +574,22 @@ export default function SiteDashboardPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="text-sm">
-                                            <tr
-                                                onClick={() => setExpandedRows(prev => ({ ...prev, [selectedZone.id]: !prev[selectedZone.id] }))}
-                                                className="border-b border-slate-100 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.04] cursor-pointer group"
-                                            >
-                                                <td className="p-4 text-slate-400">
-                                                    {expandedRows[selectedZone.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                                                </td>
-                                                <td className="p-4 font-bold text-slate-900 dark:text-white">
-                                                    {`Passerelle Ubot-${selectedZone.name.toUpperCase().replace(/\s/g, '-')}`}
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">Online</span>
-                                                </td>
-                                            </tr>
+                                            {hasEquipments && (
+                                                <tr
+                                                    onClick={() => setExpandedRows(prev => ({ ...prev, [selectedZone.id]: !prev[selectedZone.id] }))}
+                                                    className="border-b border-slate-100 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.04] cursor-pointer group"
+                                                >
+                                                    <td className="p-4 text-slate-400">
+                                                        {expandedRows[selectedZone.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                                    </td>
+                                                    <td className="p-4 font-bold text-slate-900 dark:text-white">
+                                                        {`Passerelle Ubot-${selectedZone.name.toUpperCase().replace(/\s/g, '-')}`}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">Online</span>
+                                                    </td>
+                                                </tr>
+                                            )}
                                             {/* Sensors */}
                                             {expandedRows[selectedZone.id] && selectedZone.sensors?.map((sensor: { id: string; name: string; type: string }) => {
                                                 const type = sensor.type.toLowerCase();

@@ -188,8 +188,7 @@ export class AppService implements OnModuleInit {
   async getSites(orgId?: string) {
     const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
     const where = orgId && !isGlobalContext ? { organizationId: orgId } : {};
-
-    const sites = await this.siteRepo.find({ where, relations: ['zones', 'organization'] });
+    const sites = await this.siteRepo.find({ where, relations: ['zones', 'zones.sensors', 'gateways', 'organization'] });
 
     let activeAlertsQuery = this.alertRepo.createQueryBuilder('alert')
       .leftJoinAndSelect('alert.sensor', 'sensor')
