@@ -9,13 +9,14 @@ import { Thermometer, Wind, MapPin, Layers, Settings2, Info, Users } from "lucid
 interface BuildingModelProps {
     siteName?: string;
     zones?: any[];
+    forceMockData?: boolean;
 }
 
 // Composant pour une "pièce" ou une "zone" dynamique
-function Room({ position, size, zone, activeLayer }: any) {
+function Room({ position, size, zone, activeLayer, forceMockData }: any) {
     const [hovered, setHovered] = useState(false);
 
-    const hasSensors = zone.sensors && zone.sensors.length > 0;
+    const hasSensors = forceMockData || (zone.sensors && zone.sensors.length > 0);
 
     // Simulation de données temps réel par défaut pour le rendu visuel SEULEMENT si des capteurs existent
     const temperature = hasSensors ? (zone.temperature ?? (20 + Math.random() * 5)) : null; // 20 à 25°C
@@ -110,7 +111,7 @@ function Room({ position, size, zone, activeLayer }: any) {
     );
 }
 
-export function BuildingModel({ siteName = "Bâtiment Principal", zones = [] }: BuildingModelProps) {
+export function BuildingModel({ siteName = "Bâtiment Principal", zones = [], forceMockData = false }: BuildingModelProps) {
     const [selectedFloor, setSelectedFloor] = useState("RDC");
     const [activeLayer, setActiveLayer] = useState("temperature"); // temperature, co2, occupancy, all
 
@@ -228,6 +229,7 @@ export function BuildingModel({ siteName = "Bâtiment Principal", zones = [] }: 
                             size={z.size || [2.5, 1.5, 2.5]}
                             zone={z}
                             activeLayer={activeLayer}
+                            forceMockData={forceMockData}
                         />
                     ))}
                 </group>
