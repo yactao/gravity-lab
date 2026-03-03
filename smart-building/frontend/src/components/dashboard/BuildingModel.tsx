@@ -16,9 +16,9 @@ function Room({ position, size, zone, activeLayer }: any) {
     const [hovered, setHovered] = useState(false);
 
     // Simulation de données temps réel par défaut pour le rendu visuel
-    const temperature = zone.temperature || (20 + Math.random() * 5); // 20 à 25°C
-    const co2 = zone.co2 || (400 + Math.random() * 600); // 400 à 1000 ppm
-    const isOccupied = zone.isOccupied !== undefined ? zone.isOccupied : Math.random() > 0.5;
+    const temperature = zone.temperature ?? (20 + Math.random() * 5); // 20 à 25°C
+    const co2 = zone.co2 ?? (400 + Math.random() * 600); // 400 à 1000 ppm
+    const isOccupied = zone.isOccupied ?? (Math.random() > 0.5);
 
     // Logique de coloration par couche (Layer)
     let baseColor = "#1e293b"; // Par défaut (Gris foncé)
