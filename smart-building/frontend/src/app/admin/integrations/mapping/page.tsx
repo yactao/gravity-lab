@@ -262,7 +262,7 @@ export default function MappingPage() {
                                 Cette méthode est idéale pour les capteurs officiellement certifiés UBBEE ou pré-configurés. Entrez simplement l'identifiant réseau pour déclencher l'auto-découverte.
                             </p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 items-end">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest block">Type / Modèle de l'équipement</label>
                                     <select className="w-full p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">

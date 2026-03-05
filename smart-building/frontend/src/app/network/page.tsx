@@ -20,10 +20,16 @@ export default function NetworkMonitoringPage() {
     const fetchGateways = async () => {
         setLoading(true);
         try {
-            const res = await authFetch("http://localhost:3001/api/gateways");
-            if (res.ok) {
-                setGateways(await res.json());
-            }
+            const [gwRes, sitesRes] = await Promise.all([
+                authFetch("http://localhost:3001/api/gateways"),
+                authFetch("http://localhost:3001/api/sites")
+            ]);
+
+            if (gwRes.ok) setGateways(await gwRes.json());
+            if (sitesRes.ok) setSites(await sitesRes.json());
+
+            // Micro-délai pour garantir l'animation UX du bouton Actualiser
+            await new Promise(r => setTimeout(r, 600));
         } catch (e) {
             console.error(e);
         } finally {
@@ -33,10 +39,6 @@ export default function NetworkMonitoringPage() {
 
     useEffect(() => {
         fetchGateways();
-        authFetch("http://localhost:3001/api/sites")
-            .then(res => res.json())
-            .then(data => setSites(data))
-            .catch(console.error);
     }, [authFetch]);
 
     const handleAddHardware = async (e: React.FormEvent) => {

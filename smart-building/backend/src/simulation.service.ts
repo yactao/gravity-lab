@@ -27,7 +27,13 @@ export class SimulationService implements OnModuleInit {
     startSimulation() {
         // Generate data every 5 seconds
         this.intervalId = setInterval(async () => {
-            const sensors = await this.sensorRepo.find({ relations: ['zone', 'zone.site'] });
+            const allSensors = await this.sensorRepo.find({ relations: ['zone', 'zone.site'] });
+
+            // Exclure le Projet Y (vrai matériel en cours de déploiement)
+            const sensors = allSensors.filter(sensor => {
+                const siteName = sensor.zone?.site?.name?.toLowerCase() || '';
+                return !siteName.includes('projet y') && !siteName.includes('batiment y');
+            });
 
             if (sensors.length === 0) {
                 console.warn('⚠️ No sensors found to simulate data for.');
