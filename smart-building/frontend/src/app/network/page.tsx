@@ -39,13 +39,32 @@ export default function NetworkMonitoringPage() {
             .catch(console.error);
     }, [authFetch]);
 
-    const handleAddHardware = (e: React.FormEvent) => {
+    const handleAddHardware = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Dans un monde idéal, on appellerait le backend ici. Pour l'instant on ferme la modale.
-        setIsAddModalOpen(false);
-        setNewMac("");
-        setPreAssignSite("");
-        alert("Passerelle prénumérotée avec succès. Elle s'activera au branchement.");
+        try {
+            const body = {
+                serialNumber: newMac,
+                name: `U-Bot (${newModel})`,
+                status: 'offline', // Par défaut
+                siteId: preAssignSite || undefined
+            };
+            const res = await authFetch("http://localhost:3001/api/gateways", {
+                method: "POST",
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                alert("Passerelle prénumérotée avec succès. Elle s'activera au branchement.");
+                setIsAddModalOpen(false);
+                setNewMac("");
+                setPreAssignSite("");
+                fetchGateways(); // Rafraîchissement automatique de la liste
+            } else {
+                alert("Erreur lors de l'enregistrement de la passerelle.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur de connexion au serveur.");
+        }
     };
 
     // KPI Calc

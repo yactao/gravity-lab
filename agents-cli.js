@@ -113,6 +113,7 @@ async function cmdAsk() {
         output(result, [
             `## 🤖 ${result.agent} (${result.role})`,
             `> Provider: **${result.provider}** | Model: **${result.model}** | Time: **${result.elapsed}ms**\n`,
+            `<div align="right"><em>[🛡️ Agent: ${result.agent}] | [🧠 LLM: ${result.provider}]</em></div>\n`,
             result.response,
         ].join('\n'));
     } else {
