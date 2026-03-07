@@ -1,0 +1,29 @@
+﻿commit 13b860159cdd34fc716522f46780a66ad271739a
+Author: yactao <taithamada7@gmail.com>
+Date:   Tue Mar 3 08:37:46 2026 +0100
+
+    fix(smart-building): conditionally render dashboards for new sites without equipments
+
+commit aeec6c1619efa1df344d53a0ef50bcf747844b5b
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Mar 2 23:14:12 2026 +0100
+
+    Fix site creation logic to load entire organization entity
+
+commit c9837c967154495324e6e2db0119fab306321191
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Mar 2 18:57:29 2026 +0100
+
+    fix(ui): adjust unassigned sites display, navigation, and DevEUI label
+
+commit 3097e305baf19f70dce818a2260b0f14a846513f
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Mar 2 18:22:00 2026 +0100
+
+    feat(ui): display organization for sites and add gateway selector in sensor mapping
+
+commit 6bce6bfdb66a0b510898a6ed4bcbb9e95ba4ac6e
+Author: yactao <taithamada7@gmail.com>
+Date:   Mon Mar 2 17:52:41 2026 +0100
+
+    fix(ui): dynamic refresh of clients context menu and ensure layout renders instantly

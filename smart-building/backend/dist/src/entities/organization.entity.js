@@ -13,6 +13,7 @@ exports.Organization = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 const site_entity_1 = require("./site.entity");
+const custom_role_entity_1 = require("./custom-role.entity");
 let Organization = class Organization {
     id;
     name;
@@ -34,6 +35,7 @@ let Organization = class Organization {
     createdAt;
     users;
     sites;
+    customRoles;
 };
 exports.Organization = Organization;
 __decorate([
@@ -116,6 +118,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => site_entity_1.Site, site => site.organization),
     __metadata("design:type", Array)
 ], Organization.prototype, "sites", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => custom_role_entity_1.CustomRole, customRole => customRole.organization),
+    __metadata("design:type", Array)
+], Organization.prototype, "customRoles", void 0);
 exports.Organization = Organization = __decorate([
     (0, typeorm_1.Entity)('organizations')
 ], Organization);

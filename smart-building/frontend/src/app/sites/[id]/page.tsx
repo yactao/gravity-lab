@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 import { EnergyChart } from "@/components/dashboard/EnergyChart";
 import { StatsCard } from "@/components/dashboard/StatsCard";
+import { HvacControlModal } from "@/components/equipment/HvacControlModal";
 
 // Types
 interface Sensor {
@@ -59,6 +60,7 @@ export default function SiteDashboardPage() {
 
     // Remote Control Mock States
     const [hvacState, setHvacState] = useState(true);
+    const [isHvacControlOpen, setIsHvacControlOpen] = useState(false);
     const [hvacTemp, setHvacTemp] = useState(22.0);
     const [lightsState, setLightsState] = useState(false);
 
@@ -706,14 +708,10 @@ export default function SiteDashboardPage() {
                                                 <div className="flex justify-between items-end">
                                                     <p className="text-xs text-slate-500 font-mono tracking-wider">ID: THM-2241-CD</p>
                                                     <button
-                                                        onClick={() => {
-                                                            const newState = !hvacState;
-                                                            setHvacState(newState);
-                                                            handleEquipmentAction("cvc-local", "toggle_hvac", newState);
-                                                        }}
-                                                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${hvacState ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
+                                                        onClick={() => setIsHvacControlOpen(true)}
+                                                        className="px-3 py-1 rounded text-xs font-bold transition-all bg-[#0B3B70] hover:bg-[#0B3B70]/80 dark:bg-blue-600 dark:hover:bg-blue-500 text-white shadow-sm"
                                                     >
-                                                        {hvacState ? 'Allumé' : 'Éteint'}
+                                                        Contrôler CVC
                                                     </button>
                                                 </div>
                                             </div>
@@ -795,6 +793,17 @@ export default function SiteDashboardPage() {
                         </div>
                     </div>
                 )}
+
+            <HvacControlModal
+                isOpen={isHvacControlOpen}
+                onClose={() => setIsHvacControlOpen(false)}
+                equipmentName="Contrôleur CVC"
+                initialHvacState={hvacState}
+                onToggleHvac={(state) => {
+                    setHvacState(state);
+                    handleEquipmentAction("cvc-local", "toggle_hvac", state);
+                }}
+            />
         </div>
     );
 }

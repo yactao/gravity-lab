@@ -1,4 +1,5 @@
 import { Organization } from './organization.entity';
+import { CustomRole } from './custom-role.entity';
 export declare enum UserRole {
     SUPER_ADMIN = "SUPER_ADMIN",
     ENERGY_MANAGER = "ENERGY_MANAGER",
@@ -11,5 +12,6 @@ export declare class User {
     password: string;
     role: UserRole;
     organization: Organization;
+    customRole: CustomRole;
     createdAt: Date;
 }

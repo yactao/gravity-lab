@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { Site } from './site.entity';
+import { Rule } from './rule.entity';
+import { CustomRole } from './custom-role.entity';
 
 @Entity('organizations')
 export class Organization {
@@ -64,4 +66,8 @@ export class Organization {
 
     @OneToMany(() => Site, site => site.organization)
     sites: Site[];
+
+    // Added to fix CustomRole relationship
+    @OneToMany(() => CustomRole, customRole => customRole.organization)
+    customRoles: CustomRole[];
 }

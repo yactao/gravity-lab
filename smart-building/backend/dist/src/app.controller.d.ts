@@ -65,6 +65,7 @@ export declare class AppController {
         createdAt: Date;
         users: import("./entities/user.entity").User[];
         sites: import("./entities/site.entity").Site[];
+        customRoles: import("./entities/custom-role.entity").CustomRole[];
     }[]>;
     createOrganization(orgData: any): Promise<import("./entities/organization.entity").Organization[]>;
     updateOrganization(id: string, orgData: any): Promise<import("./entities/organization.entity").Organization | null>;

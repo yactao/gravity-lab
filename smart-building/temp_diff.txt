@@ -1,0 +1,2203 @@
+﻿diff --git a/analyse_plan.md b/analyse_plan.md
+deleted file mode 100644
+index 95929c8..0000000
+--- a/analyse_plan.md
++++ /dev/null
+@@ -1,31 +0,0 @@
+-Voici l'extraction des cotes et le calcul des surfaces bas├® sur l'analyse architecturale du plan (unit├®s en centim├¿tres, converties en m├¿tres pour les calculs) :
+-
+-**Hypoth├¿se de lecture :** Les cotes principales repr├®sentent les dimensions int├®rieures des pi├¿ces. La cote **660** semble ├¬tre la dimension commune (profondeur ou longueur) partag├®e par le Salon et la Salle ├á Manger (SAM).
+-
+-| Pi├¿ce | Dimensions lues (cm) | Dimensions (m) | Surface (m┬▓) | Type |
+-|-------|---------------------|----------------|--------------|------|
+-| **CH.1** (Chambre 1) | 290 ├ù 340 | 2,90 ├ù 3,40 | **9,86** | Habitable |
+-| **CH.2** (Chambre 2) | 290 ├ù 340 | 2,90 ├ù 3,40 | **9,86** | Habitable |
+-| **SDB** (Salle de bains - ├®tage) | 210 ├ù 120 | 2,10 ├ù 1,20 | **2,52** | Habitable |
+-| **SAM** (Salle ├á manger) | 395 ├ù 660 | 3,95 ├ù 6,60 | **26,07** | Habitable |
+-| **Salon** | 465 ├ù 660 | 4,65 ├ù 6,60 | **30,69** | Habitable |
+-| **Cuisine** | 480 ├ù 300 | 4,80 ├ù 3,00 | **14,40** | Habitable |
+-| **SDB/WC** (RDC) | 486 ├ù 300* | 4,86 ├ù 3,00 | **14,58** | Habitable |
+-| **Circulations/Couloirs** | - | - | *~5,00* | Habitable |
+-| **TOTAL HABITABLE** | | | **~112,98** | |
+-| | | | | |
+-| **Garage** (gauche) | 486 ├ù 280* | 4,86 ├ù 2,80 | **13,61** | Annexe |
+-| **Terrasse/Balcon** | 181 ├ù 340* | 1,81 ├ù 3,40 | **6,15** | Ext├®rieur |
+-
+-### D├®tail des cotes extraites :
+-**Verticales (hauteur/profondeur) :** 340, 210, 340, 395, 465, 300, 181, 486  
+-**Horizontales (largeur) :** 190, 290, 120, 290, 280, 660, 480
+-
+-### Notes importantes :
+-- Les surfaces marqu├®es d'un ast├®risque (*) sont calcul├®es avec une dimension estim├®e (non explicitement cot├®e sur le plan mais d├®duite de l'alignement avec les pi├¿ces voisines).
+-- **SDB (RDC)** : La largeur de 300 cm est suppos├®e identique ├á la cuisine situ├®e au-dessus.
+-- **Garage** : La largeur de 280 cm correspond ├á la cote indiqu├®e ; la longueur de 486 cm est partag├®e avec la SDB du RDC.
+-- **Circulations** : L'entr├®e, les couloirs et les d├®gagements (notamment entre les chambres et le s├®jour) repr├®sentent environ 5 m┬▓ additionnels non explicitement c├┤t├®s.
+-- **Terrasse** : Surface non habitable (balcon loggia en haut ├á droite).
+-
+-**Surface habitable totale estim├®e : environ 113 m┬▓** (hors garage et terrasse).
+\ No newline at end of file
+diff --git a/plan.png b/plan.png
+deleted file mode 100644
+index 41473fe..0000000
+Binary files a/plan.png and /dev/null differ
+diff --git a/ssh_auth.cjs b/ssh_auth.cjs
+deleted file mode 100644
+index 4f21160..0000000
+--- a/ssh_auth.cjs
++++ /dev/null
+@@ -1,40 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== TENTATIVE DE CONNEXION LOCALE ===="
+-curl -s -X POST "http://127.0.0.1:3001/api/auth/login" \\
+-     -H "Content-Type: application/json" \\
+-     -d '{"email":"manager@ubbee.fr","password":"password"}'
+-
+-echo "\\n\\n==== PM2 LOGS ===="
+-pm2 logs gtb-backend --lines 200 --nostream
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_2.txt', output);
+-            console.log('Output saved to vps_output_2.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_auth_test.cjs b/ssh_auth_test.cjs
+deleted file mode 100644
+index 8b81ff8..0000000
+--- a/ssh_auth_test.cjs
++++ /dev/null
+@@ -1,35 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-echo "==== TENTATIVE DE CONNEXION LOCALE ===="
+-RES=$(curl -s -X POST "http://127.0.0.1:3001/api/auth/login" \\
+-     -H "Content-Type: application/json" \\
+-     -d '{"email":"manager@ubbee.fr","password":"password"}')
+-
+-echo "RESULTAT: $RES"
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_4.txt', output);
+-            console.log('Output saved to vps_output_4.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_build_back.cjs b/ssh_build_back.cjs
+deleted file mode 100644
+index 2a0d0fe..0000000
+--- a/ssh_build_back.cjs
++++ /dev/null
+@@ -1,47 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== PULL DES NOUVEAUX FICHIERS BACKEND ===="
+-cd /opt/gravity-lab/smart-building
+-git fetch origin
+-git reset --hard origin/main
+-git pull
+-
+-echo "\\n==== RECOMPILATION BACKEND ===="
+-cd backend
+-npm install
+-npm run build
+-
+-echo "\\n==== REDEMARRAGE DE PM2 BACKEND ===="
+-cd ..
+-pm2 reload ecosystem.config.cjs --update-env
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_back.txt', output);
+-            console.log('Output saved to vps_output_back.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_build_front.cjs b/ssh_build_front.cjs
+deleted file mode 100644
+index 0a9a294..0000000
+--- a/ssh_build_front.cjs
++++ /dev/null
+@@ -1,46 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== PULL DES NOUVEAUX FICHIERS FRONTEND ===="
+-cd /opt/gravity-lab/smart-building
+-git fetch origin
+-git reset --hard origin/main
+-git pull
+-
+-echo "\\n==== RECOMPILATION FRONTEND ===="
+-cd frontend
+-npm install
+-npm run build
+-
+-echo "\\n==== REDEMARRAGE DE PM2 FRONTEND ===="
+-pm2 reload gtb-frontend
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_30.txt', output);
+-            console.log('Output saved to vps_output_30.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_check_db.cjs b/ssh_check_db.cjs
+deleted file mode 100644
+index 602228a..0000000
+--- a/ssh_check_db.cjs
++++ /dev/null
+@@ -1,49 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== VERIFICATION DB SQLITE ===="
+-cd /opt/gravity-lab/smart-building/backend
+-node -e "
+-const db = require('better-sqlite3')('smartbuild_v3.sqlite');
+-console.log('--- ORGANIZATIONS ---');
+-const orgs = db.prepare('SELECT id, name FROM organizations').all();
+-console.table(orgs);
+-
+-console.log('--- SITES ---');
+-const sites = db.prepare('SELECT id, name, organizationId FROM site').all();
+-console.table(sites);
+-
+-console.log('--- USERS ---');
+-const users = db.prepare('SELECT id, email, organizationId FROM user').all();
+-console.table(users);
+-"
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_24.txt', output);
+-            console.log('Output saved to vps_output_24.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_check_sites.cjs b/ssh_check_sites.cjs
+deleted file mode 100644
+index 5e1e4c4..0000000
+--- a/ssh_check_sites.cjs
++++ /dev/null
+@@ -1,49 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== PM2 LOGS (15 DERNIERES LIGNES) ===="
+-pm2 logs gtb-backend --lines 15 --nostream
+-
+-echo "\\n==== TEST DIRECT DE L'API /api/sites EN LOCAL ===="
+-# 1. Login to get token
+-RESPONSE=$(curl -s -X POST http://127.0.0.1:3001/api/auth/login -H "Content-Type: application/json" -d '{"email":"manager@ubbee.fr","password":"password"}')
+-TOKEN=$(echo $RESPONSE | grep -oP '"access_token":"\\K[^"]+')
+-ORG_ID=$(echo $RESPONSE | grep -oP '"organizationId":"\\K[^"]+')
+-
+-echo "Token r├®cup├®r├® : \${TOKEN:0:10}..."
+-
+-# 2. Fetch sites
+-curl -s -v -X GET http://127.0.0.1:3001/api/sites \\
+-     -H "Authorization: Bearer $TOKEN" \\
+-     -H "x-organization-id: $ORG_ID" \\
+-     -H "x-user-role: ENERGY_MANAGER"
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_23.txt', output);
+-            console.log('Output saved to vps_output_23.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_check_sites_node.cjs b/ssh_check_sites_node.cjs
+deleted file mode 100644
+index 9671854..0000000
+--- a/ssh_check_sites_node.cjs
++++ /dev/null
+@@ -1,63 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-node -e "
+-async function test() {
+-  try {
+-    const loginRes = await fetch('http://127.0.0.1:3001/api/auth/login', {
+-      method: 'POST',
+-      headers: { 'Content-Type': 'application/json' },
+-      body: JSON.stringify({ email: 'manager@ubbee.fr', password: 'password' })
+-    });
+-    const loginData = await loginRes.json();
+-    const token = loginData.access_token;
+-    const orgId = loginData.user.organizationId;
+-    
+-    console.log('Login OK, OrgID:', orgId);
+-    
+-    const sitesRes = await fetch('http://127.0.0.1:3001/api/sites', {
+-      method: 'GET',
+-      headers: {
+-        'Authorization': 'Bearer ' + token,
+-        'x-organization-id': orgId,
+-        'x-user-role': 'ENERGY_MANAGER'
+-      }
+-    });
+-    const sitesData = await sitesRes.json();
+-    console.log('SITES FETCHED:', JSON.stringify(sitesData, null, 2));
+-  } catch(e) {
+-    console.error(e);
+-  }
+-}
+-test();
+-"
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_27.txt', output);
+-            console.log('Output saved to vps_output_27.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_check_users.cjs b/ssh_check_users.cjs
+deleted file mode 100644
+index 80d3c8e..0000000
+--- a/ssh_check_users.cjs
++++ /dev/null
+@@ -1,37 +0,0 @@
+-const { Client } = require('ssh2');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-cd /opt/gravity-lab/smart-building/backend
+-
+-node -e "
+-const Database = require('better-sqlite3');
+-const db = new Database('smartbuild_v3.sqlite');
+-const users = db.prepare('SELECT id, name, email, role, password, organizationId FROM users').all();
+-console.log(users);
+-"
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            console.log(output);
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_diag_timeout.cjs b/ssh_diag_timeout.cjs
+deleted file mode 100644
+index 76be391..0000000
+--- a/ssh_diag_timeout.cjs
++++ /dev/null
+@@ -1,37 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-echo "==== UFW STATUS ===="
+-ufw status
+-
+-echo "\\n==== NGINX CONFIG ===="
+-cat /etc/nginx/sites-available/gtb || cat /etc/nginx/sites-enabled/default
+-
+-echo "\\n==== PM2 ENV FRONTEND ===="
+-cat /opt/gravity-lab/smart-building/ecosystem.config.cjs
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_19.txt', output);
+-            console.log('Output saved to vps_output_19.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_docker_nginx.cjs b/ssh_docker_nginx.cjs
+deleted file mode 100644
+index cba8b0a..0000000
+--- a/ssh_docker_nginx.cjs
++++ /dev/null
+@@ -1,36 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-echo "==== ARRET DES CONTENEURS DOCKER SUR PORT 80 ===="
+-docker stop $(docker ps -q) || true
+-docker rm $(docker ps -a -q) || true
+-
+-echo "\\n==== DEMARRAGE NGINX ===="
+-systemctl restart nginx
+-systemctl status nginx --no-pager
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_18.txt', output);
+-            console.log('Output saved to vps_output_18.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_log.cjs b/ssh_log.cjs
+deleted file mode 100644
+index 46a647f..0000000
+--- a/ssh_log.cjs
++++ /dev/null
+@@ -1,44 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== VERIFICATION EN BASE DE DONNEES ===="
+-node -e "
+-const db = require('better-sqlite3')('/opt/gravity-lab/smart-building/backend/smartbuild_v3.sqlite');
+-const rows = db.prepare(\\"SELECT email, password, role FROM users WHERE email='manager@ubbee.fr'\\").get();
+-console.log(rows);
+-"
+-
+-echo "==== REQUETE HTTP CURL SUR LE SERVEUR ===="
+-curl -s -v -X POST "http://127.0.0.1:3001/api/auth/login" \\
+-     -H "Content-Type: application/json" \\
+-     -d '{"email":"manager@ubbee.fr","password":"password"}'
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_15.txt', output);
+-            console.log('Output saved to vps_output_15.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_log2.cjs b/ssh_log2.cjs
+deleted file mode 100644
+index 53f35a4..0000000
+--- a/ssh_log2.cjs
++++ /dev/null
+@@ -1,50 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-cd /opt/gravity-lab/smart-building
+-git fetch --all
+-git reset --hard origin/main
+-
+-echo "==== STARTING PM2 ===="
+-pm2 startOrRestart ecosystem.config.cjs --env production
+-pm2 save
+-
+-echo "==== STATUS =================="
+-pm2 status
+-
+-echo "==== LOGS BACKEND ============"
+-pm2 logs gtb-backend --lines 20 --nostream
+-
+-echo "==== REQUEST LOCAL API ======="
+-sleep 2 # wait for backend to boot completely
+-curl -s -v http://127.0.0.1:3001/api/auth/login -H "Content-Type: application/json" -d '{"email":"manager@ubbee.fr","password":"password"}'
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_9.txt', output);
+-            console.log('Output saved to vps_output_9.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_nginx.cjs b/ssh_nginx.cjs
+deleted file mode 100644
+index ffa1d5d..0000000
+--- a/ssh_nginx.cjs
++++ /dev/null
+@@ -1,34 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-echo "==== CONFIG NGINX ===="
+-cat /etc/nginx/sites-available/gtb
+-
+-echo "\\n==== LOGS ERREURS NGINX (5 DERNIERES LIGNES) ===="
+-tail -n 5 /var/log/nginx/error.log
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_16.txt', output);
+-            console.log('Output saved to vps_output_16.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_nginx2.cjs b/ssh_nginx2.cjs
+deleted file mode 100644
+index b3653a5..0000000
+--- a/ssh_nginx2.cjs
++++ /dev/null
+@@ -1,31 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-echo "==== PROCESSUS SUR LE PORT 80 ===="
+-lsof -i :80 || netstat -tlnp | grep ':80 '
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_17.txt', output);
+-            console.log('Output saved to vps_output_17.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_nginx_fix.cjs b/ssh_nginx_fix.cjs
+deleted file mode 100644
+index cd82315..0000000
+--- a/ssh_nginx_fix.cjs
++++ /dev/null
+@@ -1,78 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== CONFIGURATION DE NGINX ===="
+-cat > /etc/nginx/sites-available/smartbuilding << 'EOF'
+-server {
+-    listen 80;
+-    server_name _;
+-
+-    # Backend API requests
+-    location /api/ {
+-        proxy_pass http://127.0.0.1:3001/api/;
+-        proxy_http_version 1.1;
+-        proxy_set_header Upgrade $http_upgrade;
+-        proxy_set_header Connection 'upgrade';
+-        proxy_set_header Host $host;
+-        proxy_cache_bypass $http_upgrade;
+-    }
+-
+-    # Frontend Next.js requests
+-    location / {
+-        proxy_pass http://127.0.0.1:3000;
+-        proxy_http_version 1.1;
+-        proxy_set_header Upgrade $http_upgrade;
+-        proxy_set_header Connection 'upgrade';
+-        proxy_set_header Host $host;
+-        proxy_cache_bypass $http_upgrade;
+-    }
+-}
+-EOF
+-
+-# Active le site et supprime default s'il existe
+-rm -f /etc/nginx/sites-enabled/default
+-ln -sf /etc/nginx/sites-available/smartbuilding /etc/nginx/sites-enabled/smartbuilding
+-
+-# V├®rifie et recharge Nginx
+-nginx -t && systemctl reload nginx
+-
+-echo "\\n==== MISE A JOUR DU FRONTEND ===="
+-cd /opt/gravity-lab/smart-building/frontend
+-# Configure l'URL API publique pour pointer vers le port 80 (par d├®faut)
+-echo "NEXT_PUBLIC_API_URL=http://76.13.59.115" > .env.production
+-
+-# Recompile le frontend avec la nouvelle URL
+-npm run build
+-
+-echo "\\n==== REDEMARRAGE DE PM2 ===="
+-pm2 restart gtb-frontend
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_20.txt', output);
+-            console.log('Output saved to vps_output_20.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_nginx_socketio.cjs b/ssh_nginx_socketio.cjs
+deleted file mode 100644
+index 46febe2..0000000
+--- a/ssh_nginx_socketio.cjs
++++ /dev/null
+@@ -1,69 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-echo "==== MISE A JOUR NGINX ==== "
+-cat > /etc/nginx/sites-available/smartbuilding << 'EOF'
+-server {
+-    listen 80;
+-    server_name _;
+-
+-    # Backend API requests
+-    location /api/ {
+-        proxy_pass http://127.0.0.1:3001/api/;
+-        proxy_http_version 1.1;
+-        proxy_set_header Upgrade $http_upgrade;
+-        proxy_set_header Connection 'upgrade';
+-        proxy_set_header Host $host;
+-        proxy_cache_bypass $http_upgrade;
+-    }
+-
+-    # WebSockets Socket.io requests
+-    location /socket.io/ {
+-        proxy_pass http://127.0.0.1:3001/socket.io/;
+-        proxy_http_version 1.1;
+-        proxy_set_header Upgrade $http_upgrade;
+-        proxy_set_header Connection "Upgrade";
+-        proxy_set_header Host $host;
+-    }
+-
+-    # Frontend Next.js requests
+-    location / {
+-        proxy_pass http://127.0.0.1:3000;
+-        proxy_http_version 1.1;
+-        proxy_set_header Upgrade $http_upgrade;
+-        proxy_set_header Connection 'upgrade';
+-        proxy_set_header Host $host;
+-        proxy_cache_bypass $http_upgrade;
+-    }
+-}
+-EOF
+-
+-# V├®rifie et recharge Nginx
+-nginx -t && systemctl reload nginx
+-systemctl status nginx --no-pager
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_22.txt', output);
+-            console.log('Output saved to vps_output_22.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_reset_db.cjs b/ssh_reset_db.cjs
+deleted file mode 100644
+index c5cd24e..0000000
+--- a/ssh_reset_db.cjs
++++ /dev/null
+@@ -1,45 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== RESET DE LA BASE SQLITE ===="
+-cd /opt/gravity-lab/smart-building/backend
+-pm2 stop gtb-backend
+-rm -f smartbuild_v3.sqlite
+-
+-echo "Base supprim├®e. Red├®marrage de PM2..."
+-pm2 start gtb-backend
+-
+-echo "Attente de 5 secondes pour le seeding..."
+-sleep 5
+-
+-pm2 logs gtb-backend --lines 20 --nostream
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_29.txt', output);
+-            console.log('Output saved to vps_output_29.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/ssh_typeorm_test.cjs b/ssh_typeorm_test.cjs
+deleted file mode 100644
+index bc300d5..0000000
+--- a/ssh_typeorm_test.cjs
++++ /dev/null
+@@ -1,82 +0,0 @@
+-const { Client } = require('ssh2');
+-const fs = require('fs');
+-
+-const script = `
+-export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+-export NVM_DIR="$HOME/.nvm"
+-[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+-
+-echo "==== TEST TYPEORM FIND ===="
+-cd /opt/gravity-lab/smart-building/backend
+-
+-cat > test-typeorm.js << 'EOF'
+-const { DataSource } = require('typeorm');
+-const { Site } = require('./dist/src/entities/site.entity');
+-const { Organization } = require('./dist/src/entities/organization.entity');
+-const { Zone } = require('./dist/src/entities/zone.entity');
+-const { Gateway } = require('./dist/src/entities/gateway.entity');
+-const { Sensor } = require('./dist/src/entities/sensor.entity');
+-const { User } = require('./dist/src/entities/user.entity');
+-const { Reading } = require('./dist/src/entities/reading.entity');
+-const { Alert } = require('./dist/src/entities/alert.entity');
+-
+-async function test() {
+-    const dataSource = new DataSource({
+-        type: 'better-sqlite3',
+-        database: 'smartbuild_v3.sqlite',
+-        entities: [Site, Organization, Zone, Gateway, Sensor, User, Reading, Alert]
+-    });
+-
+-    await dataSource.initialize();
+-    const siteRepo = dataSource.getRepository(Site);
+-    
+-    console.log("-> TEST 1: organization: { id }");
+-    const test1 = await siteRepo.find({ 
+-        where: { organization: { id: '11111111-1111-1111-1111-111111111111' } },
+-        relations: ['zones']
+-    });
+-    console.log("Test 1 count:", test1.length);
+-
+-    console.log("-> TEST 2: organizationId direct");
+-    const test2 = await siteRepo.find({ 
+-        where: { organizationId: '11111111-1111-1111-1111-111111111111' },
+-        relations: ['zones']
+-    });
+-    console.log("Test 2 count:", test2.length);
+-
+-    console.log("-> TEST 3: all sites without where");
+-    const test3 = await siteRepo.find({});
+-    console.log("Total sites:", test3.length);
+-
+-    await dataSource.destroy();
+-}
+-
+-test().catch(console.error);
+-EOF
+-
+-node test-typeorm.js
+-`;
+-
+-const conn = new Client();
+-conn.on('ready', () => {
+-    conn.exec(script, (err, stream) => {
+-        if (err) throw err;
+-        let output = '';
+-        stream.on('close', (code, signal) => {
+-            fs.writeFileSync('vps_output_25.txt', output);
+-            console.log('Output saved to vps_output_25.txt');
+-            conn.end();
+-        }).on('data', (data) => {
+-            output += data;
+-            process.stdout.write(data);
+-        }).stderr.on('data', (data) => {
+-            output += data;
+-            process.stderr.write(data);
+-        });
+-    });
+-}).connect({
+-    host: '76.13.59.115',
+-    port: 22,
+-    username: 'root',
+-    password: '5FPuD8)DpuHH8\'Ic.(r#'
+-});
+diff --git a/vps_output.txt b/vps_output.txt
+deleted file mode 100644
+index 5cb8892..0000000
+--- a/vps_output.txt
++++ /dev/null
+@@ -1,112 +0,0 @@
+-==== PM2 BACKEND LOGS ====
+-[TAILING] Tailing last 50 lines for [gtb-backend] process (change the value with --lines option)
+-/root/.pm2/logs/gtb-backend-out.log last 50 lines:
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | ­ƒÜÇ Starting Internal Simulation Service...
+-1|gtb-back | ÔÜí Adding missing Energy Sensor for V4 Dashboard...
+-1|gtb-back | [32m[Nest] 38859  - [39m02/23/2026, 11:52:14 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +13ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +25ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mNotificationsModule dependencies initialized[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAiModule dependencies initialized[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m[38;5;3m +24ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +2ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/api}:[39m[38;5;3m +9ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api, GET} route[39m[38;5;3m +3ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sites, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations, GET} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations/:id, PUT} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/organizations/:id, DELETE} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sites, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/zones, POST} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/sensors, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, POST} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/readings, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/global, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/temperature/average, GET} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/alerts, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/hvac-performance, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | ­ƒÜÇ Starting Internal Simulation Service...
+-1|gtb-back | ÔÜí Adding missing Energy Sensor for V4 Dashboard...
+-1|gtb-back | [32m[Nest] 39503  - [39m02/23/2026, 11:58:27 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +13ms[39m
+-
+-/root/.pm2/logs/gtb-backend-error.log last 50 lines:
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-
+-\n==== DB USERS ====
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé email            Ôöé password Ôöé role          Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 0       Ôöé 'admin@ubbee.fr' Ôöé 'admin'  Ôöé 'SUPER_ADMIN' Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+diff --git a/vps_output_10.txt b/vps_output_10.txt
+deleted file mode 100644
+index 1bf9d4e..0000000
+--- a/vps_output_10.txt
++++ /dev/null
+@@ -1,4 +0,0 @@
+-==== CHERCHER BDD SQLITE ====
+-/opt/gravity-lab/smart-building/backend/smartbuild_v3.sqlite
+-\n==== CONTENU SQLITE DANS /opt/gravity-lab/smart-building ====
+-bash: line 6: node: command not found
+diff --git a/vps_output_11.txt b/vps_output_11.txt
+deleted file mode 100644
+index ffb9e11..0000000
+--- a/vps_output_11.txt
++++ /dev/null
+@@ -1,6 +0,0 @@
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé email            Ôöé password   Ôöé role          Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 0       Ôöé 'admin@ubbee.fr' Ôöé 'admin'    Ôöé 'SUPER_ADMIN' Ôöé
+-Ôöé 1       Ôöé 'client@casa.fr' Ôöé 'password' Ôöé 'CLIENT'      Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+diff --git a/vps_output_13.txt b/vps_output_13.txt
+deleted file mode 100644
+index ed7b67d..0000000
+--- a/vps_output_13.txt
++++ /dev/null
+@@ -1,22 +0,0 @@
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-Forcing insert of manager and admin...
+-Users inserted. Verifying...
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé email              Ôöé password   Ôöé role             Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 0       Ôöé 'admin@ubbee.fr'   Ôöé 'admin'    Ôöé 'SUPER_ADMIN'    Ôöé
+-Ôöé 1       Ôöé 'manager@ubbee.fr' Ôöé 'password' Ôöé 'ENERGY_MANAGER' Ôöé
+-Ôöé 2       Ôöé 'client@ubbee.fr'  Ôöé 'password' Ôöé 'CLIENT'         Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-Use --update-env to update environment variables
+-[PM2] Applying action restartProcessId on app [gtb-backend](ids: [ 1 ])
+-[PM2] [gtb-backend](1) Ô£ô
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 39503    Ôöé 0s     Ôöé 115  Ôöé online    Ôöé 0%       Ôöé 20.0mb   Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 37458    Ôöé 11m    Ôöé 1    Ôöé online    Ôöé 0%       Ôöé 57.2mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+diff --git a/vps_output_14.txt b/vps_output_14.txt
+deleted file mode 100644
+index b657a12..0000000
+--- a/vps_output_14.txt
++++ /dev/null
+@@ -1,46 +0,0 @@
+-==== TEST 1: ADMIN ====
+-*   Trying 127.0.0.1:3001...
+-* Connected to 127.0.0.1 (127.0.0.1) port 3001
+-> POST /api/auth/login HTTP/1.1
+-> Host: 127.0.0.1:3001
+-> User-Agent: curl/8.5.0
+-> Accept: */*
+-> Content-Type: application/json
+-> Content-Length: 45
+-> 
+-} [45 bytes data]
+-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpZC1hZG1pbiIsImVtYWlsIjoiYWRtaW5AdWJiZWUuZnIiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJvcmdhbml6YXRpb25JZCI6IjExMTExMTExLTExMTEtMTExMS0xMTExLTExMTExMTExMTExMSIsIm9yZ2FuaXphdGlvbk5hbWUiOiJVQkJFRSIsImlhdCI6MTc3MTg0ODAwNiwiZXhwIjoxNzcxODkxMjA2fQ.0tyAX9tKLJseCLohimlFtAMx9Dt5xke-jo-qZHlsOhM","user":{"sub":"id-admin","email":"admin@ubbee.fr","role":"SUPER_ADMIN","organizationId":"11111111-1111-1111-1111-111111111111","organizationName":"UBBEE"}}< HTTP/1.1 201 Created
+-< X-Powered-By: Express
+-< Access-Control-Allow-Origin: *
+-< Content-Type: application/json; charset=utf-8
+-< Content-Length: 497
+-< ETag: W/"1f1-R188P74UT6PcH502twkta0nzGTw"
+-< Date: Mon, 23 Feb 2026 12:00:06 GMT
+-< Connection: keep-alive
+-< Keep-Alive: timeout=5
+-< 
+-{ [497 bytes data]
+-* Connection #0 to host 127.0.0.1 left intact
+-\n\n==== TEST 2: MANAGER ====
+-*   Trying 127.0.0.1:3001...
+-* Connected to 127.0.0.1 (127.0.0.1) port 3001
+-> POST /api/auth/login HTTP/1.1
+-> Host: 127.0.0.1:3001
+-> User-Agent: curl/8.5.0
+-> Accept: */*
+-> Content-Type: application/json
+-> Content-Length: 50
+-> 
+-} [50 bytes data]
+-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpZC1tYW5hZ2VyIiwiZW1haWwiOiJtYW5hZ2VyQHViYmVlLmZyIiwicm9sZSI6IkVORVJHWV9NQU5BR0VSIiwib3JnYW5pemF0aW9uSWQiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJvcmdhbml6YXRpb25OYW1lIjoiVUJCRUUiLCJpYXQiOjE3NzE4NDgwMDYsImV4cCI6MTc3MTg5MTIwNn0.vgmafrfoUXAM-8_DcjfWrIGJ8ETuNabkxZey0Y6sGMw","user":{"sub":"id-manager","email":"manager@ubbee.fr","role":"ENERGY_MANAGER","organizationId":"11111111-1111-1111-1111-111111111111","organizationName":"UBBEE"}}< HTTP/1.1 201 Created
+-< X-Powered-By: Express
+-< Access-Control-Allow-Origin: *
+-< Content-Type: application/json; charset=utf-8
+-< Content-Length: 513
+-< ETag: W/"201-fGoAA7iSU1OlT29iYxuYV+Yy+iA"
+-< Date: Mon, 23 Feb 2026 12:00:06 GMT
+-< Connection: keep-alive
+-< Keep-Alive: timeout=5
+-< 
+-{ [513 bytes data]
+-* Connection #0 to host 127.0.0.1 left intact
+diff --git a/vps_output_15.txt b/vps_output_15.txt
+deleted file mode 100644
+index 2042bb4..0000000
+--- a/vps_output_15.txt
++++ /dev/null
+@@ -1,46 +0,0 @@
+-==== VERIFICATION EN BASE DE DONNEES ====
+-node:internal/modules/cjs/loader:1210
+-  throw err;
+-  ^
+-
+-Error: Cannot find module 'better-sqlite3'
+-Require stack:
+-- /root/[eval]
+-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+-    at Module._load (node:internal/modules/cjs/loader:1038:27)
+-    at Module.require (node:internal/modules/cjs/loader:1289:19)
+-    at require (node:internal/modules/helpers:182:18)
+-    at [eval]:2:12
+-    at runScriptInThisContext (node:internal/vm:209:10)
+-    at node:internal/process/execution:118:14
+-    at [eval]-wrapper:6:24
+-    at runScript (node:internal/process/execution:101:62)
+-    at evalScript (node:internal/process/execution:133:3) {
+-  code: 'MODULE_NOT_FOUND',
+-  requireStack: [ '/root/[eval]' ]
+-}
+-
+-Node.js v20.20.0
+-==== REQUETE HTTP CURL SUR LE SERVEUR ====
+-*   Trying 127.0.0.1:3001...
+-* Connected to 127.0.0.1 (127.0.0.1) port 3001
+-> POST /api/auth/login HTTP/1.1
+-> Host: 127.0.0.1:3001
+-> User-Agent: curl/8.5.0
+-> Accept: */*
+-> Content-Type: application/json
+-> Content-Length: 50
+-> 
+-} [50 bytes data]
+-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpZC1tYW5hZ2VyIiwiZW1haWwiOiJtYW5hZ2VyQHViYmVlLmZyIiwicm9sZSI6IkVORVJHWV9NQU5BR0VSIiwib3JnYW5pemF0aW9uSWQiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJvcmdhbml6YXRpb25OYW1lIjoiVUJCRUUiLCJpYXQiOjE3NzE4NDgxNzEsImV4cCI6MTc3MTg5MTM3MX0.HUaQh5H6USABtHxUkPrtUXan6349OtMegQYOGin4430","user":{"sub":"id-manager","email":"manager@ubbee.fr","role":"ENERGY_MANAGER","organizationId":"11111111-1111-1111-1111-111111111111","organizationName":"UBBEE"}}< HTTP/1.1 201 Created
+-< X-Powered-By: Express
+-< Access-Control-Allow-Origin: *
+-< Content-Type: application/json; charset=utf-8
+-< Content-Length: 513
+-< ETag: W/"201-LDQtUVR4a1qNOZf0JX3xU5k9jFI"
+-< Date: Mon, 23 Feb 2026 12:02:51 GMT
+-< Connection: keep-alive
+-< Keep-Alive: timeout=5
+-< 
+-{ [513 bytes data]
+-* Connection #0 to host 127.0.0.1 left intact
+diff --git a/vps_output_16.txt b/vps_output_16.txt
+deleted file mode 100644
+index df42dea..0000000
+--- a/vps_output_16.txt
++++ /dev/null
+@@ -1,8 +0,0 @@
+-==== CONFIG NGINX ====
+-cat: /etc/nginx/sites-available/gtb: No such file or directory
+-\n==== LOGS ERREURS NGINX (5 DERNIERES LIGNES) ====
+-2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+-2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+-2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+-2026/02/23 11:07:22 [emerg] 34067#34067: bind() to 0.0.0.0:80 failed (98: Address already in use)
+-2026/02/23 11:07:22 [emerg] 34067#34067: still could not bind()
+diff --git a/vps_output_17.txt b/vps_output_17.txt
+deleted file mode 100644
+index 511ee29..0000000
+--- a/vps_output_17.txt
++++ /dev/null
+@@ -1,4 +0,0 @@
+-==== PROCESSUS SUR LE PORT 80 ====
+-COMMAND     PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+-docker-pr 19242 root    8u  IPv4 126670      0t0  TCP *:http (LISTEN)
+-docker-pr 19249 root    8u  IPv6 126671      0t0  TCP *:http (LISTEN)
+diff --git a/vps_output_18.txt b/vps_output_18.txt
+deleted file mode 100644
+index f36664f..0000000
+--- a/vps_output_18.txt
++++ /dev/null
+@@ -1,29 +0,0 @@
+-==== ARRET DES CONTENEURS DOCKER SUR PORT 80 ====
+-d81d6385a519
+-22f0722ea3a6
+-a9fd1318df97
+-b59c1384c8de
+-780d2fc29e7f
+-d81d6385a519
+-22f0722ea3a6
+-a9fd1318df97
+-b59c1384c8de
+-780d2fc29e7f
+-\n==== DEMARRAGE NGINX ====
+-ÔùÅ nginx.service - A high performance web server and a reverse proxy server
+-     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+-     Active: active (running) since Mon 2026-02-23 12:05:04 UTC; 14ms ago
+-       Docs: man:nginx(8)
+-    Process: 40804 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+-    Process: 40806 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+-   Main PID: 40807 (nginx)
+-      Tasks: 3 (limit: 9483)
+-     Memory: 2.4M (peak: 2.5M)
+-        CPU: 28ms
+-     CGroup: /system.slice/nginx.service
+-             Ôö£ÔöÇ40807 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+-             Ôö£ÔöÇ40808 "nginx: worker process"
+-             ÔööÔöÇ40809 "nginx: worker process"
+-
+-Feb 23 12:05:04 srv1411776 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+-Feb 23 12:05:04 srv1411776 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+diff --git a/vps_output_19.txt b/vps_output_19.txt
+deleted file mode 100644
+index 5a973f0..0000000
+--- a/vps_output_19.txt
++++ /dev/null
+@@ -1,54 +0,0 @@
+-==== UFW STATUS ====
+-Status: active
+-
+-To                         Action      From
+---                         ------      ----
+-OpenSSH                    ALLOW       Anywhere                  
+-80/tcp                     ALLOW       Anywhere                  
+-443/tcp                    ALLOW       Anywhere                  
+-OpenSSH (v6)               ALLOW       Anywhere (v6)             
+-80/tcp (v6)                ALLOW       Anywhere (v6)             
+-443/tcp (v6)               ALLOW       Anywhere (v6)             
+-
+-\n==== NGINX CONFIG ====
+-cat: /etc/nginx/sites-available/gtb: No such file or directory
+-cat: /etc/nginx/sites-enabled/default: No such file or directory
+-\n==== PM2 ENV FRONTEND ====
+-module.exports = {
+-    apps: [
+-        {
+-            name: "gtb-frontend",
+-            script: "npm",
+-            args: "run start",
+-            cwd: "./frontend",
+-            env: {
+-                NODE_ENV: "production",
+-                PORT: "3000",
+-                // Remplacez par le nom de domaine de production
+-                NEXT_PUBLIC_API_URL: "http://127.0.0.1:3001"
+-            },
+-            watch: false,
+-            autorestart: true,
+-            max_memory_restart: "300M"
+-        },
+-        {
+-            name: "gtb-backend",
+-            script: "node",
+-            args: "dist/src/main.js",
+-            cwd: "./backend",
+-            env: {
+-                NODE_ENV: "production",
+-                PORT: "3001",
+-                // Pensez ├á configurer vos credentials Hostinger DB en Prod
+-                DB_HOST: "localhost",
+-                DB_PORT: "5432",
+-                DB_USER: "votre_utilisateur",
+-                DB_PASS: "votre_mot_de_passe",
+-                DB_NAME: "votre_base_de_donnees"
+-            },
+-            watch: false,
+-            autorestart: true,
+-            max_memory_restart: "300M"
+-        }
+-    ]
+-};
+diff --git a/vps_output_2.txt b/vps_output_2.txt
+deleted file mode 100644
+index d79efd9..0000000
+--- a/vps_output_2.txt
++++ /dev/null
+@@ -1,3 +0,0 @@
+-==== TENTATIVE DE CONNEXION LOCALE ====
+-\n\n==== PM2 LOGS ====
+-[TAILING] Tailing last 200 lines for [gtb-backend] process (change the value with --lines option)
+diff --git a/vps_output_20.txt b/vps_output_20.txt
+deleted file mode 100644
+index a66f163..0000000
+--- a/vps_output_20.txt
++++ /dev/null
+@@ -1,63 +0,0 @@
+-==== CONFIGURATION DE NGINX ====
+-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+-nginx: configuration file /etc/nginx/nginx.conf test is successful
+-\n==== MISE A JOUR DU FRONTEND ====
+-
+-> frontend@0.1.0 build
+-> next build
+-
+-ÔÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+- We detected multiple lockfiles and selected the directory of /opt/gravity-lab/package-lock.json as the root directory.
+- To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+- Detected additional lockfiles: 
+-   * /opt/gravity-lab/smart-building/frontend/package-lock.json
+-
+-Ôû▓ Next.js 16.1.6 (Turbopack)
+-- Environments: .env.production
+-
+-  Creating an optimized production build ...
+-Ô£ô Compiled successfully in 24.4s
+-  Running TypeScript ...
+-  Collecting page data using 1 worker ...
+-  Generating static pages using 1 worker (0/18) ...
+-  Generating static pages using 1 worker (4/18) 
+-  Generating static pages using 1 worker (8/18) 
+-  Generating static pages using 1 worker (13/18) 
+-Ô£ô Generating static pages using 1 worker (18/18) in 417.3ms
+-  Finalizing page optimization ...
+-
+-Route (app)
+-Ôöî Ôùï /
+-Ôö£ Ôùï /_not-found
+-Ôö£ Ôùï /alerts
+-Ôö£ Ôùï /billing
+-Ôö£ Ôùï /clients
+-Ôö£ ãÆ /clients/[id]
+-Ôö£ Ôùï /energy
+-Ôö£ Ôùï /license
+-Ôö£ Ôùï /login
+-Ôö£ Ôùï /maintenance
+-Ôö£ Ôùï /map
+-Ôö£ Ôùï /network
+-Ôö£ Ôùï /onboarding
+-Ôö£ Ôùï /rules
+-Ôö£ Ôùï /settings
+-Ôö£ Ôùï /sites
+-Ôö£ ãÆ /sites/[id]
+-Ôöö Ôùï /updates
+-
+-
+-Ôùï  (Static)   prerendered as static content
+-ãÆ  (Dynamic)  server-rendered on demand
+-
+-\n==== REDEMARRAGE DE PM2 ====
+-Use --update-env to update environment variables
+-[PM2] Applying action restartProcessId on app [gtb-frontend](ids: [ 0 ])
+-[PM2] [gtb-frontend](0) Ô£ô
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 39503    Ôöé 22m    Ôöé 115  Ôöé online    Ôöé 0%       Ôöé 81.7mb   Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 41366    Ôöé 0s     Ôöé 2    Ôöé online    Ôöé 0%       Ôöé 17.5mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+diff --git a/vps_output_21.txt b/vps_output_21.txt
+deleted file mode 100644
+index ddcfefb..0000000
+--- a/vps_output_21.txt
++++ /dev/null
+@@ -1,91 +0,0 @@
+-==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
+-HEAD is now at b982f3e fix(seed): add manager and ubbee client to default seeds
+-From https://github.com/yactao/gravity-lab
+-   b982f3e..442dc2a  main       -> origin/main
+-Updating b982f3e..442dc2a
+-Fast-forward
+- smart-building/fix_urls.js                         | 45 ++++++++++++++++++++++
+- smart-building/frontend/src/app/energy/page.tsx    |  2 +-
+- smart-building/frontend/src/app/layout.tsx         | 14 +++----
+- smart-building/frontend/src/app/map/page.tsx       |  2 +-
+- smart-building/frontend/src/app/page.tsx           |  2 +-
+- .../frontend/src/app/sites/[id]/page.tsx           |  2 +-
+- .../src/components/layout/ClientLayoutWrapper.tsx  | 26 +++++++++++++
+- smart-building/frontend/src/lib/TenantContext.tsx  | 17 ++++----
+- 8 files changed, 88 insertions(+), 22 deletions(-)
+- create mode 100644 smart-building/fix_urls.js
+- create mode 100644 smart-building/frontend/src/components/layout/ClientLayoutWrapper.tsx
+-\n==== RECOMPILATION FRONTEND ====
+-npm warn EBADENGINE Unsupported engine {
+-npm warn EBADENGINE   package: 'camera-controls@3.1.2',
+-npm warn EBADENGINE   required: { node: '>=22.0.0', npm: '>=10.5.1' },
+-npm warn EBADENGINE   current: { node: 'v20.20.0', npm: '10.8.2' }
+-npm warn EBADENGINE }
+-
+-added 479 packages, and audited 480 packages in 20s
+-
+-154 packages are looking for funding
+-  run `npm fund` for details
+-
+-15 vulnerabilities (1 moderate, 14 high)
+-
+-To address issues that do not require attention, run:
+-  npm audit fix
+-
+-To address all issues (including breaking changes), run:
+-  npm audit fix --force
+-
+-Run `npm audit` for details.
+-
+-> frontend@0.1.0 build
+-> next build
+-
+-ÔÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+- We detected multiple lockfiles and selected the directory of /opt/gravity-lab/package-lock.json as the root directory.
+- To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+- Detected additional lockfiles: 
+-   * /opt/gravity-lab/smart-building/frontend/package-lock.json
+-
+-Ôû▓ Next.js 16.1.6 (Turbopack)
+-- Environments: .env.production
+-
+-  Creating an optimized production build ...
+-Ô£ô Compiled successfully in 17.8s
+-  Running TypeScript ...
+-  Collecting page data using 1 worker ...
+-  Generating static pages using 1 worker (0/18) ...
+-  Generating static pages using 1 worker (4/18) 
+-  Generating static pages using 1 worker (8/18) 
+-  Generating static pages using 1 worker (13/18) 
+-Ô£ô Generating static pages using 1 worker (18/18) in 503.4ms
+-  Finalizing page optimization ...
+-
+-Route (app)
+-Ôöî Ôùï /
+-Ôö£ Ôùï /_not-found
+-Ôö£ Ôùï /alerts
+-Ôö£ Ôùï /billing
+-Ôö£ Ôùï /clients
+-Ôö£ ãÆ /clients/[id]
+-Ôö£ Ôùï /energy
+-Ôö£ Ôùï /license
+-Ôö£ Ôùï /login
+-Ôö£ Ôùï /maintenance
+-Ôö£ Ôùï /map
+-Ôö£ Ôùï /network
+-Ôö£ Ôùï /onboarding
+-Ôö£ Ôùï /rules
+-Ôö£ Ôùï /settings
+-Ôö£ Ôùï /sites
+-Ôö£ ãÆ /sites/[id]
+-Ôöö Ôùï /updates
+-
+-
+-Ôùï  (Static)   prerendered as static content
+-ãÆ  (Dynamic)  server-rendered on demand
+-
+-\n==== REDEMARRAGE DE PM2 FRONTEND ====
+-Use --update-env to update environment variables
+-[PM2] Applying action reloadProcessId on app [gtb-frontend](ids: [ 0 ])
+-[PM2] [gtb-frontend](0) Ô£ô
+diff --git a/vps_output_22.txt b/vps_output_22.txt
+deleted file mode 100644
+index deeeab0..0000000
+--- a/vps_output_22.txt
++++ /dev/null
+@@ -1,29 +0,0 @@
+-==== MISE A JOUR NGINX ==== 
+-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+-nginx: configuration file /etc/nginx/nginx.conf test is successful
+-ÔùÅ nginx.service - A high performance web server and a reverse proxy server
+-     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+-     Active: active (running) since Mon 2026-02-23 12:05:04 UTC; 2h 5min ago
+-       Docs: man:nginx(8)
+-    Process: 40804 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+-    Process: 40806 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+-    Process: 44004 ExecReload=/usr/sbin/nginx -g daemon on; master_process on; -s reload (code=exited, status=0/SUCCESS)
+-   Main PID: 40807 (nginx)
+-      Tasks: 3 (limit: 9483)
+-     Memory: 3.3M (peak: 4.4M)
+-        CPU: 981ms
+-     CGroup: /system.slice/nginx.service
+-             Ôö£ÔöÇ40807 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+-             Ôö£ÔöÇ41249 "nginx: worker process"
+-             Ôö£ÔöÇ41252 "nginx: worker process"
+-             Ôö£ÔöÇ44006 "nginx: worker process"
+-             ÔööÔöÇ44007 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+-
+-Feb 23 12:05:04 srv1411776 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+-Feb 23 12:05:04 srv1411776 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+-Feb 23 12:20:17 srv1411776 systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+-Feb 23 12:20:17 srv1411776 nginx[41248]: 2026/02/23 12:20:17 [notice] 41248#41248: signal process started
+-Feb 23 12:20:17 srv1411776 systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+-Feb 23 14:10:16 srv1411776 systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+-Feb 23 14:10:16 srv1411776 nginx[44004]: 2026/02/23 14:10:16 [notice] 44004#44004: signal process started
+-Feb 23 14:10:16 srv1411776 systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+diff --git a/vps_output_23.txt b/vps_output_23.txt
+deleted file mode 100644
+index ef72a45..0000000
+--- a/vps_output_23.txt
++++ /dev/null
+@@ -1,59 +0,0 @@
+-==== PM2 LOGS (15 DERNIERES LIGNES) ====
+-[TAILING] Tailing last 15 lines for [gtb-backend] process (change the value with --lines option)
+-/root/.pm2/logs/gtb-backend-error.log last 15 lines:
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-1|gtb-back | ÔÜá´©Å No sensors found to simulate data for.
+-
+-/root/.pm2/logs/gtb-backend-out.log last 15 lines:
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/global, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/temperature/average, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/alerts, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/hvac-performance, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | ­ƒÜÇ Starting Internal Simulation Service...
+-1|gtb-back | ÔÜí Adding missing Energy Sensor for V4 Dashboard...
+-1|gtb-back | [32m[Nest] 45522  - [39m02/23/2026, 2:33:25 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +15ms[39m
+-
+-\n==== TEST DIRECT DE L'API /api/sites EN LOCAL ====
+-Token r├®cup├®r├® : ...
+-*   Trying 127.0.0.1:3001...
+-* Connected to 127.0.0.1 (127.0.0.1) port 3001
+-> GET /api/sites HTTP/1.1
+-> Host: 127.0.0.1:3001
+-> User-Agent: curl/8.5.0
+-> Accept: */*
+-> Authorization: Bearer 
+-> x-user-role: ENERGY_MANAGER
+-> 
+-{"message":"Unauthorized","statusCode":401}< HTTP/1.1 401 Unauthorized
+-< X-Powered-By: Express
+-< Access-Control-Allow-Origin: *
+-< Content-Type: application/json; charset=utf-8
+-< Content-Length: 43
+-< ETag: W/"2b-dGnJzt6gv1nJjX6DJ9RztDWptng"
+-< Date: Mon, 23 Feb 2026 14:34:19 GMT
+-< Connection: keep-alive
+-< Keep-Alive: timeout=5
+-< 
+-{ [43 bytes data]
+-* Connection #0 to host 127.0.0.1 left intact
+diff --git a/vps_output_24.txt b/vps_output_24.txt
+deleted file mode 100644
+index db03977..0000000
+--- a/vps_output_24.txt
++++ /dev/null
+@@ -1,43 +0,0 @@
+-==== VERIFICATION DB SQLITE ====
+---- ORGANIZATIONS ---
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé id                                     Ôöé name              Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 0       Ôöé '11111111-1111-1111-1111-111111111111' Ôöé 'UBBEE'           Ôöé
+-Ôöé 1       Ôöé '22222222-2222-2222-2222-222222222222' Ôöé 'CASA'            Ôöé
+-Ôöé 2       Ôöé '33333333-3333-3333-3333-333333333333' Ôöé 'Leroy Merlin'    Ôöé
+-Ôöé 3       Ôöé '44444444-4444-4444-4444-444444444444' Ôöé 'Maison du Monde' Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+---- SITES ---
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé id                                     Ôöé name                 Ôöé organizationId                         Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 0       Ôöé '33ee182a-f082-4d64-a757-f2662bb709ee' Ôöé 'Si├¿ge Social UBBEE' Ôöé '11111111-1111-1111-1111-111111111111' Ôöé
+-Ôöé 1       Ôöé '972f9dad-1ab0-4269-afea-a6d2375d7438' Ôöé 'Casa Rivoli'        Ôöé '22222222-2222-2222-2222-222222222222' Ôöé
+-Ôöé 2       Ôöé 'fe2f1dbc-490e-474c-b60b-5a8b8552e695' Ôöé 'Casa Bordeaux'      Ôöé '22222222-2222-2222-2222-222222222222' Ôöé
+-Ôöé 3       Ôöé '32951ca4-4958-4f51-b56c-57b5671d860e' Ôöé 'Casa Lyon'          Ôöé '22222222-2222-2222-2222-222222222222' Ôöé
+-Ôöé 4       Ôöé '54459f49-ddcc-4503-a5f5-e348ade9b93c' Ôöé 'LM Massy'           Ôöé '33333333-3333-3333-3333-333333333333' Ôöé
+-Ôöé 5       Ôöé 'e81680e8-ba84-4485-9531-3d9aa5425273' Ôöé 'LM Daumesnil'       Ôöé '33333333-3333-3333-3333-333333333333' Ôöé
+-Ôöé 6       Ôöé '6a00267c-a9b8-4195-be52-83abdeac81c8' Ôöé 'LM Logistique'      Ôöé '33333333-3333-3333-3333-333333333333' Ôöé
+-Ôöé 7       Ôöé 'f458fc83-da2f-46d0-aa2d-44aff2fd731b' Ôöé 'MDM Nantes'         Ôöé '44444444-4444-4444-4444-444444444444' Ôöé
+-Ôöé 8       Ôöé '20bcc208-9848-499d-90b6-1006d69205d9' Ôöé 'MDM Champs'         Ôöé '44444444-4444-4444-4444-444444444444' Ôöé
+-Ôöé 9       Ôöé '7b09876b-0fae-4df3-a4c1-0ba168f514fc' Ôöé 'MDM Entrep├┤t'       Ôöé '44444444-4444-4444-4444-444444444444' Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+---- USERS ---
+-/opt/gravity-lab/smart-building/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5
+-	return this[cppdb].prepare(sql, this, false);
+-	                   ^
+-
+-SqliteError: no such table: user
+-    at Database.prepare (/opt/gravity-lab/smart-building/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)
+-    at [eval]:12:18
+-    at runScriptInThisContext (node:internal/vm:209:10)
+-    at node:internal/process/execution:118:14
+-    at [eval]-wrapper:6:24
+-    at runScript (node:internal/process/execution:101:62)
+-    at evalScript (node:internal/process/execution:133:3)
+-    at node:internal/main/eval_string:51:3 {
+-  code: 'SQLITE_ERROR'
+-}
+-
+-Node.js v20.20.0
+diff --git a/vps_output_25.txt b/vps_output_25.txt
+deleted file mode 100644
+index f0bb319..0000000
+--- a/vps_output_25.txt
++++ /dev/null
+@@ -1,7 +0,0 @@
+-==== TEST TYPEORM FIND ====
+--> TEST 1: organization: { id }
+-Test 1 count: 1
+--> TEST 2: organizationId direct
+-Test 2 count: 1
+--> TEST 3: all sites without where
+-Total sites: 10
+diff --git a/vps_output_26.txt b/vps_output_26.txt
+deleted file mode 100644
+index 6ea32ff..0000000
+--- a/vps_output_26.txt
++++ /dev/null
+@@ -1,14 +0,0 @@
+-==== PULL DES NOUVEAUX FICHIERS BACKEND ====
+-From https://github.com/yactao/gravity-lab
+-   6bdbe53..a722ff6  main       -> origin/main
+-HEAD is now at a722ff6 feat(clients): add gateways count and display all clients for global context
+-Already up to date.
+-\n==== RECOMPILATION BACKEND ====
+-
+-> backend@0.0.1 build
+-> nest build
+-
+-\n==== REDEMARRAGE DE PM2 BACKEND ====
+-Use --update-env to update environment variables
+-[PM2] Applying action reloadProcessId on app [gtb-backend](ids: [ 1 ])
+-[PM2] [gtb-backend](1) Ô£ô
+diff --git a/vps_output_27.txt b/vps_output_27.txt
+deleted file mode 100644
+index 80bd380..0000000
+--- a/vps_output_27.txt
++++ /dev/null
+@@ -1,27 +0,0 @@
+-Login OK, OrgID: 11111111-1111-1111-1111-111111111111
+-SITES FETCHED: [
+-  {
+-    "id": "53b26874-512f-4db6-b24e-854f0d381822",
+-    "name": "Si├¿ge Social UBBEE",
+-    "type": "Bureaux",
+-    "address": "15 Avenue des Champs-├ëlys├®es",
+-    "city": "Paris",
+-    "latitude": 48.8708,
+-    "longitude": 2.3051,
+-    "zones": [
+-      {
+-        "id": "178209ab-64bd-4cf7-974e-426786610c15",
+-        "name": "Accueil",
+-        "type": "Hall",
+-        "floor": "RDC"
+-      },
+-      {
+-        "id": "fd66615e-4580-4399-866d-30def5da1613",
+-        "name": "Open Space",
+-        "type": "Office",
+-        "floor": "R+1"
+-      }
+-    ],
+-    "organizationId": "11111111-1111-1111-1111-111111111111"
+-  }
+-]
+diff --git a/vps_output_28.txt b/vps_output_28.txt
+deleted file mode 100644
+index 5aee9b4..0000000
+--- a/vps_output_28.txt
++++ /dev/null
+@@ -1,7 +0,0 @@
+---- USERS ---
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé (index) Ôöé id                                     Ôöé email            Ôöé role          Ôöé password   Ôöé organizationId                         Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 0       Ôöé '636a666a-1067-4d6b-bd45-09ff9c1de4e7' Ôöé 'admin@ubbee.fr' Ôöé 'SUPER_ADMIN' Ôöé 'admin'    Ôöé '11111111-1111-1111-1111-111111111111' Ôöé
+-Ôöé 1       Ôöé 'c48e350a-a540-4d00-b547-e03de59207b6' Ôöé 'client@casa.fr' Ôöé 'CLIENT'      Ôöé 'password' Ôöé '22222222-2222-2222-2222-222222222222' Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+diff --git a/vps_output_29.txt b/vps_output_29.txt
+deleted file mode 100644
+index 1556bc1..0000000
+--- a/vps_output_29.txt
++++ /dev/null
+@@ -1,65 +0,0 @@
+-==== RESET DE LA BASE SQLITE ====
+-[PM2] Applying action stopProcessId on app [gtb-backend](ids: [ 1 ])
+-[PM2] [gtb-backend](1) Ô£ô
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 0        Ôöé 0      Ôöé 118  Ôöé stopped   Ôöé 0%       Ôöé 0b       Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 49417    Ôöé 17m    Ôöé 7    Ôöé online    Ôöé 0%       Ôöé 57.3mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-Base supprim├®e. Red├®marrage de PM2...
+-[PM2] Applying action restartProcessId on app [gtb-backend](ids: [ 1 ])
+-[PM2] [gtb-backend](1) Ô£ô
+-[PM2] Process successfully started
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 50011    Ôöé 0s     Ôöé 118  Ôöé online    Ôöé 0%       Ôöé 18.3mb   Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 49417    Ôöé 17m    Ôöé 7    Ôöé online    Ôöé 0%       Ôöé 57.3mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-Attente de 5 secondes pour le seeding...
+-[TAILING] Tailing last 20 lines for [gtb-backend] process (change the value with --lines option)
+-/root/.pm2/logs/gtb-backend-error.log last 20 lines:
+-1|gtb-back |     at async Timeout._onTimeout (/opt/gravity-lab/smart-building/backend/dist/src/simulation.service.js:53:17) {
+-1|gtb-back |   query: 'INSERT INTO "reading"("id", "value", "timestamp", "sensorId") VALUES (?, 12.37, ?, ?)',
+-1|gtb-back |   parameters: [
+-1|gtb-back |     'bd7fe41e-5eca-4df3-a828-4b1ea40d9940',
+-1|gtb-back |     '2026-02-23 17:13:01.444',
+-1|gtb-back |     '7d6d4b2f-4bcf-4dfd-815b-da1cfd57eafc'
+-1|gtb-back |   ],
+-1|gtb-back |   driverError: SqliteError: attempt to write a readonly database
+-1|gtb-back |       at BetterSqlite3QueryRunner.query (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/driver/better-sqlite3/BetterSqlite3QueryRunner.js:90:34)
+-1|gtb-back |       at async InsertQueryBuilder.execute (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/query-builder/InsertQueryBuilder.js:106:33)
+-1|gtb-back |       at async SubjectExecutor.executeInsertOperations (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/persistence/SubjectExecutor.js:260:42)
+-1|gtb-back |       at async SubjectExecutor.execute (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/persistence/SubjectExecutor.js:92:9)
+-1|gtb-back |       at async EntityPersistExecutor.execute (/opt/gravity-lab/smart-building/backend/node_modules/typeorm/persistence/EntityPersistExecutor.js:140:21)
+-1|gtb-back |       at async Timeout._onTimeout (/opt/gravity-lab/smart-building/backend/dist/src/simulation.service.js:53:17) {
+-1|gtb-back |     code: 'SQLITE_READONLY_DBMOVED'
+-1|gtb-back |   },
+-1|gtb-back |   code: 'SQLITE_READONLY_DBMOVED'
+-1|gtb-back | }
+-1|gtb-back | 
+-1|gtb-back | Node.js v20.20.0
+-
+-/root/.pm2/logs/gtb-backend-out.log last 20 lines:
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/gateways, POST} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/readings, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/global, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/temperature/average, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/alerts, GET} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/energy/hvac-performance, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/rules, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/iot/webhook, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/search, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiController {/api/ai}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/ai/generate-rule, POST} route[39m[38;5;3m +1ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/me, GET} route[39m[38;5;3m +0ms[39m
+-1|gtb-back | ­ƒÜÇ Starting Internal Simulation Service...
+-1|gtb-back | ­ƒî▒ Seeding initial V2 data (Organizations, Users, Sites)...
+-1|gtb-back | Ô£à Database seeded with Multi-Tenant structure!
+-1|gtb-back | [32m[Nest] 50011  - [39m02/23/2026, 5:30:54 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +61ms[39m
+-1|gtb-back | [WebSocket] Client connected: HPwXrbbGgtnCNnzTAAAB
+-
+diff --git a/vps_output_3.txt b/vps_output_3.txt
+deleted file mode 100644
+index 4ef5468..0000000
+--- a/vps_output_3.txt
++++ /dev/null
+@@ -1,2 +0,0 @@
+-==== PM2 ERROR LOG ====
+-\n==== PM2 OUT LOG ====
+diff --git a/vps_output_30.txt b/vps_output_30.txt
+deleted file mode 100644
+index a2d02c4..0000000
+--- a/vps_output_30.txt
++++ /dev/null
+@@ -1,86 +0,0 @@
+-==== PULL DES NOUVEAUX FICHIERS FRONTEND ====
+-From https://github.com/yactao/gravity-lab
+-   31ca5d2..59faed4  main       -> origin/main
+-warning: unable to rmdir 'superpowers': Directory not empty
+-HEAD is now at 59faed4 feat(ui): merge inventory into network dashboard and fix clients visibility
+-Already up to date.
+-\n==== RECOMPILATION FRONTEND ====
+-npm warn EBADENGINE Unsupported engine {
+-npm warn EBADENGINE   package: 'camera-controls@3.1.2',
+-npm warn EBADENGINE   required: { node: '>=22.0.0', npm: '>=10.5.1' },
+-npm warn EBADENGINE   current: { node: 'v20.20.0', npm: '10.8.2' }
+-npm warn EBADENGINE }
+-
+-up to date, audited 563 packages in 3s
+-
+-220 packages are looking for funding
+-  run `npm fund` for details
+-
+-2 vulnerabilities (1 moderate, 1 high)
+-
+-To address all issues, run:
+-  npm audit fix
+-
+-Run `npm audit` for details.
+-npm notice
+-npm notice New major version of npm available! 10.8.2 -> 11.11.0
+-npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+-npm notice To update run: npm install -g npm@11.11.0
+-npm notice
+-
+-> frontend@0.1.0 build
+-> next build
+-
+-ÔÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+- We detected multiple lockfiles and selected the directory of /opt/gravity-lab/package-lock.json as the root directory.
+- To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+- Detected additional lockfiles: 
+-   * /opt/gravity-lab/smart-building/frontend/package-lock.json
+-
+-Ôû▓ Next.js 16.1.6 (Turbopack)
+-- Environments: .env.production
+-
+-  Creating an optimized production build ...
+-Ô£ô Compiled successfully in 27.1s
+-  Running TypeScript ...
+-  Collecting page data using 1 worker ...
+-  Generating static pages using 1 worker (0/22) ...
+-  Generating static pages using 1 worker (5/22) 
+-  Generating static pages using 1 worker (10/22) 
+-  Generating static pages using 1 worker (16/22) 
+-Ô£ô Generating static pages using 1 worker (22/22) in 526.2ms
+-  Finalizing page optimization ...
+-
+-Route (app)
+-Ôöî Ôùï /
+-Ôö£ Ôùï /_not-found
+-Ôö£ Ôùï /admin/integrations/mapping
+-Ôö£ Ôùï /alerts
+-Ôö£ Ôùï /billing
+-Ôö£ Ôùï /clients
+-Ôö£ ãÆ /clients/[id]
+-Ôö£ Ôùï /energy
+-Ôö£ Ôùï /license
+-Ôö£ Ôùï /login
+-Ôö£ Ôùï /maintenance
+-Ôö£ Ôùï /map
+-Ôö£ Ôùï /network
+-Ôö£ Ôùï /network/console
+-Ôö£ Ôùï /network/system-health
+-Ôö£ Ôùï /onboarding
+-Ôö£ Ôùï /rules
+-Ôö£ Ôùï /settings
+-Ôö£ Ôùï /sites
+-Ôö£ ãÆ /sites/[id]
+-Ôö£ Ôùï /updates
+-Ôöö Ôùï /welcome
+-
+-
+-Ôùï  (Static)   prerendered as static content
+-ãÆ  (Dynamic)  server-rendered on demand
+-
+-\n==== REDEMARRAGE DE PM2 FRONTEND ====
+-Use --update-env to update environment variables
+-[PM2] Applying action reloadProcessId on app [gtb-frontend](ids: [ 0 ])
+-[PM2] [gtb-frontend](0) Ô£ô
+diff --git a/vps_output_4.txt b/vps_output_4.txt
+deleted file mode 100644
+index c2e44cb..0000000
+--- a/vps_output_4.txt
++++ /dev/null
+@@ -1,2 +0,0 @@
+-==== TENTATIVE DE CONNEXION LOCALE ====
+-RESULTAT: 
+diff --git a/vps_output_5.txt b/vps_output_5.txt
+deleted file mode 100644
+index 0b87777..0000000
+--- a/vps_output_5.txt
++++ /dev/null
+@@ -1,13 +0,0 @@
+-==== NETSTAT ====
+-\n==== PM2 STATUS ====
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name      Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-\n==== PM2 DESCRIBE BACKEND ====
+-[PM2][WARN] gtb-backend doesn't exist
+-\n==== REQUEST TO API ====
+-*   Trying 127.0.0.1:3001...
+-* connect to 127.0.0.1 port 3001 from 127.0.0.1 port 56448 failed: Connection refused
+-* Failed to connect to 127.0.0.1 port 3001 after 0 ms: Couldn't connect to server
+-* Closing connection
+-\n==== REQUEST TO FRONTEND ====
+diff --git a/vps_output_6.txt b/vps_output_6.txt
+deleted file mode 100644
+index d636bb3..0000000
+--- a/vps_output_6.txt
++++ /dev/null
+@@ -1,24 +0,0 @@
+-==== STARTING IN PM2 ====
+-[PM2][ERROR] File ecosystem.config.js malformated
+-ReferenceError: module is not defined in ES module scope
+-This file is being treated as an ES module because it has a '.js' file extension and '/opt/gravity-lab/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+-    at file:///opt/gravity-lab/smart-building/ecosystem.config.js:1:1
+-    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:437:37)
+-    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:389:47)
+-    at loadESMFromCJS (node:internal/modules/cjs/loader:1363:24)
+-    at Module._compile (node:internal/modules/cjs/loader:1503:5)
+-    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+-    at Module.load (node:internal/modules/cjs/loader:1266:32)
+-    at Module._load (node:internal/modules/cjs/loader:1091:12)
+-    at Module.require (node:internal/modules/cjs/loader:1289:19)
+-    at require (node:internal/modules/helpers:182:18)
+-[PM2] Saving current process list...
+-[PM2][WARN] PM2 is not managing any process, skipping save...
+-[PM2][WARN] To force saving use: pm2 save --force
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name      Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-\n==== PM2 LOGS FRONTEND ====
+-[TAILING] Tailing last 20 lines for [gtb-frontend] process (change the value with --lines option)
+-\n==== PM2 LOGS BACKEND ====
+-[TAILING] Tailing last 20 lines for [gtb-backend] process (change the value with --lines option)
+diff --git a/vps_output_7.txt b/vps_output_7.txt
+deleted file mode 100644
+index 6cd8101..0000000
+--- a/vps_output_7.txt
++++ /dev/null
+@@ -1,48 +0,0 @@
+-From https://github.com/yactao/gravity-lab
+-   26768b0..ad1a96e  main       -> origin/main
+-HEAD is now at ad1a96e fix: rename ecosystem.config to .cjs for esm compat
+-==== STARTING PM2 ====
+-[PM2][WARN] Applications gtb-frontend, gtb-backend not running, starting...
+-[PM2][WARN] Environment [production] is not defined in process file
+-[PM2][WARN] Environment [production] is not defined in process file
+-[PM2] App [gtb-frontend] launched (1 instances)
+-[PM2] App [gtb-backend] launched (1 instances)
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 36927    Ôöé 0      Ôöé 1    Ôöé stopped   Ôöé 0%       Ôöé 0b       Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 36921    Ôöé 0s     Ôöé 0    Ôöé online    Ôöé 0%       Ôöé 46.7mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-[PM2] Saving current process list...
+-[PM2] Successfully saved in /root/.pm2/dump.pm2
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 36999    Ôöé 0s     Ôöé 7    Ôöé online    Ôöé 0%       Ôöé 28.1mb   Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 36921    Ôöé 0s     Ôöé 0    Ôöé online    Ôöé 0%       Ôöé 58.3mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-==== LOGS BACKEND ====
+-[TAILING] Tailing last 20 lines for [gtb-backend] process (change the value with --lines option)
+-/root/.pm2/logs/gtb-backend-out.log last 20 lines:
+-/root/.pm2/logs/gtb-backend-error.log last 20 lines:
+-1|gtb-back |     at node:internal/main/run_main_module:28:49 {
+-1|gtb-back |   code: 'MODULE_NOT_FOUND',
+-1|gtb-back |   requireStack: []
+-1|gtb-back | }
+-1|gtb-back | 
+-1|gtb-back | Node.js v20.20.0
+-1|gtb-back | node:internal/modules/cjs/loader:1210
+-1|gtb-back |   throw err;
+-1|gtb-back |   ^
+-1|gtb-back | 
+-1|gtb-back | Error: Cannot find module '/opt/gravity-lab/smart-building/backend/dist/main.js'
+-1|gtb-back |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+-1|gtb-back |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+-1|gtb-back |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+-1|gtb-back |     at node:internal/main/run_main_module:28:49 {
+-1|gtb-back |   code: 'MODULE_NOT_FOUND',
+-1|gtb-back |   requireStack: []
+-1|gtb-back | }
+-1|gtb-back | 
+-1|gtb-back | Node.js v20.20.0
+-
+diff --git a/vps_output_8.txt b/vps_output_8.txt
+deleted file mode 100644
+index 20974c9..0000000
+--- a/vps_output_8.txt
++++ /dev/null
+@@ -1,20 +0,0 @@
+-dist:
+-check-db.d.ts
+-check-db.js
+-check-db.js.map
+-seed.d.ts
+-seed.js
+-seed.js.map
+-src
+-tsconfig.build.tsbuildinfo
+-
+-dist/src:
+-ai
+-app.controller.d.ts
+-app.controller.js
+-app.controller.js.map
+-app.module.d.ts
+-app.module.js
+-app.module.js.map
+-app.service.d.ts
+-app.service.js
+diff --git a/vps_output_9.txt b/vps_output_9.txt
+deleted file mode 100644
+index 13c3d32..0000000
+--- a/vps_output_9.txt
++++ /dev/null
+@@ -1,73 +0,0 @@
+-From https://github.com/yactao/gravity-lab
+-   ad1a96e..0a73778  main       -> origin/main
+-HEAD is now at 0a73778 fix(pm2): point to correct nestjs main file in dist/src/main.js
+-==== STARTING PM2 ====
+-[PM2][WARN] Environment [production] is not defined in process file
+-[PM2][WARN] Environment [production] is not defined in process file
+-[PM2] Applying action restartProcessId on app [gtb-frontend](ids: [ 0 ])
+-[PM2] Applying action restartProcessId on app [gtb-backend](ids: [ 1 ])
+-[PM2] [gtb-backend](1) Ô£ô
+-[PM2] [gtb-frontend](0) Ô£ô
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 37449    Ôöé 0s     Ôöé 15   Ôöé online    Ôöé 0%       Ôöé 56.8mb   Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 37458    Ôöé 0s     Ôöé 1    Ôöé online    Ôöé 0%       Ôöé 19.1mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-[PM2] Saving current process list...
+-[PM2] Successfully saved in /root/.pm2/dump.pm2
+-==== STATUS ==================
+-ÔöîÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö¼ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+-Ôöé id Ôöé name            Ôöé namespace   Ôöé version Ôöé mode    Ôöé pid      Ôöé uptime Ôöé Ôå║    Ôöé status    Ôöé cpu      Ôöé mem      Ôöé user     Ôöé watching Ôöé
+-Ôö£ÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö╝ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöñ
+-Ôöé 1  Ôöé gtb-backend     Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 37449    Ôöé 0s     Ôöé 15   Ôöé online    Ôöé 0%       Ôöé 62.6mb   Ôöé root     Ôöé disabled Ôöé
+-Ôöé 0  Ôöé gtb-frontend    Ôöé default     Ôöé 0.39.7  Ôöé fork    Ôöé 37458    Ôöé 0s     Ôöé 1    Ôöé online    Ôöé 0%       Ôöé 60.9mb   Ôöé root     Ôöé disabled Ôöé
+-ÔööÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔö┤ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
+-==== LOGS BACKEND ============
+-[TAILING] Tailing last 20 lines for [gtb-backend] process (change the value with --lines option)
+-/root/.pm2/logs/gtb-backend-out.log last 20 lines:
+-/root/.pm2/logs/gtb-backend-error.log last 20 lines:
+-1|gtb-back |     at node:internal/main/run_main_module:28:49 {
+-1|gtb-back |   code: 'MODULE_NOT_FOUND',
+-1|gtb-back |   requireStack: []
+-1|gtb-back | }
+-1|gtb-back | 
+-1|gtb-back | Node.js v20.20.0
+-1|gtb-back | node:internal/modules/cjs/loader:1210
+-1|gtb-back |   throw err;
+-1|gtb-back |   ^
+-1|gtb-back | 
+-1|gtb-back | Error: Cannot find module '/opt/gravity-lab/smart-building/backend/dist/main.js'
+-1|gtb-back |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+-1|gtb-back |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+-1|gtb-back |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+-1|gtb-back |     at node:internal/main/run_main_module:28:49 {
+-1|gtb-back |   code: 'MODULE_NOT_FOUND',
+-1|gtb-back |   requireStack: []
+-1|gtb-back | }
+-1|gtb-back | 
+-1|gtb-back | Node.js v20.20.0
+-
+-==== REQUEST LOCAL API =======
+-*   Trying 127.0.0.1:3001...
+-* Connected to 127.0.0.1 (127.0.0.1) port 3001
+-> POST /api/auth/login HTTP/1.1
+-> Host: 127.0.0.1:3001
+-> User-Agent: curl/8.5.0
+-> Accept: */*
+-> Content-Type: application/json
+-> Content-Length: 50
+-> 
+-} [50 bytes data]
+-< {"message":"Identifiants incorrects","error":"Unauthorized","statusCode":401}HTTP/1.1 401 Unauthorized
+-< X-Powered-By: Express
+-< Access-Control-Allow-Origin: *
+-< Content-Type: application/json; charset=utf-8
+-< Content-Length: 77
+-< ETag: W/"4d-bq36DAoBx8Hx0sfpeeQILBTIqQU"
+-< Date: Mon, 23 Feb 2026 11:47:23 GMT
+-< Connection: keep-alive
+-< Keep-Alive: timeout=5
+-< 
+-{ [77 bytes data]
+-* Connection #0 to host 127.0.0.1 left intact

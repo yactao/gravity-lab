@@ -19,29 +19,62 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const reading_entity_1 = require("./entities/reading.entity");
 const sensor_entity_1 = require("./entities/sensor.entity");
+const gateway_entity_1 = require("./entities/gateway.entity");
 let MqttService = class MqttService {
     readingRepo;
     sensorRepo;
+    gatewayRepo;
     client;
-    constructor(readingRepo, sensorRepo) {
+    constructor(readingRepo, sensorRepo, gatewayRepo) {
         this.readingRepo = readingRepo;
         this.sensorRepo = sensorRepo;
+        this.gatewayRepo = gatewayRepo;
     }
     onModuleInit() {
         this.client = (0, mqtt_1.connect)('mqtt://localhost:1883');
         this.client.on('connect', () => {
             console.log('✅ Connected to MQTT Broker');
             this.client.subscribe('smartbuilding/+/+/telemetry');
+            this.client.subscribe('ubbee/provisioning/handshake');
         });
         this.client.on('message', async (topic, message) => {
             try {
                 const payload = JSON.parse(message.toString());
-                await this.handleMessage(payload);
+                if (topic === 'ubbee/provisioning/handshake') {
+                    await this.handleHandshake(payload);
+                }
+                else if (topic.endsWith('/telemetry')) {
+                    await this.handleMessage(payload);
+                }
             }
             catch (err) {
-                console.error('❌ Error processing MQTT message:', err);
+                console.error(`❌ Error processing MQTT message on ${topic}:`, err);
             }
         });
+    }
+    async handleHandshake(payload) {
+        const { mac } = payload;
+        if (!mac)
+            return;
+        console.log(`🔌 Handshake reçu pour la MAC: ${mac}`);
+        const gateway = await this.gatewayRepo.findOne({
+            where: { serialNumber: mac },
+            relations: ['site']
+        });
+        if (!gateway) {
+            console.log(`⚠️ U-Bot inconnu (${mac}), handshake refusé.`);
+            return;
+        }
+        gateway.status = 'online';
+        await this.gatewayRepo.save(gateway);
+        const buildingId = gateway.site ? gateway.site.id : 'unknown-building';
+        console.log(`✅ U-Bot reconnu et passé online ! Assigation au site : ${buildingId}`);
+        const configData = {
+            building_id: buildingId,
+            status: 'approved',
+            timestamp: new Date().toISOString()
+        };
+        this.client.publish(`ubbee/provisioning/${mac}/config`, JSON.stringify(configData));
     }
     async handleMessage(payload) {
         const { device_id, data, timestamp } = payload;
@@ -90,7 +123,9 @@ exports.MqttService = MqttService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(reading_entity_1.Reading)),
     __param(1, (0, typeorm_1.InjectRepository)(sensor_entity_1.Sensor)),
+    __param(2, (0, typeorm_1.InjectRepository)(gateway_entity_1.Gateway)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], MqttService);
 //# sourceMappingURL=mqtt.service.js.map
