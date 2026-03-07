@@ -31,6 +31,11 @@ export class User {
     @JoinColumn({ name: 'organizationId' })
     organization: Organization;
 
+    // Added to fix CustomRole relationship
+    @ManyToOne('CustomRole', 'users', { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'customRoleId' })
+    customRole: any; // Using any to avoid circular import if needed, or proper type
+
     @CreateDateColumn()
     createdAt: Date;
 }

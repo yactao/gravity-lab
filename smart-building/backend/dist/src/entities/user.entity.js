@@ -25,6 +25,7 @@ let User = class User {
     password;
     role;
     organization;
+    customRole;
     createdAt;
 };
 exports.User = User;
@@ -56,6 +57,11 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'organizationId' }),
     __metadata("design:type", organization_entity_1.Organization)
 ], User.prototype, "organization", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)('CustomRole', 'users', { nullable: true, onDelete: 'SET NULL' }),
+    (0, typeorm_1.JoinColumn)({ name: 'customRoleId' }),
+    __metadata("design:type", Object)
+], User.prototype, "customRole", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

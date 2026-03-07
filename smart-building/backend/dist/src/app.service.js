@@ -160,7 +160,7 @@ let AppService = class AppService {
     async getSites(orgId) {
         const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
         const where = orgId && !isGlobalContext ? { organizationId: orgId } : {};
-        const sites = await this.siteRepo.find({ where, relations: ['zones'] });
+        const sites = await this.siteRepo.find({ where, relations: ['zones', 'zones.sensors', 'gateways', 'organization'] });
         let activeAlertsQuery = this.alertRepo.createQueryBuilder('alert')
             .leftJoinAndSelect('alert.sensor', 'sensor')
             .leftJoinAndSelect('sensor.zone', 'zone')
@@ -301,11 +301,12 @@ let AppService = class AppService {
         return this.gatewayRepo.find({ where, relations: ['site', 'sensors'] });
     }
     async createGateway(gatewayData) {
-        if (!gatewayData.siteId)
-            throw new Error("siteId is required");
-        const site = await this.siteRepo.findOne({ where: { id: gatewayData.siteId } });
-        if (!site)
-            throw new Error("Site not found");
+        let site = null;
+        if (gatewayData.siteId) {
+            site = await this.siteRepo.findOne({ where: { id: gatewayData.siteId } });
+            if (!site)
+                throw new Error("Site not found");
+        }
         const newGateway = this.gatewayRepo.create({
             ...gatewayData,
             site: site
@@ -466,6 +467,7 @@ let AppService = class AppService {
         const results = [];
         const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111' && (role === 'SUPER_ADMIN' || role === 'ENERGY_MANAGER');
         const sitesQuery = this.siteRepo.createQueryBuilder('site')
+            .leftJoinAndSelect('site.organization', 'organization')
             .where('(site.name LIKE :search OR site.city LIKE :search)', { search: searchStr });
         if (!isGlobalContext)
             sitesQuery.andWhere('site.organizationId = :orgId', { orgId });
@@ -474,7 +476,7 @@ let AppService = class AppService {
             id: s.id,
             type: 'site',
             title: s.name,
-            subtitle: `Bâtiment • ${s.city}`,
+            subtitle: `Bâtiment • ${s.organization?.name || 'Inconnu'} • ${s.city}`,
             url: `/sites/${s.id}`
         }));
         const zonesQuery = this.zoneRepo.createQueryBuilder('zone')

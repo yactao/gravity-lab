@@ -349,9 +349,11 @@ export class AppService implements OnModuleInit {
   }
 
   async createGateway(gatewayData: any) {
-    if (!gatewayData.siteId) throw new Error("siteId is required");
-    const site = await this.siteRepo.findOne({ where: { id: gatewayData.siteId } });
-    if (!site) throw new Error("Site not found");
+    let site = null;
+    if (gatewayData.siteId) {
+      site = await this.siteRepo.findOne({ where: { id: gatewayData.siteId } });
+      if (!site) throw new Error("Site not found");
+    }
 
     const newGateway = this.gatewayRepo.create({
       ...gatewayData,

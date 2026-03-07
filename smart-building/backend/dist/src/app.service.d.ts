@@ -86,6 +86,7 @@ export declare class AppService implements OnModuleInit {
         createdAt: Date;
         users: User[];
         sites: Site[];
+        customRoles: import("./entities/custom-role.entity").CustomRole[];
     }[]>;
     private geocodeAddress;
     createOrganization(orgData: any): Promise<Organization[]>;

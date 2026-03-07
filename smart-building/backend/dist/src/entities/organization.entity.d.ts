@@ -1,5 +1,6 @@
 import { User } from './user.entity';
 import { Site } from './site.entity';
+import { CustomRole } from './custom-role.entity';
 export declare class Organization {
     id: string;
     name: string;
@@ -21,4 +22,5 @@ export declare class Organization {
     createdAt: Date;
     users: User[];
     sites: Site[];
+    customRoles: CustomRole[];
 }

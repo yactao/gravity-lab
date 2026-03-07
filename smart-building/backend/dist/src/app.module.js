@@ -32,6 +32,7 @@ const events_gateway_1 = require("./iot/events.gateway");
 const integrations_controller_1 = require("./integrations.controller");
 const universal_mqtt_listener_service_1 = require("./iot/universal-mqtt-listener.service");
 const copilot_module_1 = require("./copilot/copilot.module");
+const mqtt_service_1 = require("./mqtt.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -52,7 +53,7 @@ exports.AppModule = AppModule = __decorate([
             copilot_module_1.CopilotModule,
         ],
         controllers: [app_controller_1.AppController, integrations_controller_1.IntegrationsController],
-        providers: [app_service_1.AppService, simulation_service_1.SimulationService, rules_engine_service_1.RulesEngineService, payload_formatter_service_1.PayloadFormatterService, events_gateway_1.EventsGateway, universal_mqtt_listener_service_1.UniversalMqttListenerService],
+        providers: [app_service_1.AppService, simulation_service_1.SimulationService, rules_engine_service_1.RulesEngineService, payload_formatter_service_1.PayloadFormatterService, events_gateway_1.EventsGateway, universal_mqtt_listener_service_1.UniversalMqttListenerService, mqtt_service_1.MqttService],
         exports: [app_service_1.AppService],
     })
 ], AppModule);

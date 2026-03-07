@@ -1,0 +1,106 @@
+﻿On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	deleted:    ../analyse_plan.md
+	deleted:    ../plan.png
+	deleted:    ../ssh_auth.cjs
+	deleted:    ../ssh_auth_test.cjs
+	deleted:    ../ssh_build_back.cjs
+	deleted:    ../ssh_build_front.cjs
+	deleted:    ../ssh_check_db.cjs
+	deleted:    ../ssh_check_sites.cjs
+	deleted:    ../ssh_check_sites_node.cjs
+	deleted:    ../ssh_check_users.cjs
+	deleted:    ../ssh_diag_timeout.cjs
+	deleted:    ../ssh_docker_nginx.cjs
+	deleted:    ../ssh_log.cjs
+	deleted:    ../ssh_log2.cjs
+	deleted:    ../ssh_nginx.cjs
+	deleted:    ../ssh_nginx2.cjs
+	deleted:    ../ssh_nginx_fix.cjs
+	deleted:    ../ssh_nginx_socketio.cjs
+	deleted:    ../ssh_reset_db.cjs
+	deleted:    ../ssh_typeorm_test.cjs
+	deleted:    ../vps_output.txt
+	deleted:    ../vps_output_10.txt
+	deleted:    ../vps_output_11.txt
+	deleted:    ../vps_output_13.txt
+	deleted:    ../vps_output_14.txt
+	deleted:    ../vps_output_15.txt
+	deleted:    ../vps_output_16.txt
+	deleted:    ../vps_output_17.txt
+	deleted:    ../vps_output_18.txt
+	deleted:    ../vps_output_19.txt
+	deleted:    ../vps_output_2.txt
+	deleted:    ../vps_output_20.txt
+	deleted:    ../vps_output_21.txt
+	deleted:    ../vps_output_22.txt
+	deleted:    ../vps_output_23.txt
+	deleted:    ../vps_output_24.txt
+	deleted:    ../vps_output_25.txt
+	deleted:    ../vps_output_26.txt
+	deleted:    ../vps_output_27.txt
+	deleted:    ../vps_output_28.txt
+	deleted:    ../vps_output_29.txt
+	deleted:    ../vps_output_3.txt
+	deleted:    ../vps_output_30.txt
+	deleted:    ../vps_output_4.txt
+	deleted:    ../vps_output_5.txt
+	deleted:    ../vps_output_6.txt
+	deleted:    ../vps_output_7.txt
+	deleted:    ../vps_output_8.txt
+	deleted:    ../vps_output_9.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	../.agents/contexts/
+	../Documentation_Complete_UBBEE.html
+	../add_decathlon.cjs
+	../aina-backend/
+	../aurae/
+	../avenir-software-factory/aina-frontend/
+	../avenir-software-factory/aina-saas-orchestrator/
+	../avenir-software-factory/brute_fix.cjs
+	../avenir-software-factory/brute_fix2.cjs
+	../avenir-software-factory/docs/Grande Purge Frugale.txt
+	"../avenir-software-factory/docs/Rapport d'Architecture A\303\257na  Analys.txt"
+	../avenir-software-factory/docs/Smoke Test.txt
+	../avenir-software-factory/errors.txt
+	../avenir-software-factory/fix_assets.cjs
+	../avenir-software-factory/fix_remaining.cjs
+	../avenir-software-factory/get_tsc.cjs
+	../avenir-software-factory/get_vite_err.cjs
+	../avenir-software-factory/mock_imports.cjs
+	../avenir-software-factory/package-lock.json
+	../avenir-software-factory/package.json
+	../avenir-software-factory/patch_chatmsg.cjs
+	../avenir-software-factory/purge.cjs
+	../avenir-software-factory/rewrite_chatmsg.cjs
+	../avenir-software-factory/rewrite_ui.cjs
+	../avenir-software-factory/sandbox/
+	../avenir-software-factory/server.js
+	../avenir-software-factory/transform.cjs
+	../avenir-software-factory/tsc-errors.txt
+	../avenir-software-factory/vite-err.txt
+	../avenir-software-factory/vite_err_utf8.txt
+	../build_back.cjs
+	../build_back.js
+	../check_pm2.cjs
+	../fetch_alerts.cjs
+	../marketing-mcp-server/
+	../pm2_logs.txt
+	../pm2_logs2.txt
+	../seed_clients.cjs
+	temp_diff.txt
+	temp_log.txt
+	temp_status.txt
+	../test-dev-worker.cjs
+	../test_create_site.cjs
+	../test_deepseek.js
+	../tmp_curl.js
+	../tmp_ssh.cjs
+
+no changes added to commit (use "git add" and/or "git commit -a")

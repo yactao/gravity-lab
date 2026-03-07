@@ -11,5 +11,6 @@ export declare class User {
     password: string;
     role: UserRole;
     organization: Organization;
+    customRole: any;
     createdAt: Date;
 }
