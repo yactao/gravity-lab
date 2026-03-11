@@ -1,0 +1,37 @@
+Bienvenue dans les coulisses de la Aïna Avenir Software Factory. Oublie les plateformes IA classiques qui consomment des ressources comme des ogres. Aïna, c'est l'IA de précision, sculptée pour l'efficience et la performance brute.
+
+Voici le concept décortiqué en quatre piliers fondamentaux :
+
+1. La Philosophie : La Frugalité Radicale
+La plupart des logiciels aujourd'hui sont "gras" (trop de bibliothèques, trop d'animations inutiles). Aïna a subi une "Grande Purge Frugale" : nous avons supprimé tout le superflu (GSAP, Framer Motion) pour ne garder que du code natif ultra-léger.
+
+L'Objectif : Une interface qui se charge instantanément et qui consomme le minimum de CPU.
+
+L'IA "Small" : Au lieu d'utiliser systématiquement des modèles géants et coûteux, Aïna privilégie les SLM (Small Language Models) comme Mistral 7B ou DeepSeek pour les tâches quotidiennes.
+
+2. Le Cœur du Réacteur : L'Architecture Événementielle
+Contrairement à un chat classique où tu attends que l'IA réponde, Aïna fonctionne comme une véritable usine avec des chaînes de montage :
+
+L'Orchestrateur : Il reçoit ta demande et décide quel expert appeler.
+
+Le Broker (RabbitMQ) : Il gère les messages dans des files d'attente. Cela permet à l'IA de travailler en arrière-plan sans jamais bloquer ton écran.
+
+Les Workers : Ce sont les "bras" de l'usine. Chaque worker est un spécialiste (Lead Tech, Pentester) qui s'active uniquement quand on a besoin de lui.
+
+3. L'Escouade Antigravity : "Expertise as a Service"
+Dans Aïna, tu ne parles pas à une IA générique, mais à une Core Team d'experts issus du Antigravity Lab :
+
+Core-Coder : Il écrit et optimise ton code.
+
+Core-Reviewer : Il audite la sécurité et traque les failles (Pentest).
+
+Core-Architect : Il s'assure que ton projet est solide et scalable.
+
+La Signature : Pour une transparence totale, chaque réponse est signée : [Agent: Nom] | [Engine: LLM utilisé] (ex: DeepSeek ou Kimi).
+
+4. Le Multi-Tenant : Une Forteresse pour tes Données
+Aïna est conçue nativement pour le Multi-Tenant via Prisma.
+
+Isolation : Que tu travailles sur le projet Aurae, Hubbee ou Aïda, les données et les contextes ne se mélangent jamais.
+
+Flexibilité : On peut changer de "cerveau" de projet en un clic en chargeant un nouveau fichier de contexte (.md), ce qui réinitialise instantanément les priorités de la Core Team.

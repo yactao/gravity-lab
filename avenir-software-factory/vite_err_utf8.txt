@@ -1,0 +1,28 @@
+[36mvite v7.1.3 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 2538 modules transformed.
+
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[31m✗[39m Build failed in 2.37s
+[31merror during build:
+[31msrc/components/chat/ChatMsg.tsx (6:7): "default" is not exported by "src/components/finance/FinanceChart.tsx", imported by "src/components/chat/ChatMsg.tsx".[31m
+file: [36mC:/Users/taouf/Documents/antigravity lab/avenir-software-factory/aina-frontend/src/components/chat/ChatMsg.tsx:6:7[31m
+[33m
+4: import type { Message } from "../../pages/Chat/Chat";
+5: 
+6: import FinanceChartView from "../finance/FinanceChart";
+          ^
+7: import FinanceTable from "../../utils/FinanceTable";
+[31m
+    at getRollupError (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Module.error (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:16915:16)
+    at Module.traceVariable (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:17367:29)
+    at ModuleScope.findVariable (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:15037:39)
+    at FunctionScope.findVariable (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:5626:38)
+    at FunctionBodyScope.findVariable (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:5626:38)
+    at ReturnValueScope.findVariable (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:5626:38)
+    at FunctionBodyScope.findVariable (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:5626:38)
+    at Identifier.bind (file:///C:/Users/taouf/Documents/antigravity%20lab/avenir-software-factory/aina-frontend/node_modules/rollup/dist/es/shared/node-entry.js:5400:40)[39m

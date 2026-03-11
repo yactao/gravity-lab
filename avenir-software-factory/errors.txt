@@ -1,0 +1,52 @@
+src/components/CardNav/CardNav.tsx(44,24): error TS2503: Cannot find namespace 'gsap'.
+src/components/CardNav/CardNav.tsx(85,5): error TS2304: Cannot find name 'gsap'.
+src/components/CardNav/CardNav.tsx(86,5): error TS2304: Cannot find name 'gsap'.
+src/components/CardNav/CardNav.tsx(88,16): error TS2304: Cannot find name 'gsap'.
+src/components/CardNav/CardNav.tsx(117,9): error TS2304: Cannot find name 'gsap'.
+src/components/FeaturesModal/FeaturesModal.tsx(119,39): error TS6133: 'index' is declared but its value is never read.
+src/components/FeaturesModal/FeaturesModal.tsx(135,45): error TS6133: 'index' is declared but its value is never read.
+src/components/finance/FinanceChart.tsx(2,1): error TS6192: All imports in import declaration are unused.
+src/components/finance/FinanceChart.tsx(16,8): error TS2307: Cannot find module 'recharts' or its corresponding type declarations.
+src/components/finance/FinanceChart.tsx(23,7): error TS6133: 'COLORS' is declared but its value is never read.
+src/components/finance/FinanceChart.tsx(63,9): error TS6133: 'seriesLabels' is declared but its value is never read.
+src/components/finance/FinanceChart.tsx(76,11): error TS6133: 'pieData' is declared but its value is never read.
+src/components/finance/VetFinanceTable.tsx(153,18): error TS2304: Cannot find name 'XLSX'.
+src/components/finance/VetFinanceTable.tsx(154,18): error TS2304: Cannot find name 'XLSX'.
+src/components/finance/VetFinanceTable.tsx(155,7): error TS2304: Cannot find name 'XLSX'.
+src/components/finance/VetFinanceTable.tsx(156,7): error TS2304: Cannot find name 'XLSX'.
+src/components/LightRays/LightRays.tsx(86,30): error TS2304: Cannot find name 'Renderer'.
+src/components/LightRays/LightRays.tsx(131,28): error TS2304: Cannot find name 'Renderer'.
+src/components/LightRays/LightRays.tsx(269,28): error TS2304: Cannot find name 'Triangle'.
+src/components/LightRays/LightRays.tsx(270,27): error TS2304: Cannot find name 'Program'.
+src/components/LightRays/LightRays.tsx(275,24): error TS2304: Cannot find name 'Mesh'.
+src/components/PricingSection/PricingSection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/PricingSection/PricingSection.tsx(77,39): error TS6133: 'index' is declared but its value is never read.
+src/components/StorySection/StorySection.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/StorySection/StorySection.tsx(60,57): error TS6133: 'item' is declared but its value is never read.
+src/pages/Home/Home.tsx(269,14): error TS2304: Cannot find name 'modulesInView'.
+src/pages/Home/Home.tsx(288,46): error TS6133: 'deptIndex' is declared but its value is never read.
+src/pages/Home/Home.tsx(305,47): error TS6133: 'index' is declared but its value is never read.
+src/utils/AnimatedPrism.tsx(11,5): error TS6133: 'speed' is declared but its value is never read.
+src/utils/BlurText.tsx(1,10): error TS6133: 'motion' is declared but its value is never read.
+src/utils/BlurText.tsx(1,54): error TS2307: Cannot find module 'motion/react' or its corresponding type declarations.
+src/utils/BlurText.tsx(51,10): error TS6133: 'inView' is declared but its value is never read.
+src/utils/BlurText.tsx(106,15): error TS6133: 'animateKeyframes' is declared but its value is never read.
+src/utils/BlurText.tsx(108,15): error TS6133: 'spanTransition' is declared but its value is never read.
+src/utils/BlurText.tsx(118,13): error TS2322: Type '{ children: (string | false)[]; key: number; onAnimationComplete: (() => void) | undefined; style: { display: "inline-block"; willChange: "transform, filter, opacity"; }; }' is not assignable to type 'DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>'.
+  Property 'onAnimationComplete' does not exist on type 'DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>'.
+src/utils/exportUtils.ts(13,20): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(90,24): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(146,28): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(153,5): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(181,20): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(189,3): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(192,3): error TS2304: Cannot find name 'XLSX'.
+src/utils/exportUtils.ts(195,23): error TS2304: Cannot find name 'XLSX'.
+src/utils/FinanceTable.tsx(210,18): error TS2304: Cannot find name 'XLSX'.
+src/utils/FinanceTable.tsx(211,18): error TS2304: Cannot find name 'XLSX'.
+src/utils/FinanceTable.tsx(212,7): error TS2304: Cannot find name 'XLSX'.
+src/utils/FinanceTable.tsx(213,7): error TS2304: Cannot find name 'XLSX'.
+src/utils/JsonTable.tsx(64,16): error TS2304: Cannot find name 'XLSX'.
+src/utils/JsonTable.tsx(65,16): error TS2304: Cannot find name 'XLSX'.
+src/utils/JsonTable.tsx(66,5): error TS2304: Cannot find name 'XLSX'.
+src/utils/JsonTable.tsx(67,5): error TS2304: Cannot find name 'XLSX'.

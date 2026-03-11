@@ -1,0 +1,53 @@
+Rapport d'Architecture Aïna : Analyse de la Software Factory
+Date : 3 Mars 2026 Projet : Aïna SaaS Marketplace Auteur : Core-Architect (Antigravity Lab)
+
+1. 📦 Inventaire des Modules Réutilisables
+L'analyse du code source de la boucle locale avenir-software-factory révèle une base très solide pour un MVP SaaS Multi-tenant :
+
+Auth (Authentification) : Une logique hybride (Custom SaaS JWT + fallback MSAL Azure) est déjà implémentée via un middleware Express (
+auth.ts
+) et le Frontend avec @azure/msal-react. C'est un Asset majeur pour l'accès sécurisé Entreprise.
+Base de Données : Un schéma Prisma très propre (
+schema.prisma
+) gère nativement le Multi-tenant (
+Tenant
+, 
+User
+, ChatEvent). SQLite utilisé actuellement pour le Dev, mais facilement scalable vers PostgreSQL.
+API & Broker : Le backend aina-saas-orchestrator utilise un pattern asynchrone robuste avec RabbitMQ (via 
+broker.ts
+). La gestion par files d'attente (comme agent_rag_queue et 
+ragWorker.ts
+) est parfaite pour l'IA.
+Interface (UI) : L'appli Vite + React + Tailwind est magnifiquement architecturée avec de la micro-interaction (Framer Motion, GSAP, Recharts).
+2. 🍃 Audit de Frugalité
+Le mandat de frugalité (Edge Computing, empreinte réduite, SLMs) soulève des Dettes Architecturales dans la stack actuelle :
+
+Frontend trop lourd : La combinaison de framer-motion, gsap, recharts, xlsx et msal-browser génère un bundle potentiellement lourd. L'utilisation sur des terminaux restreints exigera de l'élagage (Tree Shaking) ou le remplacement de GSAP par des animations CSS natives si la frugalité absolue est requise.
+Backend non-'Edge-Ready' : Le combo Express + Prisma + RabbitMQ nécessite des serveurs traditionnels/conteneurs (Node.js persistant). Pour un déploiement Edge Computing pur (Serverless genre Cloudflare Workers), il faudrait migrer sur Prisma Edge et substituer RabbitMQ par un Broker Stateless (ex: Redis Upstash, SQS, Cloudflare Queues).
+SLMs (Modèles Légers) : Actuellement, le worker RAG interroge une API externe lourde (API_BASE=https://app-rag-its-new2.azurewebsites.net). Pour garantir la frugalité IA, le worker devra pouvoir cibler des SLM locaux ou hébergés à faible coût (ex: Mistral 7B/Qwen 1.5 en Edge) pour des tâches n'ayant pas besoin de GPT-4.
+3. 🤖 Capacité Agentique (Intégration Antigravity)
+La "Factory" est 100% prête à accueillir l'Escouade d'Agents d'Antigravity :
+
+Le mécanisme de routage est déjà là : Le Schéma de DB enregistre déjà des routes IA (route: 'dev' | 'finance' | 'rag').
+Architecture Orientée Événements : Grâce à RabbitMQ, intégrer le Lead Tech ou le Pentester consiste simplement à créer de nouveaux Workers (leadTechWorker.ts, cyberWorker.ts) qui s'abonnent à des files dédiées (agent_leadtech_queue).
+Ces Workers exécuteront les requêtes en asynchrone (non-bloquant pour l'UI client) et publieront sur la file de retour saas_orchestrator_responses traitée par le Broker.
+4. 🗺️ Plan de Migration & Première Étape MVP
+Cible Arborescente Hybride
+text
+/aina-saas-marketplace
+  ├── /agents                  <-- L'Intelligence (fichiers Markdown)
+  │    ├── lead-tech.md
+  │    └── ciso-pentester.md
+  ├── /apps
+  │    ├── /frontend           <-- UI React allégée
+  │    └── /orchestrator       <-- Backend Express
+  │         └── /src/workers   <-- Le muscle : lit les fichiers .md et exécute en LLM
+  └── /packages
+       └── /database           <-- Prisma partagé
+Première Étape Technique (Le MVP)
+L'action la plus rapide à forte valeur ajoutée est de dupliquer le worker RAG pour créer le Worker Lead Tech :
+
+Créer un src/workers/devWorker.ts.
+Lier ce worker à .agents/skills/... de manière programmatique : au démarrage du traitement, le Worker lit le markdown d'instruction, l'injecte dans le System Prompt, puis exécute l'inférence via l'API LLM frugale sélectionnée.
+Remplacer la route API REST statique "dev" simulée (/api/dev) de la Factory par l'injection réelle du payload dans le Broker RabbitMQ.
