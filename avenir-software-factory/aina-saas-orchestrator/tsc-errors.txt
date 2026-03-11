@@ -1,0 +1,1 @@
+src/routes/auth/auth.ts(21,17): error TS2353: Object literal may only specify known properties, and 'plan' does not exist in type '(Without<TenantCreateInput, TenantUncheckedCreateInput> & TenantUncheckedCreateInput) | (Without<...> & TenantCreateInput)'.

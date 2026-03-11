@@ -1,0 +1,5 @@
+import { PublicClientApplication } from "@azure/msal-browser";
+import { msalConfig } from "../service/authConfig";
+
+
+export const msalInstance = new PublicClientApplication(msalConfig);

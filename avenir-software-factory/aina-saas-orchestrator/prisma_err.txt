@@ -1,0 +1,1 @@
+Unknown error during config file loading: TypeError [ERR_INVALID_ARG_TYPE]: The "paths[1]" argument must be of type string. Received an instance of Object

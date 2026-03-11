@@ -1,0 +1,70 @@
+node : PrismaClientInitializationError: 
+Au caract?re Ligne:1 : 1
++ node prisma/seed.js 2>&1 | Out-File 
+-Encoding ASCII err.txt
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecifi 
+   ed: (PrismaClientInitializationError  
+  : :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeComm 
+   andError
+ 
+Invalid `prisma.tenant.create()` 
+invocation in
+C:\Users\taouf\Documents\antigravity lab\
+avenir-software-factory\aina-saas-orchest
+rator\prisma\seed.js:6:40
+
+  3 const prisma = new PrismaClient();
+  4 
+  5 async function seed() {
+??? 6     const tenant = await 
+prisma.tenant.create(
+Unable to require(`C:\Users\taouf\Documen
+ts\antigravity lab\avenir-software-factor
+y\aina-saas-orchestrator\node_modules\.pr
+isma\client\query_engine-windows.dll.node
+`).
+The Prisma engines do not seem to be 
+compatible with your system. Please 
+refer to the documentation about 
+Prisma's system requirements: 
+https://pris.ly/d/system-requirements
+
+Details: 
+\\?\C:\Users\taouf\Documents\antigravity 
+lab\avenir-software-factory\aina-saas-orc
+hestrator\node_modules\.prisma\client\que
+ry_engine-windows.dll.node is not a 
+valid Win32 application.
+\\?\C:\Users\taouf\Documents\antigravity 
+lab\avenir-software-factory\aina-saas-orc
+hestrator\node_modules\.prisma\client\que
+ry_engine-windows.dll.node
+    at $n.handleRequestError 
+(C:\Users\taouf\Documents\antigravity lab
+\avenir-software-factory\aina-saas-orches
+trator\node_modules\@prisma\client\runtim
+e\library.js:121:7615)
+    at $n.handleAndLogRequestError 
+(C:\Users\taouf\Documents\antigravity lab
+\avenir-software-factory\aina-saas-orches
+trator\node_modules\@prisma\client\runtim
+e\library.js:121:6623)
+    at $n.request 
+(C:\Users\taouf\Documents\antigravity lab
+\avenir-software-factory\aina-saas-orches
+trator\node_modules\@prisma\client\runtim
+e\library.js:121:6307)
+    at async l 
+(C:\Users\taouf\Documents\antigravity lab
+\avenir-software-factory\aina-saas-orches
+trator\node_modules\@prisma\client\runtim
+e\library.js:130:9633)
+    at async seed 
+(C:\Users\taouf\Documents\antigravity lab
+\avenir-software-factory\aina-saas-orches
+trator\prisma\seed.js:6:20) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}

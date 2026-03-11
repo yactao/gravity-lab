@@ -1,0 +1,64 @@
+﻿src/components/finance/VetFinanceTable.tsx(156,12): error TS1128: Declaration or statement expected.
+src/components/finance/VetFinanceTable.tsx(156,41): error TS1472: 'catch' or 'finally' expected.
+src/components/finance/VetFinanceTable.tsx(156,46): error TS1443: Module declaration names may only use ' or " quoted strings.
+src/components/finance/VetFinanceTable.tsx(238,36): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(238,41): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(238,51): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(238,61): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(238,72): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(238,87): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,29): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,38): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,56): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,83): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,98): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,111): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(260,130): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(264,42): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(264,64): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(264,81): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(264,112): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(269,33): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(269,38): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(269,43): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(269,58): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(269,71): error TS1005: ';' expected.
+src/components/finance/VetFinanceTable.tsx(273,23): error TS1434: Unexpected keyword or identifier.
+src/components/finance/VetFinanceTable.tsx(344,1): error TS1160: Unterminated template literal.
+src/components/LightRays/LightRays.tsx(133,8): error TS1005: ',' expected.
+src/components/LightRays/LightRays.tsx(367,3): error TS1128: Declaration or statement expected.
+src/components/LightRays/LightRays.tsx(367,4): error TS1128: Declaration or statement expected.
+src/components/LightRays/LightRays.tsx(381,4): error TS1005: ';' expected.
+src/components/LightRays/LightRays.tsx(441,1): error TS1128: Declaration or statement expected.
+src/utils/FinanceTable.tsx(213,12): error TS1128: Declaration or statement expected.
+src/utils/FinanceTable.tsx(213,41): error TS1472: 'catch' or 'finally' expected.
+src/utils/FinanceTable.tsx(213,46): error TS1443: Module declaration names may only use ' or " quoted strings.
+src/utils/FinanceTable.tsx(279,36): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(279,41): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(279,51): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(279,61): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(279,72): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(279,84): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,29): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,38): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,53): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,77): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,92): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,105): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(302,124): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(306,42): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(306,61): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(306,80): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(306,108): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(311,33): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(311,38): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(311,43): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(311,58): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(311,71): error TS1005: ';' expected.
+src/utils/FinanceTable.tsx(317,23): error TS1434: Unexpected keyword or identifier.
+src/utils/FinanceTable.tsx(391,1): error TS1160: Unterminated template literal.
+src/utils/JsonTable.tsx(67,10): error TS1128: Declaration or statement expected.
+src/utils/JsonTable.tsx(67,39): error TS1005: ',' expected.
+src/utils/JsonTable.tsx(67,44): error TS1005: ',' expected.
+src/utils/JsonTable.tsx(136,2): error TS1005: '}' expected.
+src/utils/JsonTable.tsx(136,2): error TS1160: Unterminated template literal.

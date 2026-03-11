@@ -1,0 +1,46 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id              String      @id @default(uuid())
+  name            String
+  domain          String?     @unique
+  tierPlan        String      @default("Basique")
+  tokensAvailable Int         @default(1000)
+  createdAt       DateTime    @default(now())
+  users           User[]
+  chats           ChatEvent[]
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  name         String?
+  passwordHash String?
+  role         String      @default("user")
+  tenantId     String
+  tenant       Tenant      @relation(fields: [tenantId], references: [id])
+  chats        ChatEvent[]
+}
+
+model ChatEvent {
+  id             String   @id @default(uuid())
+  conversationId String
+  tenantId       String
+  userId         String
+  role           String // 'user', 'assistant', 'system'
+  route          String // 'dev', 'finance', 'rag'
+  message        String
+  meta           String?
+  createdAt      DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+}

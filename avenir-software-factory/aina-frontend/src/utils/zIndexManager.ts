@@ -1,0 +1,7 @@
+export const Z_INDEX = {
+  HEADER: 40,
+  SEARCH_SIDEBAR_OVERLAY: 50,
+  SEARCH_SIDEBAR: 51,
+  MODAL: 60,
+  TOOLTIP: 70
+};
