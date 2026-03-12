@@ -69,13 +69,13 @@ router.post("/rag", async (req: Request, res: Response) => {
 // Endpoint pour envoyer un message au devWorker (Aïna Dev / Lead Tech)
 router.post("/dev", async (req: Request, res: Response) => {
   try {
-    const { question, conversation_id } = req.body;
+    const { question, conversation_id, moduleName } = req.body;
     const tenantId = (req as AuthenticatedRequest).user!.tenantId;
     const userId = (req as AuthenticatedRequest).user!.id;
     const convId = conversation_id || uuidv4();
 
     console.log(
-      `[Orchestrator] Message Dev (Lead Tech) reçu pour la conversation: ${convId}`,
+      `[Orchestrator] Message Dev (Lead Tech) reçu pour la conversation: ${convId}, agent: ${moduleName}`,
     );
     console.log(`[Orchestrator] Question: ${question}`);
 
@@ -93,6 +93,7 @@ router.post("/dev", async (req: Request, res: Response) => {
     const correlationId = await enqueueTask("agent_leadtech_queue", {
       conversation_id: convId,
       question,
+      module_name: moduleName,
       tenant_id: tenantId,
       authorization_header: req.headers.authorization
     });

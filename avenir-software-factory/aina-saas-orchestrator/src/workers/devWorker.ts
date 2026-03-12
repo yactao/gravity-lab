@@ -6,7 +6,7 @@ import path from "path";
 import { z } from "zod";
 
 // On simule une URL d'API SLM (ex: Ollama local, Mistral 7B)
-const API_BASE = process.env.SLM_API_BASE || "http://localhost:11434/api/generate";
+const API_BASE = process.env.SLM_API_BASE || "https://api.mistral.ai/v1/chat/completions";
 
 export const startDevWorker = async () => {
     const channel = getChannel();
@@ -31,7 +31,8 @@ export const startDevWorker = async () => {
                 conversation_id: z.string().uuid().or(z.string()),
                 question: z.string().min(1),
                 tenant_id: z.string(),
-                authorization_header: z.string().optional()
+                authorization_header: z.string().optional(),
+                module_name: z.string().optional()
             }).passthrough();
 
             let payload;
@@ -45,7 +46,7 @@ export const startDevWorker = async () => {
 
             console.log(`[Worker Dev] 📥 Tâche reçue:`, payload);
 
-            const { conversation_id, question, tenant_id, authorization_header } = payload;
+            const { conversation_id, question, tenant_id, authorization_header, module_name } = payload;
 
             const lastUserMessage = await prisma.chatEvent.findFirst({
                 where: { conversationId: conversation_id, role: "user" },
@@ -56,13 +57,20 @@ export const startDevWorker = async () => {
 
             const simulate_ai = process.env.SIMULATE_AI === "true";
 
-            // 1. Lire dynamiquement les instructions du fichier .agents/contexts/aina-frugal-expert.md
+            // 1. Lire dynamiquement les instructions du fichier
             let systemPrompt = "Tu es un assistant tech.";
             try {
-                // 🛡️ [CISO FIX] Path Traversal colmaté ! 
-                // Utilisation d'un répertoire métier sécurisé ou fallback.
-                const agentsDir = process.env.AGENTS_CONTEXT_DIR || path.resolve(__dirname, "../../../../../.agents/contexts");
-                const requestedFile = "aina-frugal-expert.md"; 
+                // Utilisation d'un répertoire métier sécurisé localement au backend
+                const agentsDir = process.env.AGENTS_CONTEXT_DIR || path.resolve(__dirname, "../../agents");
+                const agentMap: Record<string, string> = {
+                    "Aïna Architecte & PO": "core-architect.md",
+                    "Aïna Clean Coder": "core-coder.md",
+                    "Aïna Pentester": "cyber-red-team.md",
+                    "Aïna CISO": "cyber-ciso.md",
+                    "Aïna FinOps Lead": "core-researcher.md", // placeholder until finops md exists
+                    "Aïna Data Engineer": "core-coder.md", // placeholder
+                };
+                const requestedFile = module_name ? (agentMap[module_name] || "aina-frugal-expert.md") : "aina-frugal-expert.md"; 
                 const promptPath = path.join(agentsDir, requestedFile);
                 
                 // Sécurité : Vérifier que le chemin résolu reste strictement dans le dossier agentsDir (Sandbox IO)
@@ -141,17 +149,21 @@ export const startDevWorker = async () => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 110000); // Timeout = 1min50s
 
+            const LLM_API_KEY = process.env.MISTRAL_API_KEY || process.env.OPENAI_API_KEY || "";
+
             try {
                 apiResponse = await fetch(API_BASE, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        ...(authorization_header ? { Authorization: authorization_header } : {}),
+                        "Authorization": `Bearer ${LLM_API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: "mistral",
-                        prompt: `${systemPrompt}\n\nUser Question: ${question}`,
-                        stream: false
+                        model: process.env.SLM_MODEL || "mistral-small-latest",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: question }
+                        ]
                     }),
                     signal: controller.signal as any
                 });
@@ -183,10 +195,11 @@ export const startDevWorker = async () => {
                 };
             } else {
                 const rawJson = await apiResponse.json() as any;
+                const responseContent = rawJson.choices?.[0]?.message?.content || rawJson.response || "Reponse vide du SLM";
                 responseData = {
-                    answer: rawJson.response || "Reponse vide du SLM",
+                    answer: responseContent,
                     used_docs: [],
-                    model: rawJson.model || "Mistral 7B (SLM Local)"
+                    model: rawJson.model || "Mistral 7B (API)"
                 };
                 console.log(`[Worker Dev] ✅ Réponse du SLM reçue avec succès.`);
             }

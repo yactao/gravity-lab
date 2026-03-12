@@ -160,7 +160,8 @@ const agentServiceMap: Record<
     query: string,
     n?: number,
     file?: File | null,
-    conversationId?: string
+    conversationId?: string,
+    moduleName?: string
   ) => Promise<any>
 > = {
   doc: (query, _n = 3, _file, conversationId) =>
@@ -209,8 +210,8 @@ const agentServiceMap: Record<
     };
   },
 
-  dev: async (query, _n, _file, conversationId) => {
-    const response = await askDevQuestion(query, conversationId);
+  dev: async (query, _n, _file, conversationId, moduleName) => {
+    const response = await askDevQuestion(query, conversationId, moduleName);
     return {
       answer: response.answer,
       conversation_id: response.conversation_id,
@@ -627,7 +628,8 @@ export default function Chat() {
         trimmedQuery,
         undefined,
         fileToSend || undefined,
-        activeConversation || undefined
+        activeConversation || undefined,
+        moduleName
       );
 
       // Mettre à jour la conversation active si c'est une nouvelle conversation

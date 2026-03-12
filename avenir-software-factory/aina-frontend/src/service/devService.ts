@@ -15,13 +15,15 @@ const getAccessToken = async (): Promise<string> => {
 
 export const askDevQuestion = async (
     question: string,
-    conversationId?: string
+    conversationId?: string,
+    moduleName?: string
 ): Promise<DevResponse> => {
     const accessToken = await getAccessToken();
 
     const payload = {
         question,
         conversation_id: conversationId,
+        moduleName: moduleName,
     };
 
     const response = await fetch(`${API_BASE}/api/chat/dev`, {
