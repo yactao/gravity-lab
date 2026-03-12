@@ -49,6 +49,7 @@ services:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER:-aina_mq}:${RABBITMQ_PASS:-aina_mq_secure}@rabbitmq:5672
       # SLM_API_BASE: Paramétrez ici l'URL de votre fournisseur SLM/LLM (Mistral, Azure, etc.)
       - SLM_API_BASE=${SLM_API_BASE:-https://api.mistral.ai/v1}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
     ports:
       - "8000:8000"
     restart: unless-stopped
