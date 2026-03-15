@@ -15,6 +15,7 @@ import { Gateway } from './entities/gateway.entity';
 import { DeviceTemplate } from './entities/device-template.entity';
 import { PayloadMapping } from './entities/payload-mapping.entity';
 import { AuditLog } from './entities/audit-log.entity';
+import { Device } from './entities/device.entity';
 import { SimulationService } from './simulation.service';
 import { RulesEngineService } from './rules-engine.service';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -33,11 +34,11 @@ import { LogsModule } from './logs/logs.module';
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
       database: 'smartbuild_v3.sqlite',
-      entities: [Site, Zone, Sensor, Reading, Alert, Rule, Organization, User, CustomRole, Gateway, DeviceTemplate, PayloadMapping, AuditLog],
+      entities: [Site, Zone, Sensor, Reading, Alert, Rule, Organization, User, CustomRole, Gateway, DeviceTemplate, PayloadMapping, AuditLog, Device],
       synchronize: true, // Auto-create tables (Dev only)
       logging: false, // Turn off logging to reduce noise
     }),
-    TypeOrmModule.forFeature([Site, Zone, Sensor, Reading, Alert, Rule, Organization, User, CustomRole, Gateway, DeviceTemplate, PayloadMapping, AuditLog]),
+    TypeOrmModule.forFeature([Site, Zone, Sensor, Reading, Alert, Rule, Organization, User, CustomRole, Gateway, DeviceTemplate, PayloadMapping, AuditLog, Device]),
     NotificationsModule,
     AiModule,
     AuthModule,
