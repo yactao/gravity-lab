@@ -1,21 +1,25 @@
-# 8. Protocole de Connexion du Premier U-Bot (Gateway)
+# 8. Guide d'Enrôlement et de Connexion U-Bot (Gateway)
 
-Ce document décrit le cycle de vie complet de l'installation physique d'une passerelle **U-Bot** (le routeur IoT maître) et sa première mise en relation avec le cloud UBBEE. Ce processus a été pensé pour être 100% **Plug & Play** pour le technicien sur le terrain.
+Ce document décrit le cycle de vie complet de l'installation physique d'une passerelle **U-Bot** (le routeur IoT maître) et sa première mise en relation avec le cloud UBBEE. Ce processus a été pensé pour être 100% **Plug & Play** (Zero-Touch Provisioning) pour le technicien sur le terrain, supervisé par l'Energy Manager ou le logisticien.
 
 ---
 
-## 🏗️ Phase 1 : Provisionnement en Atelier (Superviseur)
+## 🏗️ Phase 1 : Provisionnement en Atelier (Superviseur / Energy Manager)
 
-Avant même l'expédition du matériel sur le site du client, l'équipement doit être déclaré informatiquement sur la plateforme UBBEE pour des raisons de sécurité (White-listing) et d'automatisation.
+Avant même l'expédition du matériel sur le site du client, l'équipement doit être déclaré informatiquement sur la plateforme UBBEE pour des raisons de sécurité (White-listing) et d'automatisation. Son identification unique repose sur son **Adresse MAC** Ethernet (ex: `b8:27:eb:12:34:56`), inscrite sur l'étiquette au dos ou sur la boîte.
 
-1. **Accès :** Se connecter via un compte `SUPER_ADMIN` et se rendre dans **Network Monitoring > Inventaire Matériel**.
-2. **Déclaration :** Cliquer sur *Provisionner un U-Bot*.
+1. **Accès :** Se connecter via un compte Administrateur / Energy Manager et se rendre dans **Network Monitoring > Inventaire Matériel (Gateways)**.
+2. **Déclaration :** Cliquer sur *Provisionner un U-Bot* ou *Nouvelle Gateway*.
 3. **Identification :** 
    - Renseigner le **Modèle** (ex: *U-Bot Pro v2*).
-   - Renseigner l'**Adresse MAC** ou le Numéro de Série unique de la machine (ex: `A1:B2:C3:D4:E5:F6`).
+   - Renseigner l'**Identifiant / MAC** de la machine scrupuleusement.
+   - **Nom** : Utilisez la nomenclature officielle `Ubot-[Nom du Client]-[ID Unique]` (ex: `Ubot-Aziza-001`).
 4. **Pré-assignation (Le secret du Plug & Play) :** 
-   - Associer directement la passerelle au **Bâtiment (Site)** du client cible.
-   - En validant, le U-Bot passe au statut **"Pré-configuré" (Orange)**. Il est prêt à être mis dans son carton d'expédition.
+   - Associer directement la passerelle au **Bâtiment (Site)** du client cible. *(Note: S'il part en stock, laissez "Non assigné").*
+   - En validant, le U-Bot passe au statut <span style="color:orange">**"Pré-configuré" / En attente (Orange)**</span>. Il est prêt à être expédié.
+
+> [!TIP]
+> **Préparation Matérielle** : Vous pouvez étiqueter le boîtier avec le nom du site final pour faciliter le travail du sous-traitant. Le U-Bot est déjà flashé avec l'OS Smart Building. Aucune programmation n'est requise.
 
 ---
 
@@ -25,43 +29,35 @@ L'intervention sur le site physique du bâtiment ne requiert aucune compétence 
 
 1. **Fixation :** Installer le U-Bot dans les locaux techniques (TGBT, salle serveurs) ou au centre du bâtiment en hauteur.
 2. **Connectivité Réseau :**
-   - Brancher un câble RJ45 (Ethernet) relié au réseau IT du bâtiment (DHCP activé).
-   - *Ou* insérer une carte SIM si c'est un modèle U-Bot 4G.
-3. **Alimentation :** Brancher le boîtier sur secteur. Le U-Bot démarre (LED bleue clignotante).
+   - Brancher un câble RJ45 (Ethernet) relié au réseau IT du bâtiment (DHCP activé). *Alternativement, la connectivité 4G/LTE s'activera si un routeur cellulaire est inclus.*
+3. **Alimentation & Démarrage :** Brancher le boîtier sur secteur (Alimentation USB-C). Le U-Bot démarre (LED bleue clignotante). Attendez environ 1 à 2 minutes pour la séquence de boot (`Smart Building OS`).
+4. **Vérification LED :** La LED de statut doit cesser de clignoter rapidement et se stabiliser en indiquant l'obtention d'une adresse IP locale.
+
+> [!IMPORTANT]
+> **Règles Pare-feu (Firewall)** : Assurez-vous que le réseau informatique du client autorise le trafic sortant sur le **port 8883 (MQTT TLS)** ou **1883** vers l'IP du Cloud UBBEE (`76.13.59.115`).
 
 ---
 
-## 📡 Phase 3 : Le "Handshake" MQTT Automatique
+## 📡 Phase 3 : Le "Handshake" MQTT et Autoconfiguration
 
-Dès que le U-Bot obtient un accès Internet, la magie "Cloud" opère sans aucune intervention humaine :
+Dès que le U-Bot obtient un accès Internet, la magie "Cloud" opère (Processus invisible - Zero-Touch) :
 
-1. **Initiation MQTT :** Le U-Bot tente de se connecter au Broker MQTT d'UBBEE avec un certificat de sécurité et son adresse MAC comme identifiant unique.
+1. **Initiation MQTT :** Le U-Bot tente de se connecter au Broker MQTT d'UBBEE. Il envoie un message "Handshake" au serveur contenant son adresse MAC.
 2. **Acceptation & Résolution :** 
    - Le Backend UBBEE reçoit la requête et interroge la base de données de l'**Inventaire Matériel**.
-   - Il trouve l'adresse MAC et voit qu'elle a été *Pré-assignée* au "Site de Lyon".
-3. **Mise à jour d'état :** 
-   - Le statut du U-Bot passe instantanément à **"Déployé" (Vert)**.
-   - La LED de l'appareil s'allume en Vert Fixe (Connecté).
-4. **Descente de Configuration (Over-The-Air) :** UBBEE renvoie au U-Bot les identifiants finaux du site (Building_ID) et les règles réseaux spécifiques au site.
+   - Il trouve l'adresse MAC et voit qu'elle a été *Pré-assignée* au site cible.
+3. **Descente de Configuration (Over-The-Air) :** UBBEE renvoie au U-Bot l'ID de son "Building" (Site de destination) et ses canaux de discussion encryptés.
+4. **Basculement Opérationnel :** 
+   - Le U-Bot passe en mode Actif et écoute désormais les capteurs locaux (Zigbee, LoRa, Modbus, etc.).
+   - Le statut du U-Bot passe instantanément à <span style="color:green">**"Déployé" / Actif (Vert)**</span> sur la plateforme.
 
 ---
 
 ## 🛠️ Phase 3b : Logique Code et Installation Système (Le "Cerveau" du U-Bot)
 
-Pour transformer un Raspberry Pi 5 en véritable "U-Bot", il faut y installer le script d'appairage.
+*Cette section est destinée aux ingénieurs préparant les OS des routeurs pour information sur le fonctionnement interne du handshake.*
 
-### 1. Préparation Système (OS)
-Le Raspberry Pi doit être flashé avec un OS léger (Ubuntu Server ou Raspberry Pi OS Lite).
-```bash
-# Installation des dépendances requises
-sudo apt update
-sudo apt install python3 python3-pip
-pip install paho-mqtt getmac
-```
-
-### 2. Le Script Agent (Python)
-L'Agent U-Bot ne connaît pas son Bâtiment à l'avance. Il ne connaît que sa propre adresse MAC.
-Voici le workflow codé :
+L'Agent U-Bot ne connaît pas son Bâtiment à l'avance. Il ne connaît que sa propre adresse MAC. Voici le workflow codé en Python :
 
 ```python
 import paho.mqtt.client as mqtt
@@ -71,7 +67,7 @@ from getmac import get_mac_address
 
 # Récupération automatique de l'identité
 MAC_ADDRESS = get_mac_address() # Ex: a1:b2:c3:d4:e5:f6
-BROKER = "mqtt.ubbee.cloud" # (ou adresse IP du serveur de dev)
+BROKER = "mqtt.ubbee.cloud" # (ou adresse IP explicite en production)
 
 def on_connect(client, userdata, flags, rc):
     print(f"U-Bot connecté ! Demande de configuration pour MAC: {MAC_ADDRESS}")
@@ -82,39 +78,46 @@ def on_connect(client, userdata, flags, rc):
     client.publish("ubbee/provisioning/handshake", json.dumps({"mac": MAC_ADDRESS}))
 
 def on_message(client, userdata, msg):
-    # 3. Le Cloud répond et donne les accès (Si la MAC a bien été pré-assignée par le Superviseur)
+    # 3. Le Cloud répond et donne les accès 
     if msg.topic.endswith("/config"):
         config = json.loads(msg.payload)
         building_id = config["building_id"]
         print(f"✅ Assigné avec succès au bâtiment : {building_id} !")
         
-        # À partir d'ici, le script passe en mode "Exploitation"
-        # Il écoute les capteurs locaux (Bluetooth/Zigbee/Modbus)
-        # Et publie les données finales sur le topic de son site :
-        #   -> f"smartbuilding/telemetry/{building_id}/{MAC_ADDRESS}"
+        # Le script passe en mode "Exploitation"
+        # Il écoute les capteurs locaux et publie les données :
+        # -> f"smartbuilding/telemetry/{building_id}/{MAC_ADDRESS}"
 
 client = mqtt.Client(client_id=MAC_ADDRESS)
 client.on_connect = on_connect
 client.on_message = on_message
-
-# Configuration TLS (en production)
-# client.tls_set()
-
 client.connect(BROKER, 1883)
-print(f"Démarrage du processus Handshake pour {MAC_ADDRESS}...")
 client.loop_forever()
 ```
 
-### 3. Service Daemon (Lancement Automatique)
-Pour que ce soit 100% Plug & Play pour le technicien, ce script (ex: `ubot_agent.py`) est enregistré comme un Service `Systemd` sous Linux. 
-Dès que le Raspberry Pi est branché au secteur, le système d'exploitation démarre ce script en arrière plan. Le script trouve le réseau DHCP, récupère sa MAC et lance sa requête MQTT sans qu'aucun écran ni clavier ne soit nécessaire.
+Ce script est enregistré comme un Service `Systemd` sous Linux. Le système d'exploitation le démarre en arrière plan dès le lancement sans écran ni clavier.
 
 ---
 
-## ✅ Phase 4 : Vérification de Bon Fonctionnement
+## ✅ Phase 4 : Appairage des Capteurs et Vérification Globale
 
-L'Energy Manager distant (ou le Superviseur UBBEE) peut immédiatement valider l'installation via la plateforme :
+Maintenant que le U-Bot est opérationnel, il agit comme pont. L'Energy Manager distant (ou le Superviseur UBBEE) peut valider avec le technicien :
 
-1. **Supervision Réseau :** Dans l'onglet *Network Monitoring*, le nouveau U-Bot apparaît désormais "En Ligne" avec son taux de signal et sa charge CPU.
-2. **Console IoT (Live) :** L'opérateur peut ouvrir la console pour voir les trames *Ping/Heartbeat* (battements de cœur) remontées toutes les X minutes par le U-Bot, certifiant que la route est ouverte.
-3. **Enrôlement des Capteurs :** (Voir Documentation 06_appairage_iot.md). Une fois le U-Bot en place, les capteurs de la salle de réunion peuvent être allumés, le U-Bot attrapera leurs trames et les relaiera à la plateforme.
+1. **Supervision Réseau :** Dans l'onglet *Network Monitoring*, le nouveau U-Bot apparaît désormais "En Ligne" (Statut : Déployé). Console IoT : l'opérateur observe les *Ping/Heartbeat* (battements de cœur).
+2. **Activation des Capteurs :** Le technicien sur site retire la languette des piles des capteurs d'ambiance ou branche les compteurs d'énergie.
+3. **Détection :** Les capteurs s'associent automatiquement au U-Bot s'ils sont dans la zone de couverture.
+4. **Mise à Jour de la Plateforme (Jumeau Numérique / Tableau de bord) :**
+   - Sur la page du **Site** concerné sur la plateforme Ubbee, les données des capteurs (Température, Humidité, Présence) commencent à remonter en temps réel.
+
+> [!WARNING]
+> **Que faire si le U-Bot reste "Hors-ligne" (Rouge) ?**
+> Vérifiez en priorité le câble Ethernet et le routeur du client. Une absence de connexion au serveur indique souvent un problème réseau local ou de blocage du port MQTT.
+
+---
+
+## Récapitulatif du Cycle de Vie (Statuts Plateforme)
+- 🟠 **Pré-configuré** : Le Hardware ID existe dans l'inventaire mais la box n'a pas encore "appelé" le cloud.
+- 🟢 **Déployé (Actif)** : Le handshake a réussi, la télémétrie locale est acheminée.
+- 🔴 **Hors-Ligne** : Connexion perdue (Aucun battement de cœur / heartbeat depuis > 5 minutes).
+
+**Fin de la procédure**. Pour tout support avancé, le technicien peut remonter les logs locaux MQTT directement à l'équipe IT Antigravity.
