@@ -8,14 +8,30 @@ interface HvacControlModalProps {
     equipmentName: string;
     initialHvacState: boolean;
     onToggleHvac: (state: boolean) => void;
+    onCommand?: (action: string, value: any) => void;
 }
 
-export function HvacControlModal({ isOpen, onClose, equipmentName, initialHvacState, onToggleHvac }: HvacControlModalProps) {
+export function HvacControlModal({ isOpen, onClose, equipmentName, initialHvacState, onToggleHvac, onCommand }: HvacControlModalProps) {
     const [heatingSetpoint, setHeatingSetpoint] = useState(21);
     const [coolingSetpoint, setCoolingSetpoint] = useState(24);
     const [thermostatMode, setThermostatMode] = useState('0'); // 0 = Off, 1 = Heat, 2 = Cool...
     const [fanMode, setFanMode] = useState('0'); // 0 = Auto, 1 = Low...
     const [hvacState, setHvacState] = useState(initialHvacState);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const timerId = setTimeout(() => {
+            if (onCommand && isOpen) {
+                onCommand('set_parameters', {
+                    heating: heatingSetpoint,
+                    cooling: coolingSetpoint,
+                    thermostatMode: thermostatMode,
+                    fanMode: fanMode
+                });
+            }
+        }, 800);
+        return () => clearTimeout(timerId);
+    }, [heatingSetpoint, coolingSetpoint, thermostatMode, fanMode, isOpen]);
 
     if (!isOpen) return null;
 

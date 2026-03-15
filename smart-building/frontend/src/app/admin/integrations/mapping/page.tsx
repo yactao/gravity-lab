@@ -151,6 +151,10 @@ export default function MappingPage() {
     const [topicPattern, setTopicPattern] = useState("zigbee2mqtt/0x00158d00045ab...");
     const [isSaving, setIsSaving] = useState(false);
     const [mappings, setMappings] = useState<Record<string, string>>({});
+    
+    // Nouveaux states
+    const [deviceId, setDeviceId] = useState("");
+    const [deviceType, setDeviceType] = useState("Sonde Multimédia UBBEE (Temp/Hum/CO2)");
 
     const [jsonInput, setJsonInput] = useState('{\n  "temperature": 22.4,\n  "humidity": 45,\n  "battery": 98\n}');
     const [incomingSourceKeys, setIncomingSourceKeys] = useState<string[]>(["temperature", "humidity", "battery"]);
@@ -201,14 +205,46 @@ export default function MappingPage() {
     };
 
     const saveMapping = async () => {
+        if (!deviceId && activeTab === "simple") {
+             alert("Veuillez saisir l'identifiant unique du capteur.");
+             return;
+        }
+
         const mappedItems = Object.entries(mappings).map(([target, source]) => ({ sourceKey: source, targetField: target }));
 
-        // Mock save pour la démo
         setIsSaving(true);
-        setTimeout(() => {
-            alert(activeTab === "simple" ? "Équipement appairé et positionné avec succès !" : "Mapping avancé et positionnement sauvegardés avec succès !");
-            setIsSaving(false);
-        }, 1000);
+        try {
+             // Extraction de la fin du topic comme fallback deviceId en avancé
+             const extractedDeviceId = activeTab === "advanced" ? topicPattern.split('/').pop() || templateName : deviceId;
+             
+             const res = await authFetch("http://localhost:3001/api/provisioning", {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      deviceId: extractedDeviceId,
+                      type: activeTab === "simple" ? deviceType : templateName,
+                      orgId: selectedOrgId,
+                      siteId: selectedSiteId,
+                      zoneId: selectedZoneId,
+                      gatewayId: selectedGatewayId,
+                      mappings: activeTab === "advanced" ? mappedItems : null,
+                  })
+             });
+             
+             if (res.ok) {
+                 alert(activeTab === "simple" ? "Équipement appairé et positionné avec succès !" : "Mapping avancé et positionnement sauvegardés avec succès !");
+                 setDeviceId("");
+                 setMappings({});
+             } else {
+                 const errData = await res.json();
+                 alert(`Erreur: ${errData.message || 'Impossible de provisionner.'}`);
+             }
+        } catch (error) {
+             console.error("Save error", error);
+             alert("Erreur de connexion au serveur.");
+        } finally {
+             setIsSaving(false);
+        }
     };
 
     return (
@@ -265,7 +301,7 @@ export default function MappingPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 items-end">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest block">Type / Modèle de l'équipement</label>
-                                    <select className="w-full p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
+                                    <select value={deviceType} onChange={(e) => setDeviceType(e.target.value)} className="w-full p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary transition-colors cursor-pointer appearance-none">
                                         <option>Sonde Multimédia UBBEE (Temp/Hum/CO2)</option>
                                         <option>Détecteur de Présence Infrarouge (PIR)</option>
                                         <option>Compteur d'Énergie Monophasé (Modbus/IP)</option>
@@ -275,7 +311,7 @@ export default function MappingPage() {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest block">Identifiant Unique (S/N, MAC, DevEUI...)</label>
                                     <div className="flex gap-2">
-                                        <input type="text" placeholder="ex: 001A2B3C..." className="flex-1 p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-primary font-mono uppercase transition-colors" />
+                                        <input type="text" value={deviceId} onChange={(e) => setDeviceId(e.target.value)} placeholder="ex: 0x54ef4410..." className="flex-1 p-3.5 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-primary font-mono uppercase transition-colors" />
                                         <button className="px-5 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-colors flex items-center justify-center font-bold text-sm shadow-sm">
                                             <Search className="w-4 h-4" />
                                         </button>

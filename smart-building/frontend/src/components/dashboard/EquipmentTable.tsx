@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Server, Radio, Box, Activity, ThermometerSun, Wind, Zap, Power, Wifi, Layers, Plus } from "lucide-react";
 import { HvacControlModal } from '@/components/equipment/HvacControlModal';
+import { useTenant } from "@/lib/TenantContext";
 
 function getRelativeTimeString(dateString: string) {
     const time = new Date(dateString).getTime();
@@ -29,11 +30,27 @@ const SENSOR_ICONS: Record<string, any> = {
 };
 
 export function EquipmentTable({ sites }: { sites: any[] }) {
+    const { authFetch } = useTenant();
     const [expandedGateways, setExpandedGateways] = useState<Record<string, boolean>>({});
     const [activeHvacEquipment, setActiveHvacEquipment] = useState<{ id: string, name: string } | null>(null);
 
     const toggleGateway = (gwId: string) => {
         setExpandedGateways(prev => ({ ...prev, [gwId]: !prev[gwId] }));
+    };
+
+    const handleEquipmentAction = async (equipmentId: string, actionName: string, value?: string | number | boolean | object) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+            const res = await authFetch(`${API_URL}/api/equipment/action`, {
+                method: "POST",
+                body: JSON.stringify({ equipmentId, action: actionName, value })
+            });
+            if (!res.ok) {
+                console.error("Failed to execute action via Gateway");
+            }
+        } catch (err) {
+            console.error("Action error:", err);
+        }
     };
 
     // Construire une liste aplatie des gateways
@@ -273,7 +290,14 @@ export function EquipmentTable({ sites }: { sites: any[] }) {
                 equipmentName={activeHvacEquipment?.name || 'CVC'}
                 initialHvacState={false}
                 onToggleHvac={(state) => {
-                    console.log(`HVAC state for ${activeHvacEquipment?.id} set to ${state}`);
+                    if (activeHvacEquipment) {
+                        handleEquipmentAction(activeHvacEquipment.id, "toggle_hvac", state);
+                    }
+                }}
+                onCommand={(action, payload) => {
+                    if (activeHvacEquipment) {
+                        handleEquipmentAction(activeHvacEquipment.id, action, payload);
+                    }
                 }}
             />
         </div>

@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, DeleteDat
 import { Zone } from './zone.entity';
 import { Reading } from './reading.entity';
 import { Gateway } from './gateway.entity';
+import { Device } from './device.entity';
 
 @Entity()
 export class Sensor {
@@ -28,6 +29,9 @@ export class Sensor {
 
     @ManyToOne(() => Gateway, gateway => gateway.sensors, { nullable: true })
     gateway: Gateway;
+
+    @ManyToOne(() => Device, device => device.sensors, { nullable: true })
+    device: Device;
 
     @DeleteDateColumn()
     deletedAt: Date;

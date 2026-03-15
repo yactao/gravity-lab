@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Terminal, Activity, Wifi, Play, Pause, Trash2, Filter, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
+import { io, Socket } from "socket.io-client";
 
 export default function LiveIoTConsolePage() {
     const { authFetch } = useTenant();
@@ -12,32 +13,26 @@ export default function LiveIoTConsolePage() {
     const [filter, setFilter] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Mock live data stream since we don't have real MQTT WS exposed yet
+    // Listen to real MQTT WebSocket traffic from backend
     useEffect(() => {
         if (isPaused) return;
 
-        const interval = setInterval(() => {
-            const randomId = Math.floor(Math.random() * 9000) + 1000;
-            const temp = (Math.random() * 5 + 18).toFixed(1);
-            const batt = (Math.random() * 0.5 + 3.2).toFixed(2);
-            const co2 = Math.floor(Math.random() * 400 + 400);
+        const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL || "");
 
-            const mockPayloads = [
-                { topic: `zigbee2mqtt/capteur_salon_${randomId}`, payload: `{"temperature": ${temp}, "battery": ${Math.floor(parseFloat(batt) * 20)}, "humidity": 45}` },
-                { topic: `lorawan/app/device_${randomId}/rx`, payload: `{"data": {"temp_ext": ${temp}, "vBatt": ${batt}, "co2": ${co2}}}` },
-                { topic: `zwavejs/node_${randomId}/status`, payload: `{"state": "Alive", "ready": true, "values": {"air_temp": ${temp}}}` },
-                { topic: `modbus/cVC_rooftop_01`, payload: `{"register_4001": ${temp}, "register_4002": 1, "status": "ok"}` },
-            ];
+        socket.on("connect", () => {
+            console.log("Console WebSocket connected for MQTT stream");
+        });
 
-            const newMsg = mockPayloads[Math.floor(Math.random() * mockPayloads.length)];
-
+        socket.on("mqtt_stream", (data: { topic: string, payload: any, time: string }) => {
             setMessages(prev => {
-                const updated = [...prev, { ...newMsg, time: new Date() }];
-                return updated.slice(-100); // Keep last 100
+                const updated = [...prev, { topic: data.topic, payload: data.payload, time: new Date(data.time) }];
+                return updated.slice(-100); // Keep last 100 max
             });
-        }, 1500 + Math.random() * 2000); // Random interval between 1.5s and 3.5s
+        });
 
-        return () => clearInterval(interval);
+        return () => {
+            socket.disconnect();
+        };
     }, [isPaused]);
 
     useEffect(() => {
@@ -46,10 +41,11 @@ export default function LiveIoTConsolePage() {
         }
     }, [messages, isPaused]);
 
-    const filteredMessages = messages.filter(m =>
-        m.topic.toLowerCase().includes(filter.toLowerCase()) ||
-        m.payload.toLowerCase().includes(filter.toLowerCase())
-    );
+    const filteredMessages = messages.filter(m => {
+        const payloadString = typeof m.payload === 'object' ? JSON.stringify(m.payload) : String(m.payload);
+        return m.topic.toLowerCase().includes(filter.toLowerCase()) ||
+            payloadString.toLowerCase().includes(filter.toLowerCase());
+    });
 
     return (
         <div className="space-y-6 max-w-[1400px] mx-auto pb-12 pt-4 h-[calc(100vh-8rem)] flex flex-col">
@@ -105,7 +101,7 @@ export default function LiveIoTConsolePage() {
                         <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
                     </div>
                     <div className="flex items-center text-xs text-white/50 space-x-4">
-                        <span className="flex items-center"><Wifi className="h-3 w-3 mr-1 text-emerald-400" /> Connecté au Broker MQTT (ws://localhost:9001)</span>
+                        <span className="flex items-center"><Wifi className="h-3 w-3 mr-1 text-emerald-400" /> Connecté à l'API Centrale (WebSocket Sécurisé de Production)</span>
                         <span className="flex items-center"><Activity className="h-3 w-3 mr-1" /> Flux Actif</span>
                     </div>
                 </div>
@@ -122,7 +118,7 @@ export default function LiveIoTConsolePage() {
                             <div key={i} className="group hover:bg-white/5 p-1 rounded transition-colors break-all">
                                 <span className="text-slate-500 mr-3">[{msg.time.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 })}]</span>
                                 <span className="text-cyan-400 font-bold mr-3">{msg.topic}</span>
-                                <span className="text-emerald-400/90">{msg.payload}</span>
+                                <span className="text-emerald-400/90">{typeof msg.payload === 'object' ? JSON.stringify(msg.payload) : msg.payload}</span>
                             </div>
                         ))
                     )}

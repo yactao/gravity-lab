@@ -36,7 +36,6 @@ export class SimulationService implements OnModuleInit {
             });
 
             if (sensors.length === 0) {
-                console.warn('⚠️ No sensors found to simulate data for.');
                 return;
             }
 

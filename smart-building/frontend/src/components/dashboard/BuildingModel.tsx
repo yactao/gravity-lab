@@ -6,6 +6,7 @@ import { OrbitControls, Box, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { Thermometer, Wind, MapPin, Layers, Settings2, Info, Users, Expand, Shrink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { io, Socket } from "socket.io-client";
 
 interface BuildingModelProps {
     siteName?: string;
@@ -14,15 +15,37 @@ interface BuildingModelProps {
 }
 
 // Composant pour une "pièce" ou une "zone" dynamique
-function Room({ position, size, zone, activeLayer, forceMockData }: any) {
+function Room({ position, size, zone, activeLayer, forceMockData, globalLiveData = {} }: any) {
     const [hovered, setHovered] = useState(false);
 
     const hasSensors = forceMockData || (zone.sensors && zone.sensors.length > 0);
 
-    // Simulation de données temps réel par défaut pour le rendu visuel SEULEMENT si des capteurs existent
-    const temperature = hasSensors ? (zone.temperature ?? (20 + Math.random() * 5)) : null; // 20 à 25°C
-    const co2 = hasSensors ? (zone.co2 ?? (400 + Math.random() * 600)) : null; // 400 à 1000 ppm
-    const isOccupied = hasSensors ? (zone.isOccupied ?? (Math.random() > 0.5)) : null;
+    // Simulation ou données réelles fusionnées avec globalLiveData
+    // On extrait depuis globalLiveData si possible
+    let tempOverride = null;
+    let co2Override = null;
+    let occOverride = null;
+    if (zone.sensors && zone.sensors.length > 0) {
+        zone.sensors.forEach((s: any) => {
+            const v = globalLiveData[s.name] ?? globalLiveData[s.type];
+            if (v !== undefined) {
+                if (s.type.includes('temp')) tempOverride = v;
+                if (s.type.includes('co2')) co2Override = v;
+                if (s.type.toLowerCase().includes('occup') || s.type.toLowerCase().includes('presen') || s.type.toLowerCase().includes('motion')) {
+                    occOverride = (v === 1 || v === true);
+                }
+            }
+        });
+        // S'il n'y a pas de capteur mappé dans la BDD pour une valeur globale
+        if (tempOverride === null && globalLiveData['temperature'] !== undefined) tempOverride = globalLiveData['temperature'];
+        if (occOverride === null && (globalLiveData['IsOccuped'] !== undefined || globalLiveData['presence'] !== undefined)) {
+            occOverride = (globalLiveData['IsOccuped'] === 1 || globalLiveData['presence'] === 1 || globalLiveData['presence'] === true || globalLiveData['IsOccuped'] === true);
+        }
+    }
+
+    const temperature = tempOverride !== null ? tempOverride : (zone.temperature ?? null);
+    const co2 = co2Override !== null ? co2Override : (zone.co2 ?? null);
+    const isOccupied = occOverride !== null ? occOverride : (zone.isOccupied ?? null);
 
     // Logique de coloration par couche (Layer)
     let baseColor = hasSensors ? "#334155" : "#cbd5e1"; // Ardoise si capteur, Gris clair si vide
@@ -119,6 +142,23 @@ export function BuildingModel({ siteName = "Bâtiment Principal", zones = [], fo
     const [isExpanded, setIsExpanded] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const [liveData, setLiveData] = useState<Record<string, any>>({});
+
+    useEffect(() => {
+        const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL || "");
+
+        socket.on("mqtt_stream", (msg: { timestamp: string, topic: string, payload: any }) => {
+            if (msg.payload && typeof msg.payload === 'object') {
+                const actualData = msg.payload.data ? msg.payload.data : msg.payload;
+                setLiveData(prev => ({ ...prev, ...actualData }));
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
+
     useEffect(() => {
         const handleFullscreenChange = () => {
             setIsExpanded(!!document.fullscreenElement);
@@ -142,24 +182,24 @@ export function BuildingModel({ siteName = "Bâtiment Principal", zones = [], fo
     // Fix for Demo: If we force mock data (because site has a gateway) but the site has NO zones configured yet,
     // we inject default mock zones so the 3D twin isn't completely empty!
     const displayZones = useMemo(() => {
+        if (siteName.toLowerCase().includes('hotel') || siteName.toLowerCase().includes('papel')) {
+            return [
+                { id: 'mock-h1', name: 'Réception & Lobby', floor: 'RDC', position: [-2, 0, 1], size: [4, 1.5, 3] },
+                { id: 'mock-h2', name: 'Restaurant', floor: 'RDC', position: [2.5, 0, 1], size: [3, 1.5, 3] },
+                { id: 'mock-h3', name: 'Chambre 101', floor: 'Étage 1', position: [-2.5, 0, 1], size: [2, 1.5, 2] },
+                { id: 'mock-h4', name: 'Chambre 102', floor: 'Étage 1', position: [0.5, 0, 1], size: [2, 1.5, 2] },
+                { id: 'mock-h5', name: 'Suite 103', floor: 'Étage 1', position: [3.5, 0, 1], size: [2.5, 1.5, 2] },
+                { id: 'mock-h6', name: 'Chambre 201', floor: 'Étage 2', position: [-2.5, 0, 1], size: [2, 1.5, 2] },
+                { id: 'mock-h7', name: 'Chambre 202', floor: 'Étage 2', position: [0.5, 0, 1], size: [2, 1.5, 2] },
+                { id: 'mock-h8', name: 'Suite Présidentielle', floor: 'Étage 2', position: [3.5, 0, 1], size: [2.5, 1.5, 2] },
+            ];
+        }
+
         if (forceMockData && (!zones || zones.length === 0)) {
-            if (siteName.toLowerCase().includes('hotel')) {
-                return [
-                    { id: 'mock-h1', name: 'Réception & Lobby', floor: 'RDC', position: [-2, 0, 1], size: [4, 1.5, 3] },
-                    { id: 'mock-h2', name: 'Restaurant', floor: 'RDC', position: [2.5, 0, 1], size: [3, 1.5, 3] },
-                    { id: 'mock-h3', name: 'Chambre 101', floor: 'Étage 1', position: [-2.5, 0, 1], size: [2, 1.5, 2] },
-                    { id: 'mock-h4', name: 'Chambre 102', floor: 'Étage 1', position: [0.5, 0, 1], size: [2, 1.5, 2] },
-                    { id: 'mock-h5', name: 'Suite 103', floor: 'Étage 1', position: [3.5, 0, 1], size: [2.5, 1.5, 2] },
-                    { id: 'mock-h6', name: 'Chambre 201', floor: 'Étage 2', position: [-2.5, 0, 1], size: [2, 1.5, 2] },
-                    { id: 'mock-h7', name: 'Chambre 202', floor: 'Étage 2', position: [0.5, 0, 1], size: [2, 1.5, 2] },
-                    { id: 'mock-h8', name: 'Suite Présidentielle', floor: 'Étage 2', position: [3.5, 0, 1], size: [2.5, 1.5, 2] },
-                ];
-            } else {
-                return [
-                    { id: 'mock-1', name: 'Zone Principale', floor: 'RDC', position: [-2, 0, 0], size: [3, 1.5, 3] },
-                    { id: 'mock-2', name: 'Zone Secondaire', floor: 'RDC', position: [2, 0, 0], size: [2.5, 1.5, 2.5] }
-                ];
-            }
+            return [
+                { id: 'mock-1', name: 'Zone Principale', floor: 'RDC', position: [-2, 0, 0], size: [3, 1.5, 3] },
+                { id: 'mock-2', name: 'Zone Secondaire', floor: 'RDC', position: [2, 0, 0], size: [2.5, 1.5, 2.5] }
+            ];
         }
         return zones || [];
     }, [zones, forceMockData, siteName]);
@@ -333,6 +373,7 @@ export function BuildingModel({ siteName = "Bâtiment Principal", zones = [], fo
                                 zone={z}
                                 activeLayer={activeLayer}
                                 forceMockData={forceMockData}
+                                globalLiveData={liveData}
                             />
                         );
                     })}

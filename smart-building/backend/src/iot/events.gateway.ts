@@ -17,14 +17,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleConnection(client: Socket) {
         console.log(`[WebSocket] Client connected: ${client.id}`);
+        // TEST TEST TEST
+        client.emit('mqtt_stream', { topic: 'system/test', payload: 'Hello Test Handshake', time: new Date().toISOString() });
     }
 
     handleDisconnect(client: Socket) {
         console.log(`[WebSocket] Client disconnected: ${client.id}`);
     }
 
-    // Broadcaster une notification globale de rafraîchissement des données 
-    // (pour un site ou de manière globale)
     broadcastDataRefresh(siteId?: string) {
         if (siteId) {
             this.server.emit('refresh_data', { siteId });
