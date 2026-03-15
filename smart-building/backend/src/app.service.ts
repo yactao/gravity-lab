@@ -13,6 +13,7 @@ import { CustomRole } from './entities/custom-role.entity';
 import { PayloadFormatterService } from './iot/payload-formatter.service';
 import { RulesEngineService } from './rules-engine.service';
 import { EventsGateway } from './iot/events.gateway';
+import { MqttService } from './mqtt.service';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -38,6 +39,7 @@ export class AppService implements OnModuleInit {
     private payloadFormatter: PayloadFormatterService,
     private rulesEngine: RulesEngineService,
     private eventsGateway: EventsGateway,
+    private mqttService: MqttService,
   ) { }
 
   async checkHealth() {
@@ -191,7 +193,46 @@ export class AppService implements OnModuleInit {
   async getSites(orgId?: string) {
     const isGlobalContext = orgId === '11111111-1111-1111-1111-111111111111';
     const where = orgId && !isGlobalContext ? { organizationId: orgId } : {};
-    const sites = await this.siteRepo.find({ where, relations: ['zones', 'zones.sensors', 'gateways', 'organization'] });
+    const sites = await this.siteRepo.find({ where, relations: ['zones', 'zones.sensors', 'zones.sensors.device', 'gateways', 'organization'] });
+
+    // Manual hydration of gateway sensors to prevent TypeORM one-to-many bug
+    for (const site of sites) {
+      if (site.gateways && site.gateways.length > 0) {
+        for (const gw of site.gateways) {
+          const gwWithSensors = await this.gatewayRepo.findOne({ where: { id: gw.id }, relations: ['sensors', 'sensors.device'] });
+          if (gwWithSensors) gw.sensors = gwWithSensors.sensors;
+        }
+      }
+
+      // Hydrate zones with their sensors latest readings
+      if (site.zones && site.zones.length > 0) {
+        for (const zone of site.zones) {
+          if (zone.sensors && zone.sensors.length > 0) {
+            for (const sensor of zone.sensors) {
+              const lastReading = await this.readingRepo.findOne({
+                where: { sensor: { id: sensor.id } },
+                order: { timestamp: 'DESC' }
+              });
+              if (lastReading) {
+                (sensor as any).latestReading = lastReading.value;
+              }
+            }
+
+            // Compute zone summary for Digital Twin compatibility
+            const tempSensor = zone.sensors.find(s => s.type.toLowerCase().includes('temp'));
+            if (tempSensor && (tempSensor as any).latestReading !== undefined) (zone as any).temperature = (tempSensor as any).latestReading;
+
+            const co2Sensor = zone.sensors.find(s => s.type.toLowerCase().includes('co2'));
+            if (co2Sensor && (co2Sensor as any).latestReading !== undefined) (zone as any).co2 = (co2Sensor as any).latestReading;
+
+            const occSensor = zone.sensors.find(s => s.type.toLowerCase().includes('occup') || s.type.toLowerCase().includes('presen') || s.type.toLowerCase().includes('motion'));
+            if (occSensor && (occSensor as any).latestReading !== undefined) {
+              (zone as any).isOccupied = ((occSensor as any).latestReading === 1 || (occSensor as any).latestReading === true);
+            }
+          }
+        }
+      }
+    }
 
     let activeAlertsQuery = this.alertRepo.createQueryBuilder('alert')
       .leftJoinAndSelect('alert.sensor', 'sensor')
@@ -222,10 +263,57 @@ export class AppService implements OnModuleInit {
     });
   }
 
+  async getSite(id: string) {
+    const site = await this.siteRepo.findOne({
+      where: { id },
+      relations: ['zones', 'zones.sensors', 'zones.sensors.device', 'gateways', 'organization']
+    });
+
+    if (!site) return null;
+
+    if (site.gateways && site.gateways.length > 0) {
+      for (const gw of site.gateways) {
+        const gwWithSensors = await this.gatewayRepo.findOne({ where: { id: gw.id }, relations: ['sensors', 'sensors.device'] });
+        if (gwWithSensors) gw.sensors = gwWithSensors.sensors;
+      }
+    }
+
+    if (site.zones && site.zones.length > 0) {
+      for (const zone of site.zones) {
+        if (zone.sensors && zone.sensors.length > 0) {
+          for (const sensor of zone.sensors) {
+            const lastReading = await this.readingRepo.findOne({
+              where: { sensor: { id: sensor.id } },
+              order: { timestamp: 'DESC' }
+            });
+            if (lastReading) {
+              (sensor as any).latestReading = lastReading.value;
+            }
+          }
+        }
+      }
+    }
+
+    return site;
+  }
+
   async getOrganizations() {
     const orgs = await this.orgRepo.find({
       relations: ['sites', 'users', 'sites.gateways', 'sites.zones', 'sites.zones.sensors'],
     });
+
+    for (const org of orgs) {
+      if (org.sites) {
+        for (const site of org.sites) {
+          if (site.gateways && site.gateways.length > 0) {
+            for (const gw of site.gateways) {
+              const gwWithSensors = await this.gatewayRepo.findOne({ where: { id: gw.id }, relations: ['sensors'] });
+              if (gwWithSensors) gw.sensors = gwWithSensors.sensors;
+            }
+          }
+        }
+      }
+    }
 
     // Remap pour inclure les compteurs pour le front-end
     return orgs.map(org => {
@@ -347,7 +435,8 @@ export class AppService implements OnModuleInit {
   }
 
   async updateZone(id: string, zoneData: any) {
-    await this.zoneRepo.update(id, zoneData);
+    const { sensors, site, ...updateData } = zoneData;
+    await this.zoneRepo.update(id, updateData);
     return this.zoneRepo.findOne({ where: { id } });
   }
 
@@ -714,8 +803,6 @@ export class AppService implements OnModuleInit {
     return { success: true };
   }
   async executeEquipmentAction(payload: { equipmentId: string; action: string; value?: any }) {
-    // In a real scenario, this would lookup the equipment by ID and publish an MQTT payload
-    // to the actual physical device. For this demo, we'll just log and mock success.
     console.log(`[ACTION Triggered] Eq: ${payload.equipmentId} | Action: ${payload.action} | Val: ${payload.value}`);
     this.eventsGateway.server.emit('sensor_data', {
       type: 'action_audit',
@@ -724,6 +811,14 @@ export class AppService implements OnModuleInit {
       value: payload.value,
       timestamp: new Date().toISOString()
     });
+
+    // Envoi MQTT vers le matériel ciblé (ex: U-Bot)
+    this.mqttService.publishCommand(payload.equipmentId, {
+      action: payload.action,
+      value: payload.value,
+      timestamp: new Date().toISOString()
+    });
+
     return { success: true, message: `Action ${payload.action} command sent successfully.`, details: payload };
   }
 
@@ -801,5 +896,65 @@ export class AppService implements OnModuleInit {
       criticalAlerts
     };
   }
-}
 
+  async processProvisioning(data: any) {
+    const { deviceId, type, orgId, siteId, zoneId, gatewayId, mappings } = data;
+    
+    // Check if zone exists
+    let zone = null;
+    if (zoneId) {
+      zone = await this.zoneRepo.findOne({ where: { id: zoneId }, relations: ['site'] });
+      if (!zone) throw new Error("Zone not found");
+    }
+
+    // Check if gateway exists
+    let gateway = null;
+    if (gatewayId) {
+      gateway = await this.gatewayRepo.findOne({ where: { id: gatewayId } });
+    }
+
+    // Provision all mapped sensors
+    if (mappings && Array.isArray(mappings)) {
+      for (const map of mappings) {
+        const { sourceKey, targetField } = map;
+        const externalId = `${deviceId}_${sourceKey}`;
+
+        let sensor = await this.sensorRepo.findOne({ where: { externalId } });
+        if (!sensor) {
+           sensor = this.sensorRepo.create({
+             externalId: externalId,
+             name: `${targetField.replace(/_/g, ' ')} (${deviceId})`,
+             type: targetField,
+             unit: '',
+           });
+        }
+        
+        // Link to zone and gateway
+        if (zone) sensor.zone = zone;
+        if (gateway) sensor.gateway = gateway;
+
+        await this.sensorRepo.save(sensor);
+      }
+    } else {
+      // Simple provisionning (no advanced mapping)
+      // Usually would create a wildcard sensor or just a default equipment row
+      // We'll mimic creating a single default sensor representing the equipment
+      const defaultExtId = `${deviceId}_status`;
+      let sensor = await this.sensorRepo.findOne({ where: { externalId: defaultExtId } });
+      if (!sensor) {
+         sensor = this.sensorRepo.create({
+           externalId: defaultExtId,
+           name: `${type || 'Equipement'} (${deviceId})`,
+           type: 'status',
+           unit: '',
+         });
+      }
+      if (zone) sensor.zone = zone;
+      if (gateway) sensor.gateway = gateway;
+
+      await this.sensorRepo.save(sensor);
+    }
+
+    return { success: true, message: `Equipement ${deviceId} provisionné avec succès.` };
+  }
+}

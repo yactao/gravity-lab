@@ -35,6 +35,13 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('sites/:id')
+  getSite(@Param('id') id: string) {
+    return this.appService.getSite(id);
+  }
+
+
+  @UseGuards(JwtAuthGuard)
   @Get('organizations')
   getOrganizations() {
     return this.appService.getOrganizations();
@@ -252,6 +259,12 @@ export class AppController {
     @Body() payload: { equipmentId: string; action: string; value?: any }
   ) {
     return this.appService.executeEquipmentAction(payload);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('provisioning')
+  provisionEquipment(@Body() payload: any) {
+    return this.appService.processProvisioning(payload);
   }
 }
 

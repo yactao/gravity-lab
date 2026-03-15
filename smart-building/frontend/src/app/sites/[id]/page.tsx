@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
-import { Building2, Layers, ThermometerSun, Wind, Users, Activity, ChevronsUpDown, Cpu, Search, CheckCircle2, ChevronDown, ChevronRight, Building, MapPin, LayoutGrid, Thermometer, Plus, X, Zap, ArrowLeft, Sun, CloudRain, AlertTriangle, ShieldCheck, Filter, RefreshCw, Power, Lightbulb, Video, Router, Server, Trash2, Edit2 } from "lucide-react";
+import { Building2, Layers, ThermometerSun, Wind, Users, Activity, ChevronsUpDown, Cpu, Search, CheckCircle2, ChevronDown, ChevronRight, Building, MapPin, LayoutGrid, Thermometer, Plus, X, Zap, ArrowLeft, Sun, CloudRain, AlertTriangle, ShieldCheck, Filter, RefreshCw, Power, Lightbulb, Video, Router, Server, Trash2, Edit2, Radar, PersonStanding } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTenant } from "@/lib/TenantContext";
 import { EnergyChart } from "@/components/dashboard/EnergyChart";
@@ -58,6 +58,9 @@ export default function SiteDashboardPage() {
 
     // Tabs States
     const [activeTab, setActiveTab] = useState("dashboard");
+
+    // Live IoT State map
+    const [liveData, setLiveData] = useState<Record<string, any>>({});
 
     // Remote Control Mock States
     const [hvacState, setHvacState] = useState(true);
@@ -146,6 +149,13 @@ export default function SiteDashboardPage() {
             }
         });
 
+        socket.on("mqtt_stream", (msg: { timestamp: string, topic: string, payload: any }) => {
+            if (msg.payload && typeof msg.payload === 'object') {
+                const actualData = msg.payload.data ? msg.payload.data : msg.payload;
+                setLiveData(prev => ({ ...prev, ...actualData }));
+            }
+        });
+
         return () => {
             socket.disconnect();
         };
@@ -226,12 +236,85 @@ export default function SiteDashboardPage() {
 
     const hasEquipments = (site?.gateways?.length ?? 0) > 0 || site?.zones?.some((z: any) => (z.sensors?.length ?? 0) > 0) || false;
 
-    const isProjetY = site?.name?.toLowerCase().includes("projet y") || site?.organization?.name?.toLowerCase().includes("projet y");
-    const displaySensors = (selectedZone?.sensors && selectedZone.sensors.length > 0) ? selectedZone.sensors : (!isProjetY && selectedZone ? [
-        { id: `mock-${selectedZone.id}-1`, name: "Multi-Senseur Ambiance", type: "ambiance, temp, rh, lx" },
-        { id: `mock-${selectedZone.id}-2`, name: "Détecteur Présence (PIR)", type: "motion, présence" },
-        { id: `mock-${selectedZone.id}-3`, name: "Sonde Qualité Air", type: "co2, voc" }
-    ] : []);
+    const targetGatewayMac = site?.gateways && site.gateways.length > 0 ? site.gateways[0].serialNumber : "cvc-local";
+
+    const isProjetY = site?.name?.toLowerCase().includes("projet y") || site?.name?.toLowerCase().includes("batiment y") || site?.name?.toLowerCase().includes("bâtiment y") || site?.organization?.name?.toLowerCase().includes("projet y");
+
+    let displaySensors: any[] = [];
+    if (selectedZone?.sensors && selectedZone.sensors.length > 0) {
+        displaySensors = selectedZone.sensors;
+    } else {
+        // Collect unassigned sensors from the site's gateways
+        const unassignedSensors: any[] = [];
+        if (site?.gateways) {
+            site.gateways.forEach((gw: any) => {
+                if (gw.sensors) {
+                    gw.sensors.forEach((s: any) => {
+                        if (!s.zoneId && !s.zone) unassignedSensors.push(s);
+                    });
+                }
+            });
+        }
+
+        if (unassignedSensors.length > 0) {
+            displaySensors = unassignedSensors;
+        }
+    }
+
+    const groupedDevices = Object.values(
+        displaySensors.reduce((acc: Record<string, any>, sensor: any) => {
+            const rawName = sensor.name || 'Inconnu';
+            const match = rawName.match(/^(.*?)\s*\((.*?)\)$/);
+            const cleanName = match ? match[1] : rawName;
+            const hwId = match ? match[2] : `virtual-${sensor.id}`;
+
+            if (!acc[hwId]) {
+                acc[hwId] = {
+                    hwId: match ? hwId : null,
+                    virtualId: hwId,
+                    sensors: [],
+                    mainType: 'unknown',
+                    displayName: 'Capteur Inconnu',
+                    isAqaraFP1: false,
+                    deviceObj: sensor.device || null
+                };
+            }
+
+            acc[hwId].sensors.push({ ...sensor, cleanName });
+
+            const lowerName = cleanName.toLowerCase();
+            if (lowerName === 'presence' || lowerName === 'isoccuped' || lowerName.includes('occup') || lowerName.includes('motion')) {
+                acc[hwId].mainType = 'presence';
+                acc[hwId].displayName = 'Détecteur de Présence';
+            } else if (lowerName === 'temperature') {
+                if (acc[hwId].mainType === 'unknown') {
+                     acc[hwId].mainType = 'temperature';
+                     acc[hwId].displayName = 'Sonde de Température';
+                }
+            } else if (lowerName === 'hvac_status') {
+                acc[hwId].mainType = 'hvac';
+                acc[hwId].displayName = 'État CVC';
+            } else if (lowerName === 'light_status') {
+                acc[hwId].mainType = 'light';
+                acc[hwId].displayName = 'État Éclairage';
+            } else if (lowerName === 'co2') {
+                if (acc[hwId].mainType === 'unknown') {
+                     acc[hwId].mainType = 'co2';
+                     acc[hwId].displayName = 'Sonde CO2';
+                }
+            }
+
+            if (lowerName === 'presence_event' || lowerName === 'approach_distance' || lowerName === 'monitoring_mode') {
+                acc[hwId].isAqaraFP1 = true;
+            }
+            
+            if (acc[hwId].mainType === 'unknown') {
+                acc[hwId].displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+            }
+
+            return acc;
+        }, {})
+    );
 
     return (
         <div className="space-y-6 max-w-[1400px] mx-auto pb-12 pt-4">
@@ -291,9 +374,9 @@ export default function SiteDashboardPage() {
                 <>
                     {/* Metrics Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                        <StatsCard title="Conso. Globale (Live)" value={hasEquipments ? "3,500 W" : "0 W"} trend={hasEquipments ? "+5%" : "--"} trendUp={false} icon={Zap} color="cyan" />
-                        <StatsCard title="Conso. CVC (Live)" value={hasEquipments ? "2,100 W" : "0 W"} trend={hasEquipments ? "-2%" : "--"} trendUp={true} icon={ThermometerSun} color="orange" />
-                        <StatsCard title="Qualité Air Moyenne" value={hasEquipments ? "480 ppm" : "--"} trend={hasEquipments ? "Excellent" : "--"} trendUp={true} icon={Wind} color="green" />
+                        <StatsCard title="Conso. Globale (Live)" value={hasEquipments && !isProjetY ? "3,500 W" : "--W"} trend={hasEquipments && !isProjetY ? "+5%" : "--"} trendUp={false} icon={Zap} color="cyan" />
+                        <StatsCard title="Conso. CVC (Live)" value={hasEquipments && !isProjetY ? "2,100 W" : "--W"} trend={hasEquipments && !isProjetY ? "-2%" : "--"} trendUp={true} icon={ThermometerSun} color="orange" />
+                        <StatsCard title="Qualité Air Moyenne" value={hasEquipments && !isProjetY ? "480 ppm" : "--"} trend={hasEquipments && !isProjetY ? "Excellent" : "--"} trendUp={true} icon={Wind} color="green" />
                         <StatsCard title="Zones Connectées" value={hasEquipments ? (site.zones?.length?.toString() || "0") : "0"} trend={hasEquipments ? "Global: OK" : "En attente"} trendUp={true} icon={Activity} color="purple" />
                     </div>
 
@@ -313,7 +396,7 @@ export default function SiteDashboardPage() {
                                 </div>
                             </div>
                             <div className="flex-1 w-full bg-slate-50 dark:bg-black/20 rounded-xl p-4 flex flex-col border border-slate-100 dark:border-white/5 relative h-64">
-                                {hasEquipments ? <EnergyChart data={siteEnergyData} /> : <div className="flex-1 flex items-center justify-center text-sm text-slate-500">Aucune donnée de consommation disponible</div>}
+                                {(hasEquipments && !isProjetY) ? <EnergyChart data={siteEnergyData} /> : <div className="flex-1 flex items-center justify-center text-sm text-slate-500 text-center px-4">En attente des premières remontées de consommation réelles...</div>}
                             </div>
                         </div>
 
@@ -326,14 +409,14 @@ export default function SiteDashboardPage() {
                                     Anomalies du site
                                 </h3>
                                 <div className="space-y-3 flex-1 overflow-y-auto">
-                                    {hasEquipments && alerts.length > 0 ? alerts.map(a => (
+                                    {(hasEquipments && !isProjetY && alerts.length > 0) ? alerts.map(a => (
                                         <div key={a.id} className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                                             <p className="text-xs font-bold text-slate-900 dark:text-white mb-1">{a.message}</p>
                                             <p className="text-[10px] text-slate-500">{a.time}</p>
                                         </div>
                                     )) : (
                                         <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                                            <p className="text-xs py-4">Aucune anomalie détectée</p>
+                                            <p className="text-xs py-4 text-center px-4">{isProjetY ? "Le parc est sain ! En attente de premières anomalies." : "Aucune anomalie détectée"}</p>
                                         </div>
                                     )}
                                 </div>
@@ -346,14 +429,14 @@ export default function SiteDashboardPage() {
                                     Historique des Règles
                                 </h3>
                                 <div className="space-y-3 flex-1 overflow-y-auto">
-                                    {hasEquipments && rules.length > 0 ? rules.map(r => (
+                                    {(hasEquipments && !isProjetY && rules.length > 0) ? rules.map(r => (
                                         <div key={r.id} className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                                             <p className="text-xs font-bold text-slate-900 dark:text-white mb-1">{r.message}</p>
                                             <p className="text-[10px] text-slate-500">{r.time}</p>
                                         </div>
                                     )) : (
                                         <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                                            <p className="text-xs py-4">Aucune règle configurée</p>
+                                            <p className="text-xs py-4 text-center px-4">{isProjetY ? "Aucune règle exécutée pour l'instant." : "Aucune règle configurée"}</p>
                                         </div>
                                     )}
                                 </div>
@@ -427,16 +510,24 @@ export default function SiteDashboardPage() {
 
                                                         <div className="grid grid-cols-2 gap-2 mb-4">
                                                             {hasEquipments ? (
-                                                                <>
-                                                                    <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
-                                                                        <span className="text-[9px] text-slate-500 uppercase mb-0.5">Climat</span>
-                                                                        <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center"><Thermometer className="h-3 w-3 text-orange-400 mr-1" /> 22.5°C</span>
-                                                                    </div>
-                                                                    <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
-                                                                        <span className="text-[9px] text-slate-500 uppercase mb-0.5">Présence</span>
-                                                                        <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 flex items-center"><Users className="h-3 w-3 mr-1" /> Oui</span>
-                                                                    </div>
-                                                                </>
+                                                                <div className="col-span-2 grid grid-cols-2 gap-2">
+                                                                    {zone.sensors?.some(s => s.type.includes('temp') || s.type.includes('ambiance')) && (
+                                                                        <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
+                                                                            <span className="text-[9px] text-slate-500 uppercase mb-0.5">Climat</span>
+                                                                            <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center"><Thermometer className="h-3 w-3 text-orange-400 mr-1" /> {liveData['temperature'] !== undefined ? `${typeof liveData['temperature'] === 'number' ? liveData['temperature'].toFixed(1) : liveData['temperature']}°C` : '--°C'}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {zone.sensors?.some(s => s.type.toLowerCase().includes('occup') || s.type.toLowerCase().includes('presen') || s.type.toLowerCase().includes('motion')) && (
+                                                                        <div className="bg-white dark:bg-white/5 p-2 rounded-lg flex flex-col justify-center border border-slate-100 dark:border-white/5 shadow-sm">
+                                                                            <span className="text-[9px] text-slate-500 uppercase mb-0.5">Présence</span>
+                                                                            <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 flex items-center"><Users className="h-3 w-3 mr-1" /> {(liveData['IsOccuped'] || liveData['presence']) ? "Oui" : "Non"}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {/* Default text if a zone has equipments but no mapped specific sensors */}
+                                                                    {!zone.sensors?.some(s => /temp|ambiance|occup|presen|motion/i.test(s.type)) && (
+                                                                        <div className="col-span-2 text-center py-1 text-[10px] text-slate-400 font-medium">Capteurs personnalisés</div>
+                                                                    )}
+                                                                </div>
                                                             ) : (
                                                                 <div className="col-span-2 bg-white dark:bg-white/5 p-2 rounded-lg flex items-center justify-center border border-slate-100 dark:border-white/5 shadow-sm text-slate-400 text-[10px] uppercase font-bold tracking-widest">
                                                                     Aucun capteur
@@ -479,10 +570,10 @@ export default function SiteDashboardPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                        Passerelle Ubot - {site.name}
+                                        {site.gateways && site.gateways.length > 0 ? site.gateways[0].name : `Passerelle Ubot - ${site.name}`}
                                     </h3>
                                     <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-medium">
-                                        <span className="px-2 py-0.5 bg-slate-200/50 dark:bg-white/10 rounded font-mono tracking-wider">UBOT-DEMO-8604</span>
+                                        <span className="px-2 py-0.5 bg-slate-200/50 dark:bg-white/10 rounded font-mono tracking-wider">{site.gateways && site.gateways.length > 0 ? site.gateways[0].serialNumber : "UBOT-DEMO-8604"}</span>
                                         <span className="flex items-center gap-1"><Layers className="w-3.5 h-3.5" /> {site.name}</span>
                                     </div>
                                 </div>
@@ -497,125 +588,127 @@ export default function SiteDashboardPage() {
                             </div>
                         </div>
 
-                        {/* Cards Grid */}
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/30 dark:bg-transparent">
+                        {/* Cards Grid - Only show static mock cards if we're not in Projet Y, or make them conditional */}
+                        {!isProjetY && (
+                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/30 dark:bg-transparent">
 
-                            {/* Card 1: Aidoo Pro */}
-                            <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-colors">
-                                <div>
-                                    <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-500/20 shrink-0">
-                                            <ThermometerSun className="w-5 h-5" />
+                                {/* Card 1: Aidoo Pro */}
+                                <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-colors">
+                                    <div>
+                                        <div className="flex items-start gap-4 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-500/20 shrink-0">
+                                                <ThermometerSun className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 dark:text-white text-base">Aidoo Pro (Contrôleur AC)</h4>
+                                                <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                                                    <Layers className="w-3.5 h-3.5" /> Espace principal
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-base">Aidoo Pro (Contrôleur AC)</h4>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                                <Layers className="w-3.5 h-3.5" /> Espace principal
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span className="inline-block px-2.5 py-1 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 text-[10px] font-bold border border-blue-200 dark:border-blue-500/20 rounded mb-4">
-                                        CVC Pilote
-                                    </span>
-                                </div>
-                                <div className="mt-auto">
-                                    <button
-                                        onClick={() => setIsHvacModalOpen(true)}
-                                        className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 mb-4 shadow-sm active:scale-95"
-                                    >
-                                        <Router className="w-4 h-4" /> Contrôler CVC
-                                    </button>
-                                    <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5">
-                                        <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s0..</span>
-                                        <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> à l'instant</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card 2: Bascule Ete/Hiver */}
-                            <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-amber-300 transition-colors">
-                                <div>
-                                    <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-100 dark:border-amber-500/20 shrink-0">
-                                            <Power className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-base">Bascule Ete/Hiver</h4>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                                <Layers className="w-3.5 h-3.5" /> Espace principal
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 text-[10px] font-bold border border-slate-200 dark:border-slate-700 rounded mb-4">
-                                        Inactif
-                                    </span>
-                                </div>
-                                <div className="mt-auto">
-                                    <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5">
-                                        <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s1..</span>
-                                        <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> à l'instant</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card 3: Sonde T° */}
-                            <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-orange-300 transition-colors">
-                                <div>
-                                    <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-100 dark:border-orange-500/20 shrink-0">
-                                            <ThermometerSun className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-base">Sonde T° - TEXTO1</h4>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                                <Layers className="w-3.5 h-3.5" /> Extérieur
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <span className="inline-block px-2.5 py-1 bg-white dark:bg-transparent text-orange-600 dark:text-orange-400 text-xs font-bold border border-orange-200 dark:border-orange-500/30 rounded">
-                                            18.6 °C
-                                        </span>
-                                        <span className="inline-block px-2.5 py-1 bg-white dark:bg-transparent text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-500/30 rounded">
-                                            47.4 %
+                                        <span className="inline-block px-2.5 py-1 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 text-[10px] font-bold border border-blue-200 dark:border-blue-500/20 rounded mb-4">
+                                            CVC Pilote
                                         </span>
                                     </div>
-                                </div>
-                                <div className="mt-auto">
-                                    <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5 mt-4">
-                                        <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s2..</span>
-                                        <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> il y a 1 minute</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card 4: Détecteur présence */}
-                            <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-cyan-300 transition-colors">
-                                <div>
-                                    <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-cyan-50 dark:bg-cyan-500/10 flex items-center justify-center text-cyan-500 border border-cyan-100 dark:border-cyan-500/20 shrink-0">
-                                            <Activity className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-base">Détecteur de présence</h4>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                                <Layers className="w-3.5 h-3.5" /> Local Social 1
-                                            </p>
+                                    <div className="mt-auto">
+                                        <button
+                                            onClick={() => setIsHvacModalOpen(true)}
+                                            className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 mb-4 shadow-sm active:scale-95"
+                                        >
+                                            <Router className="w-4 h-4" /> Contrôler CVC
+                                        </button>
+                                        <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5">
+                                            <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s0..</span>
+                                            <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> à l'instant</span>
                                         </div>
                                     </div>
-                                    <span className="inline-block px-2.5 py-1 bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400 text-[10px] font-bold border border-cyan-200 dark:border-cyan-500/30 rounded">
-                                        Mouvement détecté
-                                    </span>
                                 </div>
-                                <div className="mt-auto">
-                                    <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5 mt-4">
-                                        <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s3..</span>
-                                        <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> il y a 2 minutes</span>
+
+                                {/* Card 2: Bascule Ete/Hiver */}
+                                <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-amber-300 transition-colors">
+                                    <div>
+                                        <div className="flex items-start gap-4 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-100 dark:border-amber-500/20 shrink-0">
+                                                <Power className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 dark:text-white text-base">Bascule Ete/Hiver</h4>
+                                                <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                                                    <Layers className="w-3.5 h-3.5" /> Espace principal
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 text-[10px] font-bold border border-slate-200 dark:border-slate-700 rounded mb-4">
+                                            Inactif
+                                        </span>
+                                    </div>
+                                    <div className="mt-auto">
+                                        <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5">
+                                            <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s1..</span>
+                                            <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> à l'instant</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                        </div>
+                                {/* Card 3: Sonde T° */}
+                                <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-orange-300 transition-colors">
+                                    <div>
+                                        <div className="flex items-start gap-4 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-100 dark:border-orange-500/20 shrink-0">
+                                                <ThermometerSun className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 dark:text-white text-base">Sonde T° - TEXTO1</h4>
+                                                <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                                                    <Layers className="w-3.5 h-3.5" /> Extérieur
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <span className="inline-block px-2.5 py-1 bg-white dark:bg-transparent text-orange-600 dark:text-orange-400 text-xs font-bold border border-orange-200 dark:border-orange-500/30 rounded">
+                                                18.6 °C
+                                            </span>
+                                            <span className="inline-block px-2.5 py-1 bg-white dark:bg-transparent text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-500/30 rounded">
+                                                47.4 %
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-auto">
+                                        <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5 mt-4">
+                                            <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s2..</span>
+                                            <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> il y a 1 minute</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Card 4: Détecteur présence */}
+                                <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between hover:border-cyan-300 transition-colors">
+                                    <div>
+                                        <div className="flex items-start gap-4 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-cyan-50 dark:bg-cyan-500/10 flex items-center justify-center text-cyan-500 border border-cyan-100 dark:border-cyan-500/20 shrink-0">
+                                                <Activity className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 dark:text-white text-base">Détecteur de présence</h4>
+                                                <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                                                    <Layers className="w-3.5 h-3.5" /> Local Social 1
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className="inline-block px-2.5 py-1 bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400 text-[10px] font-bold border border-cyan-200 dark:border-cyan-500/30 rounded">
+                                            Mouvement détecté
+                                        </span>
+                                    </div>
+                                    <div className="mt-auto">
+                                        <div className="flex items-center justify-between text-[10px] font-medium text-slate-400 font-mono pt-4 border-t border-slate-100 dark:border-white/5 mt-4">
+                                            <span className="bg-slate-100 dark:bg-white/5 px-2 py-1 rounded">ID: m-s3..</span>
+                                            <span className="flex items-center gap-1 text-emerald-500"><Activity className="w-3 h-3" /> il y a 2 minutes</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -655,7 +748,7 @@ export default function SiteDashboardPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="text-sm">
-                                            {displaySensors.length > 0 && (
+                                            {groupedDevices.length > 0 && (
                                                 <tr
                                                     onClick={() => setExpandedRows(prev => ({ ...prev, [selectedZone.id]: !prev[selectedZone.id] }))}
                                                     className="border-b border-slate-100 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.04] cursor-pointer group"
@@ -672,38 +765,83 @@ export default function SiteDashboardPage() {
                                                 </tr>
                                             )}
                                             {/* Sensors */}
-                                            {expandedRows[selectedZone.id] && displaySensors.map((sensor: { id: string; name: string; type: string }) => {
-                                                const type = sensor.type.toLowerCase();
+                                            {expandedRows[selectedZone.id] && groupedDevices.map((device: any) => {
+                                                const type = device.mainType;
                                                 let Pills = <span className="px-2.5 py-1 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-400 rounded-md">-</span>;
+                                                
+                                                // Function to extract specific live value from the device's sensors
+                                                const getVal = (searchName: string) => {
+                                                    const s = device.sensors.find((s:any) => s.cleanName.toLowerCase() === searchName.toLowerCase());
+                                                    if(s && liveData[s.name] !== undefined) return liveData[s.name];
+                                                    return liveData[searchName];
+                                                };
 
-                                                if (type.includes('temp') || type.includes('ambiance')) {
+                                                const LiveValue = getVal('presence') || getVal('temperature') || getVal(type);
+
+                                                if (type === 'temperature') {
+                                                    const tempVal = getVal('temperature');
+                                                    const dispTemp = tempVal !== undefined ? (typeof tempVal === 'number' ? tempVal.toFixed(1) : String(tempVal)) + ' °C' : '-- °C';
+
+                                                    const humVal = getVal('humidity');
+                                                    const dispHum = humVal !== undefined ? String(humVal) + ' %RH' : null;
+
                                                     Pills = (
                                                         <div className="flex gap-2">
-                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md shadow-sm">21.5 °C</span>
-                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md shadow-sm">48.2 %RH</span>
-                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md shadow-sm">120 lx</span>
+                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md shadow-sm">{dispTemp}</span>
+                                                            {dispHum && <span className="px-2.5 py-1 text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md shadow-sm">{dispHum}</span>}
                                                         </div>
                                                     );
-                                                } else if (type.includes('présence') || type.includes('motion')) {
+                                                } else if (type === 'presence') {
+                                                    const isOccupied = getVal('IsOccuped') === 1 || getVal('presence') === 1 || getVal('presence') === true || getVal('IsOccuped') === true;
                                                     Pills = (
                                                         <div className="flex gap-2">
-                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-[#142A38] dark:bg-slate-700 text-white rounded-md shadow-sm">Motion (Active)</span>
+                                                            {isOccupied ?
+                                                                <span className="px-2.5 py-1 text-[11px] font-bold bg-[#142A38] dark:bg-slate-700 text-white rounded-md shadow-sm">Motion (Active)</span>
+                                                                :
+                                                                <span className="px-2.5 py-1 text-[11px] font-bold bg-slate-500/10 text-slate-500 rounded-md shadow-sm">No Motion</span>
+                                                            }
                                                         </div>
                                                     );
-                                                } else if (type.includes('co2')) {
+                                                } else if (type === 'co2') {
                                                     Pills = (
                                                         <div className="flex gap-2">
-                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-md shadow-sm">520 ppm</span>
+                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-md shadow-sm">{LiveValue ?? '520'} ppm</span>
+                                                        </div>
+                                                    );
+                                                } else if (LiveValue !== undefined) {
+                                                    Pills = (
+                                                        <div className="flex gap-2">
+                                                            <span className="px-2.5 py-1 text-[11px] font-bold bg-slate-500/10 text-slate-600 dark:text-slate-400 rounded-md shadow-sm">{String(LiveValue)}</span>
                                                         </div>
                                                     );
                                                 }
 
                                                 return (
-                                                    <tr key={sensor.id} className="border-b border-slate-50 dark:border-white/[0.02] hover:bg-slate-50/50 dark:hover:bg-white/[0.01] transition-colors">
+                                                    <tr key={device.virtualId} className="border-b border-slate-50 dark:border-white/[0.02] hover:bg-slate-50/50 dark:hover:bg-white/[0.01] transition-colors">
                                                         <td className="p-4 border-l-2 border-slate-200 dark:border-white/10 translate-x-4 h-full" />
-                                                        <td className="py-3 px-4 text-slate-700 dark:text-slate-300 flex items-center pl-8 text-xs font-medium border-l border-slate-200 dark:border-white/5 relative">
+                                                        <td className="py-3 px-4 text-slate-700 dark:text-slate-300 flex flex-col justify-center pl-8 relative">
                                                             <div className="absolute left-0 top-1/2 w-4 border-t border-slate-200 dark:border-white/10"></div>
-                                                            {sensor.name}
+                                                            <span className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                                                                {device.mainType === 'presence' ? <PersonStanding className="w-3.5 h-3.5 text-cyan-500" /> : null}
+                                                                {device.displayName}
+                                                                {device.deviceObj && (
+                                                                    <span className="px-1.5 py-0.5 mt-0.5 text-[8px] uppercase tracking-widest bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400 rounded font-bold border border-slate-200 dark:border-white/10">
+                                                                        {device.deviceObj.manufacturer}
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                            <div className="flex items-center gap-1 mt-0.5">
+                                                                {device.hwId ? (
+                                                                    <span className="text-[9px] text-slate-400 font-mono">{device.hwId}</span>
+                                                                ) : (
+                                                                    <span className="text-[9px] text-slate-400 font-mono">{device.sensors[0].id}</span>
+                                                                )}
+                                                                {device.deviceObj && device.deviceObj.model && (
+                                                                    <span className="text-[9px] text-slate-500 font-medium truncate max-w-[180px]">
+                                                                        • {device.deviceObj.model}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                         <td className="p-4">
                                                             {Pills}
@@ -712,7 +850,7 @@ export default function SiteDashboardPage() {
                                                 );
                                             })}
 
-                                            {displaySensors.length === 0 && (
+                                            {groupedDevices.length === 0 && (
                                                 <tr>
                                                     <td colSpan={3} className="p-8 text-center text-slate-500 italic bg-slate-50/20 dark:bg-black/10">
                                                         Aucun capteur rattaché dans cette zone.
@@ -732,7 +870,7 @@ export default function SiteDashboardPage() {
                                     </h3>
                                 </div>
                                 <div className="p-4 space-y-4">
-                                    {displaySensors.length > 0 ? (
+                                    {groupedDevices.length > 0 ? (
                                         <>
                                             <div className="p-3 bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl shadow-sm hover:border-primary/30 transition-colors">
                                                 <div className="flex justify-between items-start mb-2">
@@ -747,67 +885,74 @@ export default function SiteDashboardPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="p-3 bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl shadow-sm hover:border-primary/30 transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex items-center">
-                                                        <ThermometerSun className="w-4 h-4 mr-2 text-slate-400" />
-                                                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">Contrôleur CVC</h4>
-                                                    </div>
-                                                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">Online</span>
-                                                </div>
-                                                <div className="flex justify-between items-end">
-                                                    <p className="text-xs text-slate-500 font-mono tracking-wider">ID: THM-2241-CD</p>
-                                                    <button
-                                                        onClick={() => {
-                                                            const newState = !hvacState;
-                                                            setHvacState(newState);
-                                                            handleEquipmentAction("cvc-local", "toggle_hvac", newState);
-                                                        }}
-                                                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${hvacState ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
-                                                    >
-                                                        {hvacState ? 'Allumé' : 'Éteint'}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            {/* Detailed Aqara FP1 Cards */}
+                                            {groupedDevices.filter((d:any) => d.isAqaraFP1).map((device:any) => {
+                                                const getLive = (n:string) => {
+                                                    const s = device.sensors.find((s:any)=>s.cleanName.toLowerCase()===n.toLowerCase());
+                                                    return s && liveData[s.name] !== undefined ? liveData[s.name] : liveData[n];
+                                                };
+                                                
+                                                const isOccupied = getLive('IsOccuped') === 1 || getLive('presence') === 1 || getLive('presence') === true || getLive('IsOccuped') === true;
+                                                const approachDistance = getLive('approach_distance');
+                                                const presenceEvent = getLive('presence_event');
+                                                const motionSensitivity = getLive('motion_sensitivity');
+                                                const monitoringMode = getLive('monitoring_mode');
+                                                const deviceTemp = getLive('device_temperature');
+                                                const powerOutage = getLive('power_outage_count');
+                                                const lqi = getLive('linkquality');
 
-                                            <div className="p-3 bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl shadow-sm hover:border-primary/30 transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex items-center">
-                                                        <Lightbulb className="w-4 h-4 mr-2 text-slate-400" />
-                                                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">Éclairage DALI</h4>
-                                                    </div>
-                                                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">Online</span>
-                                                </div>
-                                                <div className="flex justify-between items-end">
-                                                    <p className="text-xs text-slate-500 font-mono tracking-wider">ID: LGT-1049-EF</p>
-                                                    <button
-                                                        onClick={() => {
-                                                            const newState = !lightsState;
-                                                            setLightsState(newState);
-                                                            handleEquipmentAction("lights-local", "toggle_lights", newState);
-                                                        }}
-                                                        className={`px-3 py-1 rounded text-xs font-bold transition-all ${lightsState ? 'bg-yellow-400 hover:bg-yellow-500 text-slate-900 shadow-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}
-                                                    >
-                                                        {lightsState ? 'Allumé' : 'Éteint'}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                return (
+                                                    <div key={device.virtualId} className="p-4 bg-white dark:bg-white/[0.02] border border-cyan-500/30 dark:border-cyan-500/20 rounded-xl shadow-sm relative overflow-hidden mt-4">
+                                                        {/* background radar icon */}
+                                                        <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-10 pointer-events-none">
+                                                            <Radar className="w-24 h-24 text-cyan-500" />
+                                                        </div>
+                                                        
+                                                        <div className="flex justify-between items-start mb-3 relative z-10">
+                                                            <div className="flex items-center">
+                                                                <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center mr-3 text-cyan-500 flex-shrink-0">
+                                                                    <PersonStanding className="w-4 h-4" />
+                                                                </div>
+                                                                <div className="min-w-0 pr-2">
+                                                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">Aqara FP1 (Radar MMR)</h4>
+                                                                    <p className="text-[10px] text-slate-500 font-mono tracking-wider truncate">{device.hwId}</p>
+                                                                </div>
+                                                            </div>
+                                                            {isOccupied ? (
+                                                                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-[#142A38] dark:bg-slate-700 text-white rounded border border-slate-500/20 shrink-0">Active</span>
+                                                            ) : (
+                                                                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-slate-100 dark:bg-white/10 text-slate-500 rounded border border-slate-200 dark:border-white/10 shrink-0">Inactif</span>
+                                                            )}
+                                                        </div>
 
-                                            <div className="p-3 bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl shadow-sm hover:border-primary/30 transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex items-center">
-                                                        <Video className="w-4 h-4 mr-2 text-slate-400" />
-                                                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">Caméra Thermique</h4>
+                                                        <div className="grid grid-cols-2 gap-2 mt-4 relative z-10">
+                                                            <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg border border-slate-100 dark:border-white/5 overflow-hidden">
+                                                                <p className="text-[8px] text-slate-500 uppercase font-bold mb-1 truncate">Distance Approche</p>
+                                                                <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-300 truncate">{approachDistance ?? '--'}</p>
+                                                            </div>
+                                                            <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg border border-slate-100 dark:border-white/5 overflow-hidden">
+                                                                <p className="text-[8px] text-slate-500 uppercase font-bold mb-1 truncate">Événement</p>
+                                                                <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-300 capitalize truncate">{presenceEvent ?? '--'}</p>
+                                                            </div>
+                                                            <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg border border-slate-100 dark:border-white/5 overflow-hidden">
+                                                                <p className="text-[8px] text-slate-500 uppercase font-bold mb-1 truncate">Sensibilité</p>
+                                                                <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-300 capitalize truncate">{motionSensitivity ?? '--'}</p>
+                                                            </div>
+                                                            <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg border border-slate-100 dark:border-white/5 overflow-hidden">
+                                                                <p className="text-[8px] text-slate-500 uppercase font-bold mb-1 truncate">Mode de Suivi</p>
+                                                                <p className="text-xs font-mono font-bold text-slate-800 dark:text-slate-300 capitalize truncate">{monitoringMode ?? '--'}</p>
+                                                            </div>
+                                                            
+                                                            {/* Detailed footer info */}
+                                                            <div className="justify-between flex col-span-2 pt-2 mt-1 border-t border-slate-100 dark:border-white/5 mt-2">
+                                                                <span className="text-[9px] text-slate-400 font-mono flex items-center gap-1"><Thermometer className="w-3 h-3 text-orange-400"/> {deviceTemp ?? '--'}°C</span>
+                                                                <span className="text-[9px] text-slate-400 font-mono flex items-center gap-1"><Zap className="w-3 h-3 text-emerald-400"/> Coupures: {powerOutage ?? '0'}</span>
+                                                                <span className="text-[9px] text-slate-400 font-mono flex items-center gap-1"><Activity className="w-3 h-3 text-purple-400"/> LQI: {lqi ?? '--'}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-500 rounded border border-amber-500/20">Standby</span>
-                                                </div>
-                                                <div className="flex justify-between items-end mt-1">
-                                                    <p className="text-xs text-slate-500 font-mono tracking-wider">ID: CAM-TH-01</p>
-                                                    <span className="px-3 py-1 text-[10px] font-bold text-red-500 bg-red-500/10 rounded flex items-center">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1 animate-pulse" /> Live Feed
-                                                    </span>
-                                                </div>
-                                            </div>
+                                                );
+                                            })}
                                         </>
                                     ) : (
                                         <div className="p-8 text-center text-slate-500 italic bg-slate-50/20 dark:bg-black/10 rounded-xl border border-dashed border-slate-200 dark:border-white/5">
@@ -880,7 +1025,13 @@ export default function SiteDashboardPage() {
                 onClose={() => setIsHvacModalOpen(false)}
                 equipmentName={`Climatisation - ${site?.name || "Bâtiment"}`}
                 initialHvacState={hvacState}
-                onToggleHvac={(state) => setHvacState(state)}
+                onToggleHvac={(state) => {
+                    setHvacState(state);
+                    handleEquipmentAction(targetGatewayMac, "toggle_hvac", state);
+                }}
+                onCommand={(action, payload) => {
+                    handleEquipmentAction(targetGatewayMac, action, payload);
+                }}
             />
         </div>
     );
